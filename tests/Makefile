@@ -26,11 +26,19 @@ ifeq ($(PLATFORM),win64)
 LIB_SRC+=../src/*-windows.c
 endif
 
-all: without-tracing with-tracing
+all: without-tracing with-tracing mt-with-tracing mt-without-tracing
 
-with-tracing: CFLAGS+=-DTRACING_ENABLED=1
+mt-with-tracing with-tracing: CFLAGS+=-DTRACING_ENABLED=1
 with-tracing: test.c $(LIB_SRC)
 	$(CC) $(CFLAGS) $^ -o $@
 
 without-tracing: test.c $(LIB_SRC)
 	$(CC) $(CFLAGS) $^ -o $@
+
+mt-with-tracing: test-mt.c $(LIB_SRC)
+	$(CC) $(CFLAGS) $^ -o $@
+
+mt-without-tracing: test-mt.c $(LIB_SRC)
+	$(CC) $(CFLAGS) $^ -o $@
+
+

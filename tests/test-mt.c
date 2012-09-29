@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <string.h>
+#include <pthread.h>
+#include <unistd.h>
 
 #include "spdr.h"
-
-#include <unistd.h>
 
 #ifndef TRACING_ENABLED
 #define TRACING_ENABLED 0
@@ -21,6 +21,15 @@ void trace (const char* line)
 	fputs (buffer, stderr);
 }
 
+void* thread1(void* arg)
+{
+	SPDR_BEGIN(spdr, "Main", "thread1");
+
+	SPDR_END(spdr, "Main", "thread1");
+
+	return NULL;
+}
+
 int main (int argc, char** argv)
 {
 	spdr_init(&spdr);
@@ -28,10 +37,16 @@ int main (int argc, char** argv)
 	spdr_set_log_fn(spdr, trace);
 
 	SPDR_BEGIN(spdr, "Main", "main");
+	pthread_t thread;
+	pthread_create(&thread, NULL, thread1, NULL);
 
 	printf ("Hello,");
 	sleep (3);
 	printf (" 世界.\n");
 
+	void* status;
+	pthread_join (thread, status);
+
 	SPDR_END(spdr, "Main", "main");
+	pthread_exit (NULL);
 }
