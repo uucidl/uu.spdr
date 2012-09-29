@@ -1,13 +1,10 @@
 #include "spdr.h"
+#include "spdr_internal.h"
 #include <timer_lib/timer.h>
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
-
-/* needs a microseconds timestamp */
-/* needs a process id */
-/* needs a thread id */
 
 struct spdr
 {
@@ -76,9 +73,13 @@ extern void uu_spdr_record(struct spdr *context,
 	tick_t ticks = timer_elapsed_ticks (&context->timer, 0);
 	uint64_t ticks_per_micros = timer_ticks_per_second (&context->timer) / 1000000;
 	uint64_t microseconds = ticks / ticks_per_micros;
+	uint32_t pid = uu_spdr_get_pid();
+	uint64_t tid = uu_spdr_get_tid();
 
 	char line[256];
-	snprintf (line, sizeof line, "%llu \"%s\" \"%s\" \"%c\"", microseconds, cat, name, type);
+	snprintf (line, sizeof line,
+		  "%llu %u %llu \"%s\" \"%s\" \"%c\"",
+		  microseconds, pid, tid, cat, name, type);
 
 	context->log_fn(line);
 }
