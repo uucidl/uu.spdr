@@ -1,5 +1,5 @@
-CFLAGS+=-I../include
-LIB_SRC=../src/*-common.c
+CFLAGS+=-I../include -I../deps
+LIB_SRC=../src/*-common.c ../deps/timer_lib/timer.c
 
 all: without-tracing with-tracing
 

@@ -1,6 +1,10 @@
 #ifndef UU_SPDR_H
 #define UU_SPDR_H
 
+/**
+ * A tracing library
+ */
+
 #include "spdr-private.h"
 
 /**
