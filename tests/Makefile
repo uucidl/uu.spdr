@@ -1,4 +1,4 @@
-CFLAGS=-I../include
+CFLAGS+=-I../include
 LIB_SRC=../src/*.c
 
 all: without-tracing with-tracing
