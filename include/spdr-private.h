@@ -13,7 +13,7 @@ enum uu_spdr_type
 	SPDR_END = 'E',
 };
 
-int uu_spdr_musttrace(struct spdr* context);
+int uu_spdr_musttrace(const struct spdr* context);
 
 void uu_spdr_record(struct spdr* context,
 		    const char* cat,
