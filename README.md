@@ -1,4 +1,4 @@
-soupoudre
-=========
+spdr (soupoudre)
+================
 
-Allow you to instrument code with traces.
+Allows you to instrument code with traces.
