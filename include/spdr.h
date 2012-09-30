@@ -34,6 +34,13 @@ void spdr_set_log_fn(struct spdr *context,
 void spdr_enable_trace(struct spdr *context, int traceon);
 
 /**
+ * Builds arguments of various types
+ */
+#define SPDR_INT(key, value)   UU_SPDR_INT(key, value)
+#define SPDR_FLOAT(key, value) UU_SPDR_FLOAT(key, value)
+#define SPDR_STR(key, value)   UU_SPDR_STR(key, value)
+
+/**
  * An instant event
  */
 #define SPDR_EVENT(spdr, cat, name)		\
@@ -42,14 +49,14 @@ void spdr_enable_trace(struct spdr *context, int traceon);
 /**
  * An instant event with one parameter
  */
-#define SPDR_EVENT1(spdr, cat, name, key0, value0)		\
-	UU_SPRD_TRACE1(spdr, cat, name, SPDR_EVENT, key0, value0)
+#define SPDR_EVENT1(spdr, cat, name, arg0)				\
+	UU_SPDR_TRACE1(spdr, cat, name, SPDR_EVENT, arg0)
 
 /**
  * An instant event with two parameters
  */
-#define SPDR_EVENT2(spdr, cat, name, key0, value0, key1, value1)	\
-	UU_SPRD_TRACE2(spdr, cat, name, SPDR_EVENT, key0, value0, key1, value1)
+#define SPDR_EVENT2(spdr, cat, name, arg0, arg1)	\
+	UU_SPDR_TRACE2(spdr, cat, name, SPDR_EVENT, arg0, arg1)
 
 /**
  * Begin a slice of work
@@ -60,15 +67,14 @@ void spdr_enable_trace(struct spdr *context, int traceon);
 /**
  * Begin a slice of work, with one parameter.
  */
-#define SPDR_BEGIN1(spdr, cat, name, key0, value0)			\
-	UU_SPRD_TRACE1(spdr, cat, name, SPDR_BEGIN, key0, value0)
+#define SPDR_BEGIN1(spdr, cat, name, arg0)				\
+	UU_SPDR_TRACE1(spdr, cat, name, SPDR_BEGIN, arg0)
 
 /**
  * Begin a slice of work, with two parameters
  */
-#define SPDR_BEGIN2(spdr, cat, name, key0, value0, key1, value1)	\
-	UU_SPRD_TRACE2(spdr, cat, name, SPDR_BEGIN, key0, value0, \
-		       key1, value1)
+#define SPDR_BEGIN2(spdr, cat, name, arg0, arg1)	\
+	UU_SPDR_TRACE2(spdr, cat, name, SPDR_BEGIN, arg0, arg1)
 
 /**
  * End a slice of work

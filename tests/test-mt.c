@@ -23,7 +23,7 @@ void trace (const char* line)
 
 void* thread1(void* arg)
 {
-	SPDR_BEGIN(spdr, "Main", "thread1");
+	SPDR_BEGIN1(spdr, "Main", "thread1", SPDR_INT("arg", (int) arg));
 
 	SPDR_END(spdr, "Main", "thread1");
 

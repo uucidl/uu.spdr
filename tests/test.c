@@ -27,7 +27,9 @@ int main (int argc, char** argv)
 	spdr_enable_trace(spdr, TRACING_ENABLED);
 	spdr_set_log_fn(spdr, trace);
 
-	SPDR_BEGIN(spdr, "Main", "main");
+	SPDR_BEGIN2(spdr, "Main", "main",
+		    SPDR_INT("argc", argc),
+		    SPDR_STR("argv[0]", argv[0]));
 
 	printf ("Hello,");
 	sleep (3);
