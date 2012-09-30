@@ -27,11 +27,6 @@ struct event
 	struct spdr_arg args[2];
 };
 
-static void null_log_fn (const char* line)
-{
-	// no op
-}
-
 extern int spdr_init(struct spdr **pcontext)
 {
 	if (timer_lib_initialize() < 0) {
@@ -44,7 +39,6 @@ extern int spdr_init(struct spdr **pcontext)
 	}
 
 	timer_initialize(&context->timer);
-	context->log_fn = null_log_fn;
 
 	*pcontext = context;
 
@@ -174,7 +168,9 @@ extern void uu_spdr_record(struct spdr *context,
 {
 	struct event e;
 	event_make (context, &e, cat, name, type);
-	event_log (context, &e);
+	if (context->log_fn) {
+		event_log (context, &e);
+	}
 }
 
 extern void uu_spdr_record_1(struct spdr *context,
@@ -186,7 +182,9 @@ extern void uu_spdr_record_1(struct spdr *context,
 	struct event e;
 	event_make (context, &e, cat, name, type);
 	event_add_arg (&e, arg0);
-	event_log (context, &e);
+	if (context->log_fn) {
+		event_log (context, &e);
+	}
 }
 
 extern void uu_spdr_record_2(struct spdr *context,
@@ -200,5 +198,7 @@ extern void uu_spdr_record_2(struct spdr *context,
 	event_make (context, &e, cat, name, type);
 	event_add_arg (&e, arg0);
 	event_add_arg (&e, arg1);
-	event_log (context, &e);
+	if (context->log_fn) {
+		event_log (context, &e);
+	}
 }
