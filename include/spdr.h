@@ -82,4 +82,18 @@ void spdr_enable_trace(struct spdr *context, int traceon);
 #define SPDR_END(spdr, cat, name)		\
 	UU_SPDR_TRACE(spdr, cat, name, SPDR_END)
 
+/**
+ * Mark the beginning and end of a scope
+ *
+ * Non standard. Only supported on select compilers.
+ */
+#define SPDR_SCOPE(spdr, cat, name)		\
+	UU_SPDR_SCOPE_TRACE(spdr, cat, name)
+
+#define SPDR_SCOPE1(spdr, cat, name, arg0)		\
+	UU_SPDR_SCOPE_TRACE1(spdr, cat, name, arg0)
+
+#define SPDR_SCOPE2(spdr, cat, name, arg0, arg1)	\
+	UU_SPDR_SCOPE_TRACE2(spdr, cat, name, arg0, arg1)
+
 #endif

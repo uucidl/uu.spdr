@@ -78,4 +78,45 @@ void uu_spdr_record_2(struct spdr* context,
 	UU_SPDR_COND_EXPR(uu_spdr_musttrace(context),			\
 			  uu_spdr_record_2(context, cat, name, type, arg0, arg1))
 
+#ifdef  __GNUC__
+
+struct uu_scope_t
+{
+	struct spdr* spdr;
+	const char* cat;
+	const char* name;
+};
+
+static inline void uu_spdr_scope_exit (struct uu_scope_t* scope)
+{
+	UU_SPDR_TRACE(scope->spdr, scope->cat, scope->name, SPDR_END);
+}
+
+#define UU_SPDR_SCOPE_SETUP(spdr, cat, name)				\
+	struct uu_scope_t scope##__LINE__				\
+	__attribute__((cleanup(uu_spdr_scope_exit))) = { spdr, cat, name }
+
+#define UU_SPDR_SCOPE_TRACE(spdr, cat, name)		\
+	UU_SPDR_SCOPE_SETUP(spdr, cat, name);		\
+	UU_SPDR_TRACE(spdr, cat, name, SPDR_BEGIN)
+
+#define UU_SPDR_SCOPE_TRACE1(spdr, cat, name, arg0)		\
+	UU_SPDR_SCOPE_SETUP(spdr, cat, name);			\
+	UU_SPDR_TRACE1(spdr, cat, name, SPDR_BEGIN, arg0)
+
+#define UU_SPDR_SCOPE_TRACE2(spdr, cat, name, arg0, arg1)	\
+	UU_SPDR_SCOPE_SETUP(spdr, cat, name);			\
+	UU_SPDR_TRACE2(spdr, cat, name, SPDR_BEGIN, arg0, arg1)
+
+#else
+
+#define UU_SPDR_SCOPE_TRACE(spdr, cat, name)	\
+	uu_unsupported
+#define UU_SPDR_SCOPE_TRACE1(spdr, cat, name, arg0)	\
+	uu_unsupported
+#define UU_SPDR_SCOPE_TRACE2(spdr, cat, name, arg0, arg1)	\
+	uu_unsupported
+
+#endif
+
 #endif

@@ -28,7 +28,7 @@ endif
 
 all: without-tracing with-tracing mt-with-tracing mt-without-tracing
 
-mt-with-tracing with-tracing: CFLAGS+=-DTRACING_ENABLED=1
+mt-with-tracing with-tracing scope-tracing: CFLAGS+=-DTRACING_ENABLED=1
 with-tracing: test.c $(LIB_SRC)
 	$(CC) $(CFLAGS) $^ -o $@
 
@@ -41,4 +41,5 @@ mt-with-tracing: test-mt.c $(LIB_SRC)
 mt-without-tracing: test-mt.c $(LIB_SRC)
 	$(CC) $(CFLAGS) $^ -o $@
 
-
+scope-tracing: test-scope.c $(LIB_SRC)
+	$(CC) $(CFLAGS) $^ -o $@
