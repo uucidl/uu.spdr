@@ -38,4 +38,6 @@ int main (int argc, char** argv)
 	printf (" 世界.\n");
 
 	SPDR_END(spdr, "Main", "main");
+
+	spdr_deinit(&spdr);
 }

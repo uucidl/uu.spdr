@@ -72,5 +72,8 @@ int main (int argc, char** argv)
 	SPDR_END(spdr, "Main", "Waiting For Thread1");
 
 	SPDR_END(spdr, "Main", "main");
+
+	spdr_deinit(&spdr);
+
 	pthread_exit (NULL);
 }

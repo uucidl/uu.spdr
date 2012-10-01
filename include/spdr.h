@@ -18,9 +18,9 @@ struct spdr;
 int spdr_init(struct spdr **context);
 
 /**
- * Shutdown the library
+ * Shutdowns the library
  */
-void spdr_deinit(struct spdr* context);
+void spdr_deinit(struct spdr** context);
 
 /**
  * Provide your logging function if you want a trace stream to be produced.
