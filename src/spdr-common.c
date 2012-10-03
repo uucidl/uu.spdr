@@ -27,7 +27,7 @@ struct event
 	struct spdr_arg args[2];
 };
 
-extern int spdr_init(struct spdr **pcontext)
+extern int spdr_init(struct spdr **context_ptr)
 {
 	if (timer_lib_initialize() < 0) {
 		return -1;
@@ -40,15 +40,16 @@ extern int spdr_init(struct spdr **pcontext)
 
 	timer_initialize(&context->timer);
 
-	*pcontext = context;
+	*context_ptr = context;
 
 	return 0;
 }
 
-extern void spdr_deinit(struct spdr* context)
+extern void spdr_deinit(struct spdr** context_ptr)
 {
-	free (context);
 	timer_lib_shutdown();
+	free (*context_ptr);
+	*context_ptr = NULL;
 }
 
 /**

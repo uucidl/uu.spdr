@@ -27,6 +27,8 @@ int main (int argc, char** argv)
 	spdr_enable_trace(spdr, TRACING_ENABLED);
 	spdr_set_log_fn(spdr, trace);
 
+	SPDR_METADATA1(spdr, "thread_name", SPDR_STR("name", "Main_Thread"));
+
 	SPDR_BEGIN2(spdr, "Main", "main",
 		    SPDR_INT("argc", argc),
 		    SPDR_STR("argv[0]", argv[0]));
@@ -36,4 +38,6 @@ int main (int argc, char** argv)
 	printf (" 世界.\n");
 
 	SPDR_END(spdr, "Main", "main");
+
+	spdr_deinit(&spdr);
 }
