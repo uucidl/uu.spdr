@@ -28,6 +28,8 @@ void* thread1(void* arg)
 	double x = 0.1234;
 	double y = 0.117;
 
+	SPDR_METADATA1(spdr, "thread_name", SPDR_STR("name", "Thread1"));
+
 	while (n--) {
 		int cosn = 16*65536;
 		int pown = 32*65536;
@@ -52,6 +54,8 @@ int main (int argc, char** argv)
 	spdr_init(&spdr);
 	spdr_enable_trace(spdr, TRACING_ENABLED);
 	spdr_set_log_fn(spdr, trace);
+
+	SPDR_METADATA1(spdr, "thread_name", SPDR_STR("name", "Main_Thread"));
 
 	SPDR_BEGIN2(spdr, "Main", "main",
 		    SPDR_INT("argc", argc), SPDR_STR("argv[0]", argv[0]));

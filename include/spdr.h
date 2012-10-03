@@ -83,6 +83,17 @@ void spdr_enable_trace(struct spdr *context, int traceon);
 	UU_SPDR_TRACE(spdr, cat, name, SPDR_END)
 
 /**
+ * Metadata.
+ *
+ * For instance to set the thread name:
+ * @code
+ * SPDR_METADATA1("thread_name", SPDR_STR("name", "My_Thread"))
+ * @code
+ */
+#define SPDR_METADATA1(spdr, name, arg0)		\
+	UU_SPDR_TRACE1(spdr, "__metadata", name, SPDR_METADATA, arg0)
+
+/**
  * Mark the beginning and end of a scope
  *
  * Non standard. Only supported on select compilers.
