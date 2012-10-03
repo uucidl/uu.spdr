@@ -1,7 +1,8 @@
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
+#include <cmath>
 
-#include "spdr.h"
+#include "spdr.hh"
 #include "sleep.h"
 
 #ifndef TRACING_ENABLED
@@ -20,6 +21,22 @@ void trace (const char* line)
 	fputs (buffer, stderr);
 }
 
+void fun1()
+{
+	static double x = 0.5f;
+	static double y = -0.15f;
+
+	SPDR_SCOPE2(spdr, "Main", "fun1",
+		    SPDR_FLOAT("x", x),
+		    SPDR_FLOAT("y", y));
+
+	int N = 65536;
+	while (N--) {
+		y = cos(x + atan2(x, y));
+		x = sin(y);
+	}
+}
+
 int main (int argc, char** argv)
 {
 	spdr_init(&spdr);
@@ -35,6 +52,8 @@ int main (int argc, char** argv)
 	printf ("Hello,");
 	sleep (3);
 	printf (" 世界.\n");
+
+	fun1();
 
 	SPDR_END(spdr, "Main", "main");
 
