@@ -29,11 +29,13 @@ struct event
 
 extern int spdr_init(struct spdr **context_ptr)
 {
+	struct spdr* context;
+
 	if (timer_lib_initialize() < 0) {
 		return -1;
 	}
 
-	struct spdr* context = calloc (sizeof *context, 1);
+	context = calloc (sizeof *context, 1);
 	if (!context) {
 		return -1;
 	}
@@ -76,21 +78,21 @@ int uu_spdr_musttrace(const struct spdr *context)
 
 extern struct spdr_arg spdr_arg_make_int(const char* key, int value)
 {
-	struct spdr_arg arg = { key, SPDR_INT };
+	struct spdr_arg arg = { key, SPDR_INT, { 0 } };
 	arg.value.i = value;
 	return arg;
 }
 
 extern struct spdr_arg spdr_arg_make_double(const char* key, double value)
 {
-	struct spdr_arg arg = { key, SPDR_FLOAT };
+	struct spdr_arg arg = { key, SPDR_FLOAT, { 0 } };
 	arg.value.d = value;
 	return arg;
 }
 
 extern struct spdr_arg spdr_arg_make_str(const char* key, const char* value)
 {
-	struct spdr_arg arg = { key, SPDR_STR };
+	struct spdr_arg arg = { key, SPDR_STR, { 0 } };
 	arg.value.str = value;
 	return arg;
 }
