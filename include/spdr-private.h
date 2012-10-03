@@ -81,7 +81,8 @@ void uu_spdr_record_2(struct spdr* context,
 
 #if defined(__cplusplus) || (defined(__GNUC__) && !defined(__STRICT_ANSI__))
 
-#  define UU_SPDR_CONCAT(prefix, suffix) prefix ## suffix
+#  define UU_SPDR_CONCAT_N(prefix, suffix) prefix ## suffix
+#  define UU_SPDR_CONCAT(prefix, suffix) UU_SPDR_CONCAT_N(prefix,suffix)
 
 #  if defined(__cplusplus)
 
