@@ -27,6 +27,8 @@ LIB_SRC+=../src/*-windows.c
 endif
 
 all: without-tracing with-tracing mt-with-tracing mt-without-tracing
+clean: 
+	rm -f *-tracing
 
 mt-with-tracing with-tracing scope-tracing: CFLAGS+=-DTRACING_ENABLED=1
 with-tracing: test.c $(LIB_SRC)
