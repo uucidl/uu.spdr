@@ -18,7 +18,7 @@ void trace (const char* line)
 	strncat(buffer, line, sizeof buffer - 2);
 	strncat(buffer, "\n", sizeof buffer - 2);
 
-	// fputs is thread-safe
+	/* fputs is thread-safe */
 	fputs (buffer, stderr);
 }
 
@@ -51,6 +51,8 @@ void* thread1(void* arg)
 
 int main (int argc, char** argv)
 {
+	pthread_t thread;
+
 	spdr_init(&spdr);
 	spdr_enable_trace(spdr, TRACING_ENABLED);
 	spdr_set_log_fn(spdr, trace);
@@ -59,7 +61,7 @@ int main (int argc, char** argv)
 
 	SPDR_BEGIN2(spdr, "Main", "main",
 		    SPDR_INT("argc", argc), SPDR_STR("argv[0]", argv[0]));
-	pthread_t thread;
+
 	pthread_create(&thread, NULL, thread1, NULL);
 
 	printf ("Hello,");
@@ -67,8 +69,10 @@ int main (int argc, char** argv)
 	printf (" 世界.\n");
 
 	SPDR_BEGIN(spdr, "Main", "Waiting For Thread1");
-	void* status;
-	pthread_join (thread, &status);
+	{
+		void* status;
+		pthread_join (thread, &status);
+	}
 	SPDR_END(spdr, "Main", "Waiting For Thread1");
 
 	SPDR_END(spdr, "Main", "main");
