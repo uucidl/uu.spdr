@@ -3,6 +3,7 @@
 
 #include "spdr.h"
 
+#include <math.h>
 #include <unistd.h>
 
 #ifndef TRACING_ENABLED
@@ -17,8 +18,24 @@ void trace (const char* line)
 	strncat(buffer, line, sizeof buffer - 2);
 	strncat(buffer, "\n", sizeof buffer - 2);
 
-	/* fputs is thread-safe */
+	// fputs is thread-safe
 	fputs (buffer, stderr);
+}
+
+void fun1()
+{
+	static double x = 0.5f;
+	static double y = -0.15f;
+
+	SPDR_SCOPE2(spdr, "Main", "fun1",
+		    SPDR_FLOAT("x", x),
+		    SPDR_FLOAT("y", y));
+
+	int N = 65536;
+	while (N--) {
+		y = cos(x + atan2(x, y));
+		x = sin(y);
+	}
 }
 
 int main (int argc, char** argv)
@@ -34,6 +51,10 @@ int main (int argc, char** argv)
 	printf ("Hello,");
 	sleep (3);
 	printf (" 世界.\n");
+
+	fun1();
+	fun1();
+	fun1();
 
 	SPDR_END(spdr, "Main", "main");
 }
