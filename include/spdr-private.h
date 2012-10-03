@@ -78,7 +78,7 @@ void uu_spdr_record_2(struct spdr* context,
 	UU_SPDR_COND_EXPR(uu_spdr_musttrace(context),			\
 			  uu_spdr_record_2(context, cat, name, type, arg0, arg1))
 
-#ifdef  __GNUC__
+#if defined(__GNUC__) && !defined(__STRICT_ANSI__)
 
 struct uu_scope_t
 {
