@@ -14,7 +14,7 @@ enum uu_spdr_type
 	SPDR_METADATA = 'M'
 };
 
-struct spdr_arg
+struct uu_spdr_arg
 {
 	const char* key;
 	enum { SPDR_INT, SPDR_FLOAT, SPDR_STR } type;
@@ -28,19 +28,19 @@ struct spdr_arg
 #if __STDC_VERSION__ >= 199901L
 /* type checks possible on c99 */
 #  define UU_SPDR_INT(argkey, argvalue)   \
-	((struct spdr_arg) { .key = argkey, .type = SPDR_INT, .value = { .i = argvalue } })
+	((struct uu_spdr_arg) { .key = argkey, .type = SPDR_INT, .value = { .i = argvalue } })
 #  define UU_SPDR_FLOAT(argkey, argvalue) \
-	((struct spdr_arg) { .key = argkey, .type = SPDR_FLOAT, .value = { .d = argvalue } })
+	((struct uu_spdr_arg) { .key = argkey, .type = SPDR_FLOAT, .value = { .d = argvalue } })
 #  define UU_SPDR_STR(argkey, argvalue) \
-	((struct spdr_arg) { .key = argkey, .type = SPDR_STR, .value = { .str = argvalue } })
+	((struct uu_spdr_arg) { .key = argkey, .type = SPDR_STR, .value = { .str = argvalue } })
 #else
-struct spdr_arg spdr_arg_make_int(const char* key, int value);
-struct spdr_arg spdr_arg_make_double(const char* key, double value);
-struct spdr_arg spdr_arg_make_str(const char* key, const char* str);
+struct uu_spdr_arg uu_spdr_arg_make_int(const char* key, int value);
+struct uu_spdr_arg uu_spdr_arg_make_double(const char* key, double value);
+struct uu_spdr_arg uu_spdr_arg_make_str(const char* key, const char* str);
 
-#  define UU_SPDR_INT(key, value)   spdr_arg_make_int(key, value)
-#  define UU_SPDR_FLOAT(key, value) spdr_arg_make_double(key, value)
-#  define UU_SPDR_STR(key, value)   spdr_arg_make_str(key, value)
+#  define UU_SPDR_INT(key, value)   uu_spdr_arg_make_int(key, value)
+#  define UU_SPDR_FLOAT(key, value) uu_spdr_arg_make_double(key, value)
+#  define UU_SPDR_STR(key, value)   uu_spdr_arg_make_str(key, value)
 #endif
 
 
@@ -55,14 +55,14 @@ void uu_spdr_record_1(struct spdr* context,
 		      const char* cat,
 		      const char* name,
 		      enum uu_spdr_type type,
-		      struct spdr_arg arg0);
+		      struct uu_spdr_arg arg0);
 
 void uu_spdr_record_2(struct spdr* context,
 		      const char* cat,
 		      const char* name,
 		      enum uu_spdr_type type,
-		      struct spdr_arg arg0,
-		      struct spdr_arg arg1);
+		      struct uu_spdr_arg arg0,
+		      struct uu_spdr_arg arg1);
 
 #define UU_SPDR_COND_EXPR(cond, expr) \
 	(void) (cond && ((expr), 1))
@@ -86,40 +86,40 @@ void uu_spdr_record_2(struct spdr* context,
 
 #  if defined(__cplusplus)
 
-struct uu_scope
+struct uu_spdr_scope
 {
 	struct spdr* spdr;
 	const char* cat;
 	const char* name;
 
-	uu_scope(struct spdr* spdr, const char* cat, const char* name) :
+	uu_spdr_scope(struct spdr* spdr, const char* cat, const char* name) :
 	  spdr(spdr), cat(cat), name(name)
 	{}
 
-	~uu_scope()
+	~uu_spdr_scope()
 	{
 		UU_SPDR_TRACE(spdr, cat, name, SPDR_END);
 	}
 };
 
 #    define UU_SPDR_SCOPE_SETUP(spdr, cat, name)			\
-	struct uu_scope UU_SPDR_CONCAT(scope,__LINE__) (spdr, cat, name)
+	struct uu_spdr_scope UU_SPDR_CONCAT(scope,__LINE__) (spdr, cat, name)
 
 #  elif defined(__GNUC__) && !defined(__STRICT_ANSI__)
-struct uu_scope
+struct uu_spdr_scope
 {
 	struct spdr* spdr;
 	const char* cat;
 	const char* name;
 };
 
-static inline void uu_spdr_scope_exit (struct uu_scope* scope)
+static inline void uu_spdr_scope_exit (struct uu_spdr_scope* scope)
 {
 	UU_SPDR_TRACE(scope->spdr, scope->cat, scope->name, SPDR_END);
 }
 
 #    define UU_SPDR_SCOPE_SETUP(spdr, cat, name)			\
-	struct uu_scope UU_SPDR_CONCAT(scope,__LINE__)			\
+	struct uu_spdr_scope UU_SPDR_CONCAT(scope,__LINE__)			\
 	     __attribute__((cleanup(uu_spdr_scope_exit))) = { spdr, cat, name }
 
 #  endif

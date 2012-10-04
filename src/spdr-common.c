@@ -24,7 +24,7 @@ struct event
 	const char* name;
 	enum uu_spdr_type phase;
 	int arg_count;
-	struct spdr_arg args[2];
+	struct uu_spdr_arg args[2];
 };
 
 extern int spdr_init(struct spdr **context_ptr)
@@ -76,23 +76,23 @@ int uu_spdr_musttrace(const struct spdr *context)
 	return context->tracing_p;
 }
 
-extern struct spdr_arg spdr_arg_make_int(const char* key, int value)
+extern struct uu_spdr_arg uu_spdr_arg_make_int(const char* key, int value)
 {
-	struct spdr_arg arg = { key, SPDR_INT, { 0 } };
+	struct uu_spdr_arg arg = { key, SPDR_INT, { 0 } };
 	arg.value.i = value;
 	return arg;
 }
 
-extern struct spdr_arg spdr_arg_make_double(const char* key, double value)
+extern struct uu_spdr_arg uu_spdr_arg_make_double(const char* key, double value)
 {
-	struct spdr_arg arg = { key, SPDR_FLOAT, { 0 } };
+	struct uu_spdr_arg arg = { key, SPDR_FLOAT, { 0 } };
 	arg.value.d = value;
 	return arg;
 }
 
-extern struct spdr_arg spdr_arg_make_str(const char* key, const char* value)
+extern struct uu_spdr_arg uu_spdr_arg_make_str(const char* key, const char* value)
 {
-	struct spdr_arg arg = { key, SPDR_STR, { 0 } };
+	struct uu_spdr_arg arg = { key, SPDR_STR, { 0 } };
 	arg.value.str = value;
 	return arg;
 }
@@ -115,7 +115,7 @@ static void event_make(struct spdr* context,
 	event->arg_count = 0;
 }
 
-static void event_add_arg(struct event* event, struct spdr_arg arg)
+static void event_add_arg(struct event* event, struct uu_spdr_arg arg)
 {
 	event->args[event->arg_count++] = arg;
 }
@@ -138,7 +138,7 @@ static void event_log(struct spdr* context, struct event* event)
 		int line_n = strlen(line);
 		char *ptr = line + line_n;
 		int size  = (sizeof line) - line_n;
-		struct spdr_arg* arg = &event->args[i];
+		struct uu_spdr_arg* arg = &event->args[i];
 		switch (arg->type) {
 		case SPDR_INT:
 			snprintf(ptr, size,
@@ -180,7 +180,7 @@ extern void uu_spdr_record_1(struct spdr *context,
 			     const char* cat,
 			     const char* name,
 			     enum uu_spdr_type type,
-			     struct spdr_arg arg0)
+			     struct uu_spdr_arg arg0)
 {
 	struct event e;
 	event_make (context, &e, cat, name, type);
@@ -194,8 +194,8 @@ extern void uu_spdr_record_2(struct spdr *context,
 			     const char* cat,
 			     const char* name,
 			     enum uu_spdr_type type,
-			     struct spdr_arg arg0,
-			     struct spdr_arg arg1)
+			     struct uu_spdr_arg arg0,
+			     struct uu_spdr_arg arg1)
 {
 	struct event e;
 	event_make (context, &e, cat, name, type);
