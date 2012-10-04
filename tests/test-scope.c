@@ -57,4 +57,6 @@ int main (int argc, char** argv)
 	fun1();
 
 	SPDR_END(spdr, "Main", "main");
+
+	return 0;
 }

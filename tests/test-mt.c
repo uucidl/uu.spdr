@@ -80,4 +80,6 @@ int main (int argc, char** argv)
 	spdr_deinit(&spdr);
 
 	pthread_exit (NULL);
+
+	return 0;
 }

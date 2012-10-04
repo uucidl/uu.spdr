@@ -1,4 +1,4 @@
-#include "spdr_internal.h"
+#include "spdr-internal.h"
 
 #include <stdint.h>
 #include <sys/types.h>

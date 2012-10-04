@@ -1,6 +1,6 @@
 #ifdef _WIN32
 #include <windows.h>
-static inline void sleep (int seconds)
+static __inline void sleep (int seconds)
 {
 	Sleep (1000 * seconds);
 }

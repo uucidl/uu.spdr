@@ -58,4 +58,6 @@ int main (int argc, char** argv)
 	SPDR_END(spdr, "Main", "main");
 
 	spdr_deinit(&spdr);
+
+	return 0;
 }

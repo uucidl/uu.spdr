@@ -1,4 +1,5 @@
-#include "spdr_internal.h"
+#include "spdr-internal.h"
+
 #include <windows.h>
 
 uint32_t uu_spdr_get_pid()

@@ -1,12 +1,12 @@
 /* -*- coding: utf-8; -*- */
+
 #include "spdr.h"
-#include "spdr_internal.h"
+#include "spdr-internal.h"
 #include <timer_lib/timer.h>
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdint.h>
-#include <string.h>
+#include "uu-string.h"
 
 struct spdr
 {
@@ -135,10 +135,13 @@ static void event_log(struct spdr* context, struct event* event)
 		  event->phase);
 
 	for (i = 0; i < event->arg_count; i++) {
-		int line_n = strlen(line);
+		const struct uu_spdr_arg* arg = &event->args[i];
+
+		size_t line_n = strlen(line);
 		char *ptr = line + line_n;
-		int size  = (sizeof line) - line_n;
-		struct uu_spdr_arg* arg = &event->args[i];
+		size_t size  = (sizeof line) - line_n;
+
+
 		switch (arg->type) {
 		case SPDR_INT:
 			snprintf(ptr, size,

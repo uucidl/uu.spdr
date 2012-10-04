@@ -1,5 +1,5 @@
-#ifndef SPDR_PRIVATE_H
-#define SPDR_PRIVATE_H
+#ifndef UU_SPDR_PRIVATE_H
+#define UU_SPDR_PRIVATE_H
 
 /**
  * Context for the library
