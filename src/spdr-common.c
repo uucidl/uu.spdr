@@ -8,12 +8,6 @@
 #include <stdio.h>
 #include "uu-string.h"
 
-struct spdr
-{
-	int tracing_p;
-	timer timer;
-	void (*log_fn) (const char* line);
-};
 
 struct event
 {
@@ -27,7 +21,16 @@ struct event
 	struct uu_spdr_arg args[2];
 };
 
-extern int spdr_init(struct spdr **context_ptr)
+struct spdr
+{
+	int tracing_p;
+	timer timer;
+	void (*log_fn) (const char* line);
+	int log_capacity;
+	struct event log[1];
+};
+
+extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size)
 {
 	struct spdr* context;
 
@@ -35,10 +38,14 @@ extern int spdr_init(struct spdr **context_ptr)
 		return -1;
 	}
 
-	context = calloc (sizeof *context, 1);
-	if (!context) {
+	if (buffer_size < sizeof *context) {
 		return -1;
 	}
+
+	context = buffer;
+	memset(context, 0, sizeof *context);
+
+	context->log_capacity = 1 + (buffer_size - sizeof *context) / sizeof (struct event);
 
 	timer_initialize(&context->timer);
 
@@ -50,7 +57,6 @@ extern int spdr_init(struct spdr **context_ptr)
 extern void spdr_deinit(struct spdr** context_ptr)
 {
 	timer_lib_shutdown();
-	free (*context_ptr);
 	*context_ptr = NULL;
 }
 

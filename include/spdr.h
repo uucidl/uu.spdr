@@ -7,6 +7,8 @@
 
 #include "spdr-private.h"
 
+#include <stddef.h> /* for size_t */
+
 /**
  * Context for the library
  */
@@ -14,8 +16,16 @@ struct spdr;
 
 /**
  * Initializes the library
+ *
+ * spdr will use the provided memory buffer for its memory
+ * allocations.
+ *
+ * the size of the memory buffer will limit the number of events that
+ * can be recorded at a time.
+ *
+ * @return 0 on success
  */
-int spdr_init(struct spdr **context);
+int spdr_init(struct spdr **context, void* buffer, size_t buffer_size);
 
 /**
  * Shutdowns the library

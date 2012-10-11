@@ -3,6 +3,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <math.h>
+#include <stdlib.h>
 
 #include "spdr.h"
 
@@ -11,6 +12,8 @@
 #endif
 
 static struct spdr* spdr;
+enum { LOG_N = 2 * 1024 * 1024 };
+static void* spdr_buffer;
 
 void trace (const char* line)
 {
@@ -34,7 +37,7 @@ void* thread1(void* arg)
 		int cosn = 16*65536;
 		int pown = 32*65536;
 
-		SPDR_BEGIN2(spdr, "Main", "thread1", SPDR_INT("arg", (int) arg), SPDR_FLOAT("y", y));
+		SPDR_BEGIN2(spdr, "Main", "thread1", SPDR_INT("arg", (intptr_t) arg), SPDR_FLOAT("y", y));
 		while (cosn--) {
 			x += cos(x);
 		}
@@ -53,7 +56,8 @@ int main (int argc, char** argv)
 {
 	pthread_t thread;
 
-	spdr_init(&spdr);
+	spdr_buffer = malloc(LOG_N);
+	spdr_init(&spdr, spdr_buffer, LOG_N);
 	spdr_enable_trace(spdr, TRACING_ENABLED);
 	spdr_set_log_fn(spdr, trace);
 
@@ -78,6 +82,7 @@ int main (int argc, char** argv)
 	SPDR_END(spdr, "Main", "main");
 
 	spdr_deinit(&spdr);
+	free(spdr_buffer);
 
 	pthread_exit (NULL);
 

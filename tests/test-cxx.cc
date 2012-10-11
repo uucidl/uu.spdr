@@ -2,6 +2,8 @@
 #include <cstring>
 #include <cmath>
 
+#include <vector>
+
 #include "spdr.hh"
 #include "sleep.h"
 
@@ -10,6 +12,7 @@
 #endif
 
 static struct spdr* spdr;
+enum { LOG_N = 2 * 1024 * 1024 };
 
 void trace (const char* line)
 {
@@ -39,7 +42,8 @@ void fun1()
 
 int main (int argc, char** argv)
 {
-	spdr_init(&spdr);
+	std::vector<char> buffer (LOG_N);
+	spdr_init(&spdr, &buffer.front(), LOG_N);
 	spdr_enable_trace(spdr, TRACING_ENABLED);
 	spdr_set_log_fn(spdr, trace);
 

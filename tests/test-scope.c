@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "spdr.h"
 
@@ -10,6 +11,8 @@
 #define TRACING_ENABLED 0
 #endif
 
+enum { LOG_N = 2 * 1024 * 1024 };
+static void* spdr_buffer;
 static struct spdr* spdr;
 
 void trace (const char* line)
@@ -40,7 +43,8 @@ void fun1()
 
 int main (int argc, char** argv)
 {
-	spdr_init(&spdr);
+	spdr_buffer = malloc(LOG_N);
+	spdr_init(&spdr, spdr_buffer, LOG_N);
 	spdr_enable_trace(spdr, TRACING_ENABLED);
 	spdr_set_log_fn(spdr, trace);
 
@@ -57,6 +61,9 @@ int main (int argc, char** argv)
 	fun1();
 
 	SPDR_END(spdr, "Main", "main");
+
+	spdr_deinit(&spdr);
+	free(spdr_buffer);
 
 	return 0;
 }
