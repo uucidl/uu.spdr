@@ -2,32 +2,54 @@
 
 #include "spdr.h"
 #include "spdr-internal.h"
+
 #include <timer_lib/timer.h>
+#include <libatomic_ops-7.2/src/atomic_ops.h>
 
 #include <stdlib.h>
 #include <stdio.h>
 #include "uu-string.h"
 
-struct spdr
-{
-	int tracing_p;
-	timer timer;
-	void (*log_fn) (const char* line);
-};
-
 struct event
 {
-	uint64_t ts_microseconds;
-	uint32_t pid;
-	uint64_t tid;
-	const char* cat;
-	const char* name;
-	enum uu_spdr_type phase;
-	int arg_count;
+	uint64_t           ts_microseconds;
+	uint32_t           pid;
+	uint64_t           tid;
+	const char*        cat;
+	const char*        name;
+	enum uu_spdr_type  phase;
+	int                arg_count;
 	struct uu_spdr_arg args[2];
 };
 
-extern int spdr_init(struct spdr **context_ptr)
+struct spdr
+{
+	int          tracing_p;
+	AO_t         log_next;
+	timer        timer;
+	void       (*log_fn) (const char* line);
+	int          log_capacity;
+	struct event log[1];
+};
+
+/**
+ * Grow the log until capacity is reached.
+ *
+ * @return an event or NULL if the capacity has been reached.
+ */
+static struct event* growlog_until(struct event* logs, int log_capacity, volatile AO_t* next)
+{
+	AO_t i = AO_fetch_and_add1_acquire(next);
+
+	if (i >= log_capacity) {
+		AO_fetch_and_sub1_release(next);
+		return NULL;
+	}
+
+	return &logs[i];
+}
+
+extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size)
 {
 	struct spdr* context;
 
@@ -35,10 +57,15 @@ extern int spdr_init(struct spdr **context_ptr)
 		return -1;
 	}
 
-	context = calloc (sizeof *context, 1);
-	if (!context) {
+	if (buffer_size < sizeof *context) {
 		return -1;
 	}
+
+	context = buffer;
+	memset(context, 0, sizeof *context);
+
+	context->log_capacity = 1 + (buffer_size - sizeof *context) / sizeof (struct event);
+	AO_store(&context->log_next, 0);
 
 	timer_initialize(&context->timer);
 
@@ -50,9 +77,24 @@ extern int spdr_init(struct spdr **context_ptr)
 extern void spdr_deinit(struct spdr** context_ptr)
 {
 	timer_lib_shutdown();
-	free (*context_ptr);
 	*context_ptr = NULL;
 }
+
+extern void spdr_reset(struct spdr* context)
+{
+	AO_store(&context->log_next, 0);
+}
+
+extern struct spdr_capacity spdr_capacity(struct spdr* context)
+{
+	struct spdr_capacity cap;
+
+	cap.count = AO_load(&context->log_next);
+	cap.capacity = context->log_capacity;
+
+	return cap;
+}
+
 
 /**
  * Provide your logging function if you want a trace stream to be produced.
@@ -120,7 +162,9 @@ static void event_add_arg(struct event* event, struct uu_spdr_arg arg)
 	event->args[event->arg_count++] = arg;
 }
 
-static void event_log(struct spdr* context, struct event* event)
+static void event_log(const struct spdr* context,
+		      const struct event* event,
+		      void       (*log_fn) (const char* line))
 {
 	int i;
 	char line[256];
@@ -164,7 +208,7 @@ static void event_log(struct spdr* context, struct event* event)
 		}
 	}
 
-	context->log_fn(line);
+	log_fn(line);
 }
 
 extern void uu_spdr_record(struct spdr *context,
@@ -172,10 +216,15 @@ extern void uu_spdr_record(struct spdr *context,
 			   const char* name,
 			   enum uu_spdr_type type)
 {
-	struct event e;
-	event_make (context, &e, cat, name, type);
+	struct event* e = growlog_until(context->log, context->log_capacity, &context->log_next);
+	if (!e) {
+		return;
+	}
+
+	event_make (context, e, cat, name, type);
+
 	if (context->log_fn) {
-		event_log (context, &e);
+		event_log (context, e, context->log_fn);
 	}
 }
 
@@ -185,11 +234,15 @@ extern void uu_spdr_record_1(struct spdr *context,
 			     enum uu_spdr_type type,
 			     struct uu_spdr_arg arg0)
 {
-	struct event e;
-	event_make (context, &e, cat, name, type);
-	event_add_arg (&e, arg0);
+	struct event* e = growlog_until(context->log, context->log_capacity, &context->log_next);
+	if (!e) {
+		return;
+	}
+
+	event_make (context, e, cat, name, type);
+	event_add_arg (e, arg0);
 	if (context->log_fn) {
-		event_log (context, &e);
+		event_log (context, e, context->log_fn);
 	}
 }
 
@@ -200,11 +253,26 @@ extern void uu_spdr_record_2(struct spdr *context,
 			     struct uu_spdr_arg arg0,
 			     struct uu_spdr_arg arg1)
 {
-	struct event e;
-	event_make (context, &e, cat, name, type);
-	event_add_arg (&e, arg0);
-	event_add_arg (&e, arg1);
+	struct event* e = growlog_until(context->log, context->log_capacity, &context->log_next);
+	if (!e) {
+		return;
+	}
+
+	event_make (context, e, cat, name, type);
+	event_add_arg (e, arg0);
+	event_add_arg (e, arg1);
 	if (context->log_fn) {
-		event_log (context, &e);
+		event_log (context, e, context->log_fn);
+	}
+}
+
+void spdr_report(struct spdr *context,
+		 void (*log_fn) (const char* line))
+{
+	struct spdr_capacity cap = spdr_capacity(context);
+	for (size_t i = 0; i < cap.count; i++) {
+		const struct event *e = &context->log[i];
+
+		event_log(context, e, log_fn);
 	}
 }

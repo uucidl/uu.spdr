@@ -3,6 +3,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <math.h>
+#include <stdlib.h>
 
 #include "spdr.h"
 
@@ -11,6 +12,8 @@
 #endif
 
 static struct spdr* spdr;
+enum { LOG_N = 5 * 1024 };
+static void* spdr_buffer;
 
 void trace (const char* line)
 {
@@ -34,7 +37,7 @@ void* thread1(void* arg)
 		int cosn = 16*65536;
 		int pown = 32*65536;
 
-		SPDR_BEGIN2(spdr, "Main", "thread1", SPDR_INT("arg", (int) arg), SPDR_FLOAT("y", y));
+		SPDR_BEGIN2(spdr, "Main", "thread1", SPDR_INT("arg", (intptr_t) arg), SPDR_FLOAT("y", y));
 		while (cosn--) {
 			x += cos(x);
 		}
@@ -52,10 +55,15 @@ void* thread1(void* arg)
 int main (int argc, char** argv)
 {
 	pthread_t thread;
+	struct spdr_capacity cap;
 
-	spdr_init(&spdr);
+	spdr_buffer = malloc(LOG_N);
+	spdr_init(&spdr, spdr_buffer, LOG_N);
+
+	cap = spdr_capacity(spdr);
+	printf ("spdr capacity: %ld/%ld\n", cap.count, cap.capacity);
+
 	spdr_enable_trace(spdr, TRACING_ENABLED);
-	spdr_set_log_fn(spdr, trace);
 
 	SPDR_METADATA1(spdr, "thread_name", SPDR_STR("name", "Main_Thread"));
 
@@ -77,7 +85,11 @@ int main (int argc, char** argv)
 
 	SPDR_END(spdr, "Main", "main");
 
+	cap = spdr_capacity(spdr);
+	printf ("spdr capacity: %ld/%ld\n", cap.count, cap.capacity);
+	spdr_report(spdr, trace);
 	spdr_deinit(&spdr);
+	free(spdr_buffer);
 
 	pthread_exit (NULL);
 

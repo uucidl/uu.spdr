@@ -1,4 +1,4 @@
-#! env perl
+#!/usr/bin/env perl
 
 $quoted_str_re = /\"([^\\\"]|\\.)*\"/;
 $prefix = "";

@@ -7,20 +7,54 @@
 
 #include "spdr-private.h"
 
+#include <stddef.h> /* for size_t */
+
 /**
  * Context for the library
  */
 struct spdr;
 
 /**
- * Initializes the library
+ * Buffer capacity
  */
-int spdr_init(struct spdr **context);
+struct spdr_capacity
+{
+	size_t count;
+	size_t capacity;
+};
+
+/**
+ * Initializes the library
+ *
+ * spdr will use the provided memory buffer for its memory
+ * allocations.
+ *
+ * the size of the memory buffer will limit the number of events that
+ * can be recorded at a time.
+ *
+ * @return 0 on success
+ */
+int spdr_init(struct spdr **context, void* buffer, size_t buffer_size);
 
 /**
  * Shutdowns the library
  */
 void spdr_deinit(struct spdr** context);
+
+/**
+ * Activates the recording of traces (off by default)
+ */
+void spdr_enable_trace(struct spdr *context, int traceon);
+
+/**
+ * Clears the log buffer to start anew
+ */
+void spdr_reset(struct spdr* context);
+
+/**
+ * Returns the current event count and total capacity
+ */
+struct spdr_capacity spdr_capacity(struct spdr* context);
 
 /**
  * Provide your logging function if you want a trace stream to be produced.
@@ -29,9 +63,12 @@ void spdr_set_log_fn(struct spdr *context,
 		     void (*log_fn) (const char* line));
 
 /**
- * Activates the recording of traces (off by default)
+ * Report the traces which have been recorded so far, using the
+ * provided log function.
  */
-void spdr_enable_trace(struct spdr *context, int traceon);
+void spdr_report(struct spdr *context,
+		 void (*log_fn) (const char* line));
+
 
 /**
  * Builds arguments of various types
