@@ -12,7 +12,7 @@
 #endif
 
 static struct spdr* spdr;
-enum { LOG_N = 2 * 1024 * 1024 };
+enum { LOG_N = 5 * 1024 };
 static void* spdr_buffer;
 
 void trace (const char* line)
@@ -55,11 +55,15 @@ void* thread1(void* arg)
 int main (int argc, char** argv)
 {
 	pthread_t thread;
+	struct spdr_capacity cap;
 
 	spdr_buffer = malloc(LOG_N);
 	spdr_init(&spdr, spdr_buffer, LOG_N);
+
+	cap = spdr_capacity(spdr);
+	printf ("spdr capacity: %ld/%ld\n", cap.count, cap.capacity);
+
 	spdr_enable_trace(spdr, TRACING_ENABLED);
-	spdr_set_log_fn(spdr, trace);
 
 	SPDR_METADATA1(spdr, "thread_name", SPDR_STR("name", "Main_Thread"));
 
@@ -81,6 +85,9 @@ int main (int argc, char** argv)
 
 	SPDR_END(spdr, "Main", "main");
 
+	cap = spdr_capacity(spdr);
+	printf ("spdr capacity: %ld/%ld\n", cap.count, cap.capacity);
+	spdr_report(spdr, trace);
 	spdr_deinit(&spdr);
 	free(spdr_buffer);
 
