@@ -28,7 +28,7 @@ struct spdr
 	AO_t         log_next;
 	timer        timer;
 	void       (*log_fn) (const char* line);
-	int          log_capacity;
+	size_t       log_capacity;
 	struct event log[1];
 };
 
@@ -37,7 +37,7 @@ struct spdr
  *
  * @return an event or NULL if the capacity has been reached.
  */
-static struct event* growlog_until(struct event* logs, int log_capacity, volatile AO_t* next)
+static struct event* growlog_until(struct event* logs, size_t log_capacity, volatile AO_t* next)
 {
 	AO_t i = AO_fetch_and_add1_acquire(next);
 
@@ -270,7 +270,9 @@ void spdr_report(struct spdr *context,
 		 void (*log_fn) (const char* line))
 {
 	struct spdr_capacity cap = spdr_capacity(context);
-	for (size_t i = 0; i < cap.count; i++) {
+  	size_t i;
+
+	for (i = 0; i < cap.count; i++) {
 		const struct event *e = &context->log[i];
 
 		event_log(context, e, log_fn);
