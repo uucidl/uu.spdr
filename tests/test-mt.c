@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <math.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "spdr.h"
 
@@ -15,9 +16,13 @@ static struct spdr* spdr;
 enum { LOG_N = 5 * 1024 };
 static void* spdr_buffer;
 
-void trace (const char* line)
+void trace (const char* line, void* user_data)
 {
+	const char* msg = user_data;
 	char buffer[512] = "";
+
+	assert(0 == strcmp(msg, "Hello"));
+
 	strncat(buffer, line, sizeof buffer - 2);
 	strncat(buffer, "\n", sizeof buffer - 2);
 
@@ -87,7 +92,7 @@ int main (int argc, char** argv)
 
 	cap = spdr_capacity(spdr);
 	printf ("spdr capacity: %ld/%ld\n", cap.count, cap.capacity);
-	spdr_report(spdr, trace);
+	spdr_report(spdr, trace, "Hello");
 	spdr_deinit(&spdr);
 	free(spdr_buffer);
 

@@ -27,7 +27,8 @@ struct spdr
 	int          tracing_p;
 	AO_t         log_next;
 	timer        timer;
-	void       (*log_fn) (const char* line);
+	void       (*log_fn) (const char* line, void* user_data);
+	void*        log_user_data;
 	size_t       log_capacity;
 	struct event log[1];
 };
@@ -100,9 +101,11 @@ extern struct spdr_capacity spdr_capacity(struct spdr* context)
  * Provide your logging function if you want a trace stream to be produced.
  */
 void spdr_set_log_fn(struct spdr *context,
-		     void (*log_fn) (const char* line))
+		     void (*log_fn) (const char* line, void* user_data),
+		     void* user_data)
 {
-	context->log_fn = log_fn;
+	context->log_fn        = log_fn;
+	context->log_user_data = user_data;
 }
 
 /**
@@ -164,7 +167,8 @@ static void event_add_arg(struct event* event, struct uu_spdr_arg arg)
 
 static void event_log(const struct spdr* context,
 		      const struct event* event,
-		      void       (*log_fn) (const char* line))
+		      void (*log_fn) (const char* line, void *user_data),
+		      void* user_data)
 {
 	int i;
 	char line[256];
@@ -208,7 +212,7 @@ static void event_log(const struct spdr* context,
 		}
 	}
 
-	log_fn(line);
+	log_fn(line, user_data);
 }
 
 extern void uu_spdr_record(struct spdr *context,
@@ -224,7 +228,7 @@ extern void uu_spdr_record(struct spdr *context,
 	event_make (context, e, cat, name, type);
 
 	if (context->log_fn) {
-		event_log (context, e, context->log_fn);
+		event_log (context, e, context->log_fn, context->log_user_data);
 	}
 }
 
@@ -242,7 +246,7 @@ extern void uu_spdr_record_1(struct spdr *context,
 	event_make (context, e, cat, name, type);
 	event_add_arg (e, arg0);
 	if (context->log_fn) {
-		event_log (context, e, context->log_fn);
+		event_log (context, e, context->log_fn, context->log_user_data);
 	}
 }
 
@@ -262,19 +266,20 @@ extern void uu_spdr_record_2(struct spdr *context,
 	event_add_arg (e, arg0);
 	event_add_arg (e, arg1);
 	if (context->log_fn) {
-		event_log (context, e, context->log_fn);
+		event_log (context, e, context->log_fn, context->log_user_data);
 	}
 }
 
 void spdr_report(struct spdr *context,
-		 void (*log_fn) (const char* line))
+		 void (*log_fn) (const char* line, void* user_data),
+		 void* user_data)
 {
 	struct spdr_capacity cap = spdr_capacity(context);
-  	size_t i;
+	size_t i;
 
 	for (i = 0; i < cap.count; i++) {
 		const struct event *e = &context->log[i];
 
-		event_log(context, e, log_fn);
+		event_log(context, e, log_fn, user_data);
 	}
 }
