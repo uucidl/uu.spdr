@@ -24,6 +24,15 @@ struct spdr_capacity
 };
 
 /**
+ * Reporting type.
+ */
+enum spdr_report_type
+{
+	SPDR_PLAIN_REPORT,
+	SPDR_CHROME_REPORT,
+};
+
+/**
  * Initializes the library
  *
  * spdr will use the provided memory buffer for its memory
@@ -68,6 +77,7 @@ void spdr_set_log_fn(struct spdr *context,
  * provided log function.
  */
 void spdr_report(struct spdr *context,
+		 enum spdr_report_type report_type,
 		 void (*log_fn) (const char* line, void* user_data),
 		 void* user_data);
 

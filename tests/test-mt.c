@@ -92,7 +92,7 @@ int main (int argc, char** argv)
 
 	cap = spdr_capacity(spdr);
 	printf ("spdr capacity: %ld/%ld\n", cap.count, cap.capacity);
-	spdr_report(spdr, trace, "Hello");
+	spdr_report(spdr, SPDR_CHROME_REPORT, trace, "Hello");
 	spdr_deinit(&spdr);
 	free(spdr_buffer);
 

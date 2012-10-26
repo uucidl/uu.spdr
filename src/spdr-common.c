@@ -270,16 +270,43 @@ extern void uu_spdr_record_2(struct spdr *context,
 	}
 }
 
+static log_json(const struct event* e,
+	       const char* prefix,
+	       void (*log_fn) (const char* line, void* user_data),
+	       void* user_data)
+{
+	/* TO BE IMPLEMENTED */
+}
+
 void spdr_report(struct spdr *context,
+		 enum spdr_report_type report_type,
 		 void (*log_fn) (const char* line, void* user_data),
 		 void* user_data)
 {
 	struct spdr_capacity cap = spdr_capacity(context);
 	size_t i;
 
-	for (i = 0; i < cap.count; i++) {
-		const struct event *e = &context->log[i];
+	if (!log_fn) {
+		return;
+	}
 
-		event_log(context, e, log_fn, user_data);
+	if (SPDR_PLAIN_REPORT == report_type) {
+		for (i = 0; i < cap.count; i++) {
+			const struct event *e = &context->log[i];
+
+			event_log(context, e, log_fn, user_data);
+		}
+	} else if (SPDR_CHROME_REPORT == report_type) {
+		const char* prefix = "";
+
+		log_fn("{\"traceEvents\":[", user_data);
+		for (i = 0; i < cap.count; i++) {
+			const struct event *e = &context->log[i];
+
+			log_json(e, prefix, log_fn, user_data);
+
+			prefix = ",";
+		}
+		log_fn("]}", user_data);
 	}
 }
