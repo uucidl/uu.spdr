@@ -23,6 +23,10 @@ void trace (const char* line, void* _)
 	fputs (buffer, stderr);
 }
 
+void print (const char* string, void* _)
+{
+	fputs (string, stderr);
+}
 int main (int argc, char** argv)
 {
 	spdr_buffer = malloc(LOG_N);
@@ -42,6 +46,7 @@ int main (int argc, char** argv)
 
 	SPDR_END(spdr, "Main", "main");
 
+	spdr_report(spdr, SPDR_CHROME_REPORT, print, "Hello");
 	spdr_deinit(&spdr);
 	free(spdr_buffer);
 

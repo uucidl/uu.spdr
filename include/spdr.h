@@ -78,7 +78,7 @@ void spdr_set_log_fn(struct spdr *context,
  */
 void spdr_report(struct spdr *context,
 		 enum spdr_report_type report_type,
-		 void (*log_fn) (const char* line, void* user_data),
+		 void (*print_fn) (const char* string, void* user_data),
 		 void* user_data);
 
 
