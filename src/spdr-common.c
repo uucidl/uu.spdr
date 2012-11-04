@@ -174,7 +174,7 @@ static void event_log(const struct spdr* context,
 			  int with_newlines_p)
 {
 	int i;
-	char line[256];
+	char line[1024];
 	struct Chars buffer = { 0 };
 	const char* prefix = "";
 
