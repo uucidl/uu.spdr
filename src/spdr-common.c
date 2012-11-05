@@ -54,6 +54,7 @@ static struct event* growlog_until(struct event* logs, size_t log_capacity, vola
 
 extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size)
 {
+	const struct spdr null = { 0 };
 	struct spdr* context;
 
 	if (timer_lib_initialize() < 0) {
@@ -65,7 +66,7 @@ extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size
 	}
 
 	context = buffer;
-	*context = ((struct spdr) { 0 });
+	*context = null;
 
 	context->log_capacity = 1 + (buffer_size - sizeof *context) / sizeof (struct event);
 	AO_store(&context->log_next, 0);
@@ -227,6 +228,66 @@ static void event_log(const struct spdr* context,
 	}
 }
 
+
+static void log_json(const struct event* e,
+	       const char* prefix,
+	       void (*print_fn) (const char* string, void* user_data),
+	       void* user_data)
+{
+	int i;
+	const char* arg_prefix = "";
+	char buffer[512];
+	struct Chars string = { 0 };
+	string.chars = buffer;
+	string.capacity = sizeof buffer;
+
+	chars_catsprintf(&string,
+		"%s{\"ts\":%llu,\"pid\":%u,\"tid\":%llu,\"cat\":\"%s\","
+		"\"name\":\"%s\",\"ph\":\"%c\",\"args\":{",
+		prefix,
+		e->ts_microseconds,
+		e->pid,
+		e->tid,
+		e->cat,
+		e->name,
+		e->phase);
+
+	for (i = 0; i < e->arg_count; i++) {
+		const struct uu_spdr_arg* arg = &e->args[i];
+
+		switch (arg->type) {
+		case SPDR_INT:
+			chars_catsprintf(&string,
+				 "%s\"%s\":%d",
+				 arg_prefix,
+				 arg->key,
+				 arg->value.i);
+			break;
+		case SPDR_FLOAT:
+			chars_catsprintf(&string,
+				 "%s\"%s\":%f",
+				 arg_prefix,
+				 arg->key,
+				 arg->value.d);
+			break;
+		case SPDR_STR:
+			chars_catsprintf(&string,
+				 "%s\"%s\":\"%s\"",
+				 arg_prefix,
+				 arg->key,
+				 arg->value.str);
+			break;
+		}
+		arg_prefix = ",";
+	}
+
+	chars_catsprintf(&string, "}}");
+
+	if (0 == string.error)
+	{
+		print_fn(string.chars, user_data);
+	}
+}
 extern void uu_spdr_record(struct spdr *context,
 			   const char* cat,
 			   const char* name,
@@ -280,14 +341,6 @@ extern void uu_spdr_record_2(struct spdr *context,
 	if (context->log_fn) {
 		event_log (context, e, context->log_fn, context->log_user_data, !T(with_newlines));
 	}
-}
-
-static void log_json(const struct event* e,
-	       const char* prefix,
-	       void (*log_fn) (const char* line, void* user_data),
-	       void* user_data)
-{
-	/* TO BE IMPLEMENTED */
 }
 
 void spdr_report(struct spdr *context,

@@ -20,7 +20,7 @@ void trace (const char* line, void* _)
 	strncat(buffer, "\n", sizeof buffer - 2);
 
 	/* fputs is thread-safe */
-	fputs (buffer, stderr);
+	fputs (buffer, stdout);
 }
 
 void print (const char* string, void* _)
