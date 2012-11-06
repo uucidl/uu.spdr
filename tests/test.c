@@ -45,7 +45,9 @@ int main (int argc, char** argv)
 
 	printf ("Hello,");
 	sleep (3);
+	SPDR_BEGIN1(spdr, "Main", "printf", SPDR_STR("format", " 世界.\n"));
 	printf (" 世界.\n");
+	SPDR_END(spdr, "Main", "printf");
 
 	SPDR_END(spdr, "Main", "main");
 
