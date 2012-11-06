@@ -242,15 +242,20 @@ static void log_json(const struct event* e,
 	string.capacity = sizeof buffer;
 
 	chars_catsprintf(&string,
-		"%s{\"ts\":%llu,\"pid\":%u,\"tid\":%llu,\"cat\":\"%s\","
-		"\"name\":\"%s\",\"ph\":\"%c\",\"args\":{",
-		prefix,
-		e->ts_microseconds,
-		e->pid,
-		e->tid,
-		e->cat,
-		e->name,
-		e->phase);
+			 "%s{\"ts\":%llu,\"pid\":%u,\"tid\":%llu",
+			 prefix,
+			 e->ts_microseconds,
+			 e->pid,
+			 e->tid);
+
+	chars_catsprintf(&string, ",\"cat\":\"");
+	chars_catjsonstr(&string, e->cat);
+	chars_catsprintf(&string, "\"");
+	chars_catsprintf(&string, ",\"name\":\"");
+	chars_catjsonstr(&string, e->name);
+	chars_catsprintf(&string, "\"");
+	chars_catsprintf(&string, ",\"ph\":\"%c\",\"args\":{", e->phase);
+
 
 	for (i = 0; i < e->arg_count; i++) {
 		const struct uu_spdr_arg* arg = &e->args[i];
@@ -272,10 +277,11 @@ static void log_json(const struct event* e,
 			break;
 		case SPDR_STR:
 			chars_catsprintf(&string,
-				 "%s\"%s\":\"%s\"",
-				 arg_prefix,
-				 arg->key,
-				 arg->value.str);
+					 "%s\"%s\":\"",
+					 arg_prefix,
+					 arg->key);
+			chars_catjsonstr(&string, arg->value.str);
+			chars_catsprintf(&string, "\"");
 			break;
 		}
 		arg_prefix = ",";

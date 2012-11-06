@@ -23,10 +23,13 @@ void trace (const char* line, void* _)
 	fputs (buffer, stdout);
 }
 
-void print (const char* string, void* _)
+void print (const char* string, void* user_data)
 {
-	fputs (string, stderr);
+	FILE* file = user_data;
+
+	fputs (string, file);
 }
+
 int main (int argc, char** argv)
 {
 	spdr_buffer = malloc(LOG_N);
@@ -38,7 +41,7 @@ int main (int argc, char** argv)
 
 	SPDR_BEGIN2(spdr, "Main", "main",
 		    SPDR_INT("argc", argc),
-		    SPDR_STR("argv[0]", argv[0]));
+			SPDR_STR("argv[0]", argv[0]));
 
 	printf ("Hello,");
 	sleep (3);
@@ -46,7 +49,13 @@ int main (int argc, char** argv)
 
 	SPDR_END(spdr, "Main", "main");
 
-	spdr_report(spdr, SPDR_CHROME_REPORT, print, "Hello");
+	{
+		FILE* file = fopen("trace.json", "wb+");
+		if (file) {
+			spdr_report(spdr, SPDR_CHROME_REPORT, print, file);
+			fclose(file);
+		}
+	}
 	spdr_deinit(&spdr);
 	free(spdr_buffer);
 
