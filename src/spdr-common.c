@@ -8,7 +8,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "uu-string.h"
+#include "chars.h"
+
+#define T(x) (!0)
 
 struct event
 {
@@ -27,7 +29,8 @@ struct spdr
 	int          tracing_p;
 	AO_t         log_next;
 	timer        timer;
-	void       (*log_fn) (const char* line);
+	void       (*log_fn) (const char* line, void* user_data);
+	void*        log_user_data;
 	size_t       log_capacity;
 	struct event log[1];
 };
@@ -51,6 +54,7 @@ static struct event* growlog_until(struct event* logs, size_t log_capacity, vola
 
 extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size)
 {
+	const struct spdr null = { 0 };
 	struct spdr* context;
 
 	if (timer_lib_initialize() < 0) {
@@ -62,7 +66,7 @@ extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size
 	}
 
 	context = buffer;
-	memset(context, 0, sizeof *context);
+	*context = null;
 
 	context->log_capacity = 1 + (buffer_size - sizeof *context) / sizeof (struct event);
 	AO_store(&context->log_next, 0);
@@ -100,9 +104,11 @@ extern struct spdr_capacity spdr_capacity(struct spdr* context)
  * Provide your logging function if you want a trace stream to be produced.
  */
 void spdr_set_log_fn(struct spdr *context,
-		     void (*log_fn) (const char* line))
+		     void (*log_fn) (const char* line, void* user_data),
+		     void* user_data)
 {
-	context->log_fn = log_fn;
+	context->log_fn        = log_fn;
+	context->log_user_data = user_data;
 }
 
 /**
@@ -164,13 +170,26 @@ static void event_add_arg(struct event* event, struct uu_spdr_arg arg)
 
 static void event_log(const struct spdr* context,
 		      const struct event* event,
-		      void       (*log_fn) (const char* line))
+		      void (*print_fn) (const char* string, void *user_data),
+		      void* user_data,
+			  int with_newlines_p)
 {
 	int i;
-	char line[256];
+	char line[1024];
+	struct Chars buffer = { 0 };
+	const char* prefix = "";
 
-	snprintf (line, sizeof line,
-		  "%llu %u %llu \"%s\" \"%s\" \"%c\"",
+	buffer.chars = line;
+	buffer.capacity = sizeof line;
+
+	if (with_newlines_p) {
+		prefix = "\n";
+	}
+
+
+	chars_catsprintf (&buffer,
+		  "%s%llu %u %llu \"%s\" \"%s\" \"%c\"",
+		  prefix,
 		  event->ts_microseconds,
 		  event->pid,
 		  event->tid,
@@ -181,26 +200,21 @@ static void event_log(const struct spdr* context,
 	for (i = 0; i < event->arg_count; i++) {
 		const struct uu_spdr_arg* arg = &event->args[i];
 
-		size_t line_n = strlen(line);
-		char *ptr = line + line_n;
-		size_t size  = (sizeof line) - line_n;
-
-
 		switch (arg->type) {
 		case SPDR_INT:
-			snprintf(ptr, size,
+			chars_catsprintf(&buffer,
 				 " \"%s\" %d",
 				 arg->key,
 				 arg->value.i);
 			break;
 		case SPDR_FLOAT:
-			snprintf(ptr, size,
+			chars_catsprintf(&buffer,
 				 " \"%s\" %f",
 				 arg->key,
 				 arg->value.d);
 			break;
 		case SPDR_STR:
-			snprintf(ptr, size,
+			chars_catsprintf(&buffer,
 				 " \"%s\" \"%s\"",
 				 arg->key,
 				 arg->value.str);
@@ -208,9 +222,78 @@ static void event_log(const struct spdr* context,
 		}
 	}
 
-	log_fn(line);
+	if (0 == buffer.error)
+	{
+		print_fn(buffer.chars, user_data);
+	}
 }
 
+
+static void log_json(const struct event* e,
+	       const char* prefix,
+	       void (*print_fn) (const char* string, void* user_data),
+	       void* user_data)
+{
+	int i;
+	const char* arg_prefix = "";
+	char buffer[512];
+	struct Chars string = { 0 };
+	string.chars = buffer;
+	string.capacity = sizeof buffer;
+
+	chars_catsprintf(&string,
+			 "%s{\"ts\":%llu,\"pid\":%u,\"tid\":%llu",
+			 prefix,
+			 e->ts_microseconds,
+			 e->pid,
+			 e->tid);
+
+	chars_catsprintf(&string, ",\"cat\":\"");
+	chars_catjsonstr(&string, e->cat);
+	chars_catsprintf(&string, "\"");
+	chars_catsprintf(&string, ",\"name\":\"");
+	chars_catjsonstr(&string, e->name);
+	chars_catsprintf(&string, "\"");
+	chars_catsprintf(&string, ",\"ph\":\"%c\",\"args\":{", e->phase);
+
+
+	for (i = 0; i < e->arg_count; i++) {
+		const struct uu_spdr_arg* arg = &e->args[i];
+
+		switch (arg->type) {
+		case SPDR_INT:
+			chars_catsprintf(&string,
+				 "%s\"%s\":%d",
+				 arg_prefix,
+				 arg->key,
+				 arg->value.i);
+			break;
+		case SPDR_FLOAT:
+			chars_catsprintf(&string,
+				 "%s\"%s\":%f",
+				 arg_prefix,
+				 arg->key,
+				 arg->value.d);
+			break;
+		case SPDR_STR:
+			chars_catsprintf(&string,
+					 "%s\"%s\":\"",
+					 arg_prefix,
+					 arg->key);
+			chars_catjsonstr(&string, arg->value.str);
+			chars_catsprintf(&string, "\"");
+			break;
+		}
+		arg_prefix = ",";
+	}
+
+	chars_catsprintf(&string, "}}");
+
+	if (0 == string.error)
+	{
+		print_fn(string.chars, user_data);
+	}
+}
 extern void uu_spdr_record(struct spdr *context,
 			   const char* cat,
 			   const char* name,
@@ -224,7 +307,7 @@ extern void uu_spdr_record(struct spdr *context,
 	event_make (context, e, cat, name, type);
 
 	if (context->log_fn) {
-		event_log (context, e, context->log_fn);
+		event_log (context, e, context->log_fn, context->log_user_data, !T(with_newlines));
 	}
 }
 
@@ -242,7 +325,7 @@ extern void uu_spdr_record_1(struct spdr *context,
 	event_make (context, e, cat, name, type);
 	event_add_arg (e, arg0);
 	if (context->log_fn) {
-		event_log (context, e, context->log_fn);
+		event_log (context, e, context->log_fn, context->log_user_data, !T(with_newlines));
 	}
 }
 
@@ -262,19 +345,39 @@ extern void uu_spdr_record_2(struct spdr *context,
 	event_add_arg (e, arg0);
 	event_add_arg (e, arg1);
 	if (context->log_fn) {
-		event_log (context, e, context->log_fn);
+		event_log (context, e, context->log_fn, context->log_user_data, !T(with_newlines));
 	}
 }
 
 void spdr_report(struct spdr *context,
-		 void (*log_fn) (const char* line))
+		 enum spdr_report_type report_type,
+		 void (*print_fn) (const char* text, void* user_data),
+		 void* user_data)
 {
 	struct spdr_capacity cap = spdr_capacity(context);
-  	size_t i;
+	size_t i;
 
-	for (i = 0; i < cap.count; i++) {
-		const struct event *e = &context->log[i];
+	if (!print_fn) {
+		return;
+	}
 
-		event_log(context, e, log_fn);
+	if (SPDR_PLAIN_REPORT == report_type) {
+		for (i = 0; i < cap.count; i++) {
+			const struct event *e = &context->log[i];
+
+			event_log(context, e, print_fn, user_data, T(with_newlines));
+		}
+	} else if (SPDR_CHROME_REPORT == report_type) {
+		const char* prefix = "";
+
+		print_fn("{\"traceEvents\":[", user_data);
+		for (i = 0; i < cap.count; i++) {
+			const struct event *e = &context->log[i];
+
+			log_json(e, prefix, print_fn, user_data);
+
+			prefix = ",";
+		}
+		print_fn("]}", user_data);
 	}
 }

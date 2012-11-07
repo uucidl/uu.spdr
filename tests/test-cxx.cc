@@ -14,7 +14,7 @@
 static struct spdr* spdr;
 enum { LOG_N = 2 * 1024 * 1024 };
 
-void trace (const char* line)
+void trace (const char* line, void* _)
 {
 	char buffer[512] = "";
 	strncat(buffer, line, sizeof buffer - 2);
@@ -45,7 +45,7 @@ int main (int argc, char** argv)
 	std::vector<char> buffer (LOG_N);
 	spdr_init(&spdr, &buffer.front(), LOG_N);
 	spdr_enable_trace(spdr, TRACING_ENABLED);
-	spdr_set_log_fn(spdr, trace);
+	spdr_set_log_fn(spdr, trace, NULL);
 
 	SPDR_METADATA1(spdr, "thread_name", SPDR_STR("name", "Main_Thread"));
 

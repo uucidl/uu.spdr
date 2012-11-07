@@ -1,6 +1,7 @@
 CFLAGS+=-I../include -I../deps
 
 LIB_SRC=../src/spdr-common.c
+LIB_SRC+=../src/chars-common.c
 LIB_SRC+=../deps/timer_lib/timer.c
 LIB=libspdr.a
 
@@ -8,26 +9,31 @@ PLATFORM?=posix
 
 ifeq ($(PLATFORM),posix)
 LIB_SRC+=../src/spdr-posix.c
+LIB_SRC+=../src/chars-posix.c
 LIB_SRC+=../src/spdr-thread-posix.c
 endif
 
 ifeq ($(PLATFORM),macosx)
 LIB_SRC+=../src/spdr-posix.c
+LIB_SRC+=../src/chars-posix.c
 LIB_SRC+=../src/spdr-thread-posix.c
 LIB_SRC+=../src/spdr-macosx.c
 endif
 
 ifeq ($(PLATFORM),linux)
 LIB_SRC+=../src/spdr-posix.c
+LIB_SRC+=../src/chars-posix.c
 LIB_SRC+=../src/spdr-linux.c
 endif
 
 ifeq ($(PLATFORM),win32)
 LIB_SRC+=../src/spdr-windows.c
+LIB_SRC+=../src/chars-windows.c
 endif
 
 ifeq ($(PLATFORM),win64)
 LIB_SRC+=../src/spdr-windows.c
+LIB_SRC+=../src/chars-windows.c
 endif
 
 all: without-tracing with-tracing mt-with-tracing mt-without-tracing cxx-tracing

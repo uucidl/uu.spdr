@@ -24,6 +24,15 @@ struct spdr_capacity
 };
 
 /**
+ * Reporting type.
+ */
+enum spdr_report_type
+{
+	SPDR_PLAIN_REPORT,
+	SPDR_CHROME_REPORT,
+};
+
+/**
  * Initializes the library
  *
  * spdr will use the provided memory buffer for its memory
@@ -60,14 +69,17 @@ struct spdr_capacity spdr_capacity(struct spdr* context);
  * Provide your logging function if you want a trace stream to be produced.
  */
 void spdr_set_log_fn(struct spdr *context,
-		     void (*log_fn) (const char* line));
+		     void (*log_fn) (const char* line, void* user_data),
+		     void *user_data);
 
 /**
  * Report the traces which have been recorded so far, using the
  * provided log function.
  */
 void spdr_report(struct spdr *context,
-		 void (*log_fn) (const char* line));
+		 enum spdr_report_type report_type,
+		 void (*print_fn) (const char* string, void* user_data),
+		 void* user_data);
 
 
 /**
