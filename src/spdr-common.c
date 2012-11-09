@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "chars.h"
+#include "clock.h"
 
 #define T(x) (!0)
 
@@ -38,13 +39,13 @@ struct Block
 
 struct spdr
 {
-	int          tracing_p;
-	AO_t         blocks_next;
-	timer        timer;
-	void       (*log_fn) (const char* line, void* user_data);
-	void*        log_user_data;
-	size_t       blocks_capacity;
-	struct Block blocks[1];
+	int           tracing_p;
+	AO_t          blocks_next;
+	struct Clock* clock;
+	void        (*log_fn) (const char* line, void* user_data);
+	void*         log_user_data;
+	size_t        blocks_capacity;
+	struct Block  blocks[1];
 };
 
 /**
@@ -85,10 +86,6 @@ extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size
 	const struct spdr null = { 0 };
 	struct spdr* context;
 
-	if (timer_lib_initialize() < 0) {
-		return -1;
-	}
-
 	if (buffer_size < sizeof *context) {
 		return -1;
 	}
@@ -99,7 +96,9 @@ extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size
 	context->blocks_capacity = 1 + (buffer_size - sizeof *context) / (sizeof *context->blocks);
 	AO_store(&context->blocks_next, 0);
 
-	timer_initialize(&context->timer);
+	if (clock_init(&context->clock) < 0) {
+		return -1;
+	}
 
 	*context_ptr = context;
 
@@ -108,7 +107,7 @@ extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size
 
 extern void spdr_deinit(struct spdr** context_ptr)
 {
-	timer_lib_shutdown();
+	clock_deinit(&(*context_ptr)->clock);
 	*context_ptr = NULL;
 }
 
@@ -173,16 +172,14 @@ extern struct uu_spdr_arg uu_spdr_arg_make_str(const char* key, const char* valu
 	return arg;
 }
 
-static void event_make(struct spdr* context,
-struct Event* event,
+static void event_make(
+	struct spdr* context,
+	struct Event* event,
 	const char* cat,
 	const char* name,
 	enum uu_spdr_type type)
 {
-	tick_t ticks = timer_elapsed_ticks (&context->timer, 0);
-	uint64_t ticks_per_micros = timer_ticks_per_second (&context->timer) / 1000000;
-
-	event->ts_microseconds = ticks / ticks_per_micros;
+	event->ts_microseconds = clock_microseconds(context->clock);
 	event->pid   = uu_spdr_get_pid();
 	event->tid   = uu_spdr_get_tid();
 	event->cat   = cat;
