@@ -30,6 +30,30 @@ void print (const char* string, void* user_data)
 	fputs (string, file);
 }
 
+static void act(const char* a_string)
+{
+	SPDR_BEGIN2(spdr, "Main", "act", 
+		SPDR_INT("info-id", (int) a_string), 
+		SPDR_STR("info", a_string));
+
+	printf("%s\n", a_string);
+	sleep (1);
+
+	SPDR_END(spdr, "Main", "act");
+}
+
+static void stuff()
+{
+	{
+		char str[64] = "A Dynamically Allocated String";
+		act(str);
+	}
+	{
+		char str[64] = "Another Dynamically Allocated String";
+		act(str);
+	}
+}
+
 int main (int argc, char** argv)
 {
 	spdr_buffer = malloc(LOG_N);
@@ -44,10 +68,12 @@ int main (int argc, char** argv)
 			SPDR_STR("argv[0]", argv[0]));
 
 	printf ("Hello,");
-	sleep (3);
+	sleep (1);
 	SPDR_BEGIN1(spdr, "Main", "printf", SPDR_STR("format", " 世界.\n"));
 	printf (" 世界.\n");
 	SPDR_END(spdr, "Main", "printf");
+
+	stuff();
 
 	SPDR_END(spdr, "Main", "main");
 

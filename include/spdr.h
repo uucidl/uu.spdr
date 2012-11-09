@@ -61,7 +61,7 @@ void spdr_enable_trace(struct spdr *context, int traceon);
 void spdr_reset(struct spdr* context);
 
 /**
- * Returns the current event count and total capacity
+ * Returns the current byte count and total available capacity
  */
 struct spdr_capacity spdr_capacity(struct spdr* context);
 
