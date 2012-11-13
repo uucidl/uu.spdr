@@ -38,13 +38,18 @@ struct Block
 
 struct spdr
 {
-	int           tracing_p;
-	AO_t          blocks_next;
-	struct Clock* clock;
-	void        (*log_fn) (const char* line, void* user_data);
-	void*         log_user_data;
-	size_t        blocks_capacity;
-	struct Block  blocks[1];
+	int                  tracing_p;
+	AO_t                 blocks_next;
+
+	struct Clock*        clock;
+	unsigned long long (*clock_fn)(void* user_data);
+	void*                clock_user_data;
+
+	void               (*log_fn) (const char* line, void* user_data);
+	void*                log_user_data;
+
+	size_t               blocks_capacity;
+	struct Block         blocks[1];
 };
 
 /**
@@ -125,6 +130,13 @@ extern struct spdr_capacity spdr_capacity(struct spdr* context)
 	return cap;
 }
 
+extern void spdr_set_clock_microseconds_fn(struct spdr *context,
+		     unsigned long long (*clock_microseconds_fn)(void* user_data),
+		     void *user_data)
+{
+	context->clock_fn        = clock_microseconds_fn;
+	context->clock_user_data = user_data;
+}
 
 /**
 * Provide your logging function if you want a trace stream to be produced.
@@ -178,7 +190,11 @@ static void event_make(
 	const char* name,
 	enum uu_spdr_type type)
 {
-	event->ts_microseconds = clock_microseconds(context->clock);
+	if (context->clock_fn) {
+		event->ts_microseconds = context->clock_fn(context->clock_user_data);
+	} else {
+		event->ts_microseconds = clock_microseconds(context->clock);
+	}
 	event->pid   = uu_spdr_get_pid();
 	event->tid   = uu_spdr_get_tid();
 	event->cat   = cat;

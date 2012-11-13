@@ -1,6 +1,8 @@
 #ifndef UU_CLOCK_H
 #define UU_CLOCK_H
 
+#include "uu-stdint.h" // uint64_t
+
 struct Clock;
 
 extern int clock_init(struct Clock** clock);
