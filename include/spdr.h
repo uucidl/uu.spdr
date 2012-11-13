@@ -61,9 +61,23 @@ void spdr_enable_trace(struct spdr *context, int traceon);
 void spdr_reset(struct spdr* context);
 
 /**
- * Returns the current byte count and total available capacity
+ * Returns the current event count and total available capacity
  */
 struct spdr_capacity spdr_capacity(struct spdr* context);
+
+/**
+ * Provide your own clock function.
+ * 
+ * It must return a strictly monotonic series of numbers
+ * representing elapsed microseconds.
+ *
+ * It must be thread-safe: it will be called concurrently
+ * from multiple threads 
+ */
+void spdr_set_clock_microseconds_fn(struct spdr *context,
+		     unsigned long long (*clock_microseconds_fn)(void* user_data),
+		     void *user_data);
+
 
 /**
  * Provide your logging function if you want a trace stream to be produced.
