@@ -3,7 +3,6 @@
 #include "spdr.h"
 #include "spdr-internal.h"
 
-#include <timer_lib/timer.h>
 #include <libatomic_ops-7.2/src/atomic_ops.h>
 
 #include <stdlib.h>
