@@ -11,6 +11,7 @@
 
 #include "chars.h"
 #include "clock.h"
+#include "allocator_type.h"
 
 #define T(x) (!0)
 
@@ -36,10 +37,17 @@ struct Block
 	} data;
 };
 
+struct SpdrAllocator
+{
+	struct Allocator super;
+	struct spdr* spdr;
+};
+
 struct spdr
 {
 	int                  tracing_p;
 	AO_t                 blocks_next;
+	struct SpdrAllocator arena_allocator;
 
 	struct Clock*        clock;
 	unsigned long long (*clock_fn)(void* user_data);
@@ -85,6 +93,30 @@ static struct Event* growlog_until(struct Block* blocks, size_t blocks_capacity,
 	return &block->data.event;
 }
 
+static void* spdr_alloc(struct Allocator* allocator, size_t size)
+{
+	struct spdr* context = ((struct SpdrAllocator*) allocator)->spdr;
+
+	int nblocks = 1 + size / sizeof(struct Block);
+
+	struct Block* first_block = growblocks_until(context->blocks, context->blocks_capacity, &context->blocks_next, nblocks);
+
+	if (!first_block) {
+		return NULL;
+	}
+
+	first_block->type = STR_BLOCK;
+
+	return &first_block->data.chars;
+}
+
+static void spdr_free(struct Allocator* _, void* ptr)
+{
+	(void) _, ptr;
+
+	/* no op */
+}
+
 extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size)
 {
 	const struct spdr null = { 0 };
@@ -100,7 +132,11 @@ extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size
 	context->blocks_capacity = 1 + (buffer_size - sizeof *context) / (sizeof *context->blocks);
 	AO_store(&context->blocks_next, 0);
 
-	if (clock_init(&context->clock) < 0) {
+	context->arena_allocator.super.alloc = spdr_alloc;
+	context->arena_allocator.super.free  = spdr_free;
+	context->arena_allocator.spdr        = context;
+
+	if (clock_init(&context->clock, &context->arena_allocator.super) < 0) {
 		return -1;
 	}
 
@@ -436,9 +472,9 @@ void spdr_report(struct spdr *context,
 			if (block->type == EVENT_BLOCK)
 			{
 				log_json(&block->data.event, prefix, print_fn, user_data);
+				prefix = ",";
 			}
 
-			prefix = ",";
 			i += block->count;
 		}
 		print_fn("]}", user_data);
