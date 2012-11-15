@@ -15,6 +15,8 @@ extern int clock_init(struct Clock** clockp, struct Allocator* allocator)
 		return -1;
 	}
 
+	clock->allocator = allocator;
+
 	*clockp = clock;
 
 	return 0;

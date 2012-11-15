@@ -12,6 +12,8 @@
 #include "chars.h"
 #include "clock.h"
 #include "allocator_type.h"
+#include "allocator.h"
+
 
 #define T(x) (!0)
 
@@ -244,16 +246,14 @@ static void event_add_arg(struct spdr* context, struct Event* event, struct uu_s
 	if (arg.type == SPDR_STR) {
 		/* take copy of strings */
 		int n = strlen(arg.value.str) + 1;
-		int nblocks = 1 + n / (sizeof (union BlockData));
-		struct Block* first_block = growblocks_until(context->blocks, context->blocks_capacity, &context->blocks_next, nblocks);
+		char* str = allocator_alloc(&context->arena_allocator.super, n);
 
-		if (!first_block) {
+		if (!str) {
 			arg.value.str = "<Out of arg. memory>";
 		} else {
-			first_block->type = STR_BLOCK;
-			memcpy(&first_block->data.chars, arg.value.str, n);
+			memcpy(str, arg.value.str, n);
 
-			arg.value.str = first_block->data.chars;
+			arg.value.str = str;
 		}
 	}
 
