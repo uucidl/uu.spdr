@@ -114,7 +114,8 @@ static void* spdr_alloc(struct Allocator* allocator, size_t size)
 
 static void spdr_free(struct Allocator* _, void* ptr)
 {
-	(void) _, ptr;
+	(void) _;
+	(void) ptr;
 
 	/* no op */
 }
