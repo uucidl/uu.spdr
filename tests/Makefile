@@ -7,6 +7,9 @@ LIB_SRC+=../deps/timer_lib/timer.c
 LIB=libspdr.a
 
 PLATFORM?=posix
+ifeq ($(shell uname),Darwin)
+PLATFORM=osx
+endif
 
 ifeq ($(PLATFORM),posix)
 LIB_SRC+=../src/spdr-posix.c
@@ -14,11 +17,11 @@ LIB_SRC+=../src/chars-posix.c
 LIB_SRC+=../src/spdr-thread-posix.c
 endif
 
-ifeq ($(PLATFORM),macosx)
+ifeq ($(PLATFORM),osx)
 LIB_SRC+=../src/spdr-posix.c
 LIB_SRC+=../src/chars-posix.c
 LIB_SRC+=../src/spdr-thread-posix.c
-LIB_SRC+=../src/spdr-macosx.c
+LIB_SRC+=../src/clock-osx.c
 endif
 
 ifeq ($(PLATFORM),linux)
@@ -29,6 +32,7 @@ endif
 
 ifeq ($(PLATFORM),win32)
 LIB_SRC+=../src/spdr-windows.c
+LIB_SRC+=../src/clock-windows.c
 LIB_SRC+=../src/chars-windows.c
 endif
 
