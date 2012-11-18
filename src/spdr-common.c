@@ -32,7 +32,15 @@ struct Event
 struct Block
 {
 	enum { EVENT_BLOCK, STR_BLOCK } type;
-	int count; // extra block count;
+
+	/*
+	 * extra block count.
+	 *
+	 * Whenever a block is not sufficient, contiguous blocks of
+	 * memory are allocated of exactly:
+	 *   count * sizeof(struct Block)
+	 */
+	int count;
 	union BlockData {
 		struct Event event;
 		char         chars[sizeof (struct Event)];

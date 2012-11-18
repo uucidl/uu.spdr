@@ -3,7 +3,6 @@ CFLAGS+=-I../include -I../deps
 LIB_SRC=../src/spdr-common.c
 LIB_SRC+=../src/chars-common.c
 LIB_SRC+=../src/allocator.c
-LIB_SRC+=../deps/timer_lib/timer.c
 LIB=libspdr.a
 
 PLATFORM?=posix
@@ -67,4 +66,7 @@ cxx-tracing: test-cxx.cc $(LIB)
 	$(CXX) $(CFLAGS) -L. -lspdr $< -o $@
 
 scope-tracing: test-scope.c $(LIB_SRC)
+	$(CC) $(CFLAGS) $^ -o $@
+
+tracing-with-external-clock: ../deps/timer_lib/timer.c test-external_clock.c $(LIB_SRC)
 	$(CC) $(CFLAGS) $^ -o $@
