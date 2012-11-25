@@ -3,7 +3,6 @@
 #include "spdr.h"
 #include "spdr-internal.h"
 
-#include <timer_lib/timer.h>
 #include <libatomic_ops-7.2/src/atomic_ops.h>
 
 #include <stdlib.h>
@@ -11,6 +10,10 @@
 #include <string.h>
 
 #include "chars.h"
+#include "clock.h"
+#include "allocator_type.h"
+#include "allocator.h"
+
 
 #define T(x) (!0)
 
@@ -29,22 +32,42 @@ struct Event
 struct Block
 {
 	enum { EVENT_BLOCK, STR_BLOCK } type;
-	int count; // extra block count;
+
+	/*
+	 * extra block count.
+	 *
+	 * Whenever a block is not sufficient, contiguous blocks of
+	 * memory are allocated of exactly:
+	 *   count * sizeof(struct Block)
+	 */
+	int count;
 	union BlockData {
 		struct Event event;
 		char         chars[sizeof (struct Event)];
 	} data;
 };
 
+struct SpdrAllocator
+{
+	struct Allocator super;
+	struct spdr* spdr;
+};
+
 struct spdr
 {
-	int          tracing_p;
-	AO_t         blocks_next;
-	timer        timer;
-	void       (*log_fn) (const char* line, void* user_data);
-	void*        log_user_data;
-	size_t       blocks_capacity;
-	struct Block blocks[1];
+	int                  tracing_p;
+	AO_t                 blocks_next;
+	struct SpdrAllocator arena_allocator;
+
+	struct Clock*        clock;
+	unsigned long long (*clock_fn)(void* user_data);
+	void*                clock_user_data;
+
+	void               (*log_fn) (const char* line, void* user_data);
+	void*                log_user_data;
+
+	size_t               blocks_capacity;
+	struct Block         blocks[1];
 };
 
 /**
@@ -80,14 +103,35 @@ static struct Event* growlog_until(struct Block* blocks, size_t blocks_capacity,
 	return &block->data.event;
 }
 
+static void* spdr_alloc(struct Allocator* allocator, size_t size)
+{
+	struct spdr* context = ((struct SpdrAllocator*) allocator)->spdr;
+
+	int nblocks = 1 + size / sizeof(struct Block);
+
+	struct Block* first_block = growblocks_until(context->blocks, context->blocks_capacity, &context->blocks_next, nblocks);
+
+	if (!first_block) {
+		return NULL;
+	}
+
+	first_block->type = STR_BLOCK;
+
+	return &first_block->data.chars;
+}
+
+static void spdr_free(struct Allocator* _, void* ptr)
+{
+	(void) _;
+	(void) ptr;
+
+	/* no op */
+}
+
 extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size)
 {
 	const struct spdr null = { 0 };
 	struct spdr* context;
-
-	if (timer_lib_initialize() < 0) {
-		return -1;
-	}
 
 	if (buffer_size < sizeof *context) {
 		return -1;
@@ -99,7 +143,13 @@ extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size
 	context->blocks_capacity = 1 + (buffer_size - sizeof *context) / (sizeof *context->blocks);
 	AO_store(&context->blocks_next, 0);
 
-	timer_initialize(&context->timer);
+	context->arena_allocator.super.alloc = spdr_alloc;
+	context->arena_allocator.super.free  = spdr_free;
+	context->arena_allocator.spdr        = context;
+
+	if (clock_init(&context->clock, &context->arena_allocator.super) < 0) {
+		return -1;
+	}
 
 	*context_ptr = context;
 
@@ -108,7 +158,7 @@ extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size
 
 extern void spdr_deinit(struct spdr** context_ptr)
 {
-	timer_lib_shutdown();
+	clock_deinit(&(*context_ptr)->clock);
 	*context_ptr = NULL;
 }
 
@@ -127,6 +177,13 @@ extern struct spdr_capacity spdr_capacity(struct spdr* context)
 	return cap;
 }
 
+extern void spdr_set_clock_microseconds_fn(struct spdr *context,
+		     unsigned long long (*clock_microseconds_fn)(void* user_data),
+		     void *user_data)
+{
+	context->clock_fn        = clock_microseconds_fn;
+	context->clock_user_data = user_data;
+}
 
 /**
 * Provide your logging function if you want a trace stream to be produced.
@@ -173,16 +230,18 @@ extern struct uu_spdr_arg uu_spdr_arg_make_str(const char* key, const char* valu
 	return arg;
 }
 
-static void event_make(struct spdr* context,
-struct Event* event,
+static void event_make(
+	struct spdr* context,
+	struct Event* event,
 	const char* cat,
 	const char* name,
 	enum uu_spdr_type type)
 {
-	tick_t ticks = timer_elapsed_ticks (&context->timer, 0);
-	uint64_t ticks_per_micros = timer_ticks_per_second (&context->timer) / 1000000;
-
-	event->ts_microseconds = ticks / ticks_per_micros;
+	if (context->clock_fn) {
+		event->ts_microseconds = context->clock_fn(context->clock_user_data);
+	} else {
+		event->ts_microseconds = clock_microseconds(context->clock);
+	}
 	event->pid   = uu_spdr_get_pid();
 	event->tid   = uu_spdr_get_tid();
 	event->cat   = cat;
@@ -196,16 +255,14 @@ static void event_add_arg(struct spdr* context, struct Event* event, struct uu_s
 	if (arg.type == SPDR_STR) {
 		/* take copy of strings */
 		int n = strlen(arg.value.str) + 1;
-		int nblocks = 1 + n / (sizeof (union BlockData));
-		struct Block* first_block = growblocks_until(context->blocks, context->blocks_capacity, &context->blocks_next, nblocks);
+		char* str = allocator_alloc(&context->arena_allocator.super, n);
 
-		if (!first_block) {
+		if (!str) {
 			arg.value.str = "<Out of arg. memory>";
 		} else {
-			first_block->type = STR_BLOCK;
-			memcpy(&first_block->data.chars, arg.value.str, n);
+			memcpy(str, arg.value.str, n);
 
-			arg.value.str = first_block->data.chars;
+			arg.value.str = str;
 		}
 	}
 
@@ -424,9 +481,9 @@ void spdr_report(struct spdr *context,
 			if (block->type == EVENT_BLOCK)
 			{
 				log_json(&block->data.event, prefix, print_fn, user_data);
+				prefix = ",";
 			}
 
-			prefix = ",";
 			i += block->count;
 		}
 		print_fn("]}", user_data);
