@@ -62,6 +62,12 @@ Tested platforms as of 2012-11:
 *     MacOSX, GCC and Clang
 *     Windows, Visual Studio 2012
 
+Sources to include for each platforms may be found in:
+*     src/src-list-linux.txt (you need -lrt to link)
+*     src/src-list-osx.txt
+*     src/src-list-win32.txt
+*     src/src-list-win64.txt
+
 Dropping the implementation files inside src/ for your platform in a
 project and importing the header found in include/ should basically be
 sufficient.
