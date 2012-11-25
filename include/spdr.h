@@ -67,12 +67,12 @@ struct spdr_capacity spdr_capacity(struct spdr* context);
 
 /**
  * Provide your own clock function.
- * 
+ *
  * It must return a strictly monotonic series of numbers
  * representing elapsed microseconds.
  *
  * It must be thread-safe: it will be called concurrently
- * from multiple threads 
+ * from multiple threads
  */
 void spdr_set_clock_microseconds_fn(struct spdr *context,
 		     unsigned long long (*clock_microseconds_fn)(void* user_data),
@@ -152,6 +152,9 @@ void spdr_report(struct spdr *context,
  * @code
  * SPDR_METADATA1("thread_name", SPDR_STR("name", "My_Thread"))
  * @code
+ *
+ * chrome://tracing will then display this name rather than the tid of
+ * the thread.
  */
 #define SPDR_METADATA1(spdr, name, arg0)		\
 	UU_SPDR_TRACE1(spdr, "__metadata", name, SPDR_METADATA, arg0)
