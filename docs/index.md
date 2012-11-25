@@ -1,5 +1,9 @@
 # SPDR
 
+Allow you to instrument code with traces.
+
+Copyright (C) 2012 Nicolas Léveillé <nicolas@uucidl.com>
+
 ## Description
 
 This library offers you a series of macros supported by a C-based implementation to introduce timed traces inside your code. They may be used to debug your program and its threads and overwise measure the performance of groups of operations.
@@ -13,7 +17,9 @@ See:
 
 ## Usage
 
-Please check examples/ for some typical uses.
+Check include/spdr.h it is hopefully small enough to be sufficient as documentation.
+
+Check examples/ for some typical uses.
 
 ### Tracing
 
@@ -51,6 +57,9 @@ Tested platforms as of 2012-11:
 Dropping the implementation files inside src/ for your platform in a
 project and importing the header found in include/ should basically be
 sufficient.
+
+Use of the library in C++ is supported, you must include the
+include/spdr.hh header rather than spdr.h.
 
 ## Implementation & Design
 
