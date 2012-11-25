@@ -5,15 +5,20 @@ LIB_SRC+=../src/chars-common.c
 LIB_SRC+=../src/allocator.c
 LIB=libspdr.a
 
-PLATFORM?=posix
+
+GUESSED_PLATFORM=posix
 ifeq ($(shell uname),Darwin)
-PLATFORM=osx
+GUESSED_PLATFORM=osx
 endif
+
+
+PLATFORM?=$(GUESSED_PLATFORM)
 
 ifeq ($(PLATFORM),posix)
 LIB_SRC+=../src/spdr-posix.c
 LIB_SRC+=../src/chars-posix.c
 LIB_SRC+=../src/spdr-thread-posix.c
+LIB_SRC+=../src/clock-posix.c
 endif
 
 ifeq ($(PLATFORM),osx)
