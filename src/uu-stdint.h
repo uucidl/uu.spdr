@@ -3,7 +3,7 @@
 
 #if defined(_MSC_VER) && _MSC_VER < 1600
 /* Before VS 2010, Microsoft did not ship a stdint.h */
-#include "stdint-msvc.h"
+#include "../deps/stdint-msvc.h"
 #else
 #include <stdint.h>
 #endif

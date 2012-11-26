@@ -1,14 +1,13 @@
 /* -*- coding: utf-8; -*- */
 
-#include "spdr.h"
-#include "spdr-internal.h"
-
-#include <libatomic_ops-7.2/src/atomic_ops.h>
+#include "../include/spdr.h"
+#include "../deps/libatomic_ops-7.2/src/atomic_ops.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "spdr-internal.h"
 #include "chars.h"
 #include "clock.h"
 #include "allocator_type.h"
