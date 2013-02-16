@@ -120,7 +120,7 @@ static inline void uu_spdr_scope_exit (struct uu_spdr_scope* scope)
 
 #    define UU_SPDR_SCOPE_SETUP(spdr, cat, name)			\
 	struct uu_spdr_scope UU_SPDR_CONCAT(scope,__LINE__)			\
-	     __attribute__((cleanup(uu_spdr_scope_exit))) = { spdr, cat, name }
+	  __attribute__((cleanup(uu_spdr_scope_exit))) = { spdr, cat, name }; (void) UU_SPDR_CONCAT(scope,__LINE__)
 
 #  endif
 
