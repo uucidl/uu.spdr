@@ -1,0 +1,152 @@
+#include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <pthread.h>
+
+#include "spdr.h"
+
+
+#include "../src/clock.h"
+#include "../src/allocator_type.h"
+
+#ifndef TRACING_ENABLED
+#define TRACING_ENABLED 0
+#endif
+
+static struct spdr* spdr;
+
+static void* std_allocator_alloc(struct Allocator* self, size_t size)
+{
+	(void) self;
+
+	return malloc(size);
+}
+
+static void std_allocator_free(struct Allocator* self, void* ptr)
+{
+	(void) self;
+
+	free(ptr);
+}
+
+struct ThreadContext
+{
+	struct Clock* clock;
+	pthread_t pthread;
+	volatile double* results;
+	int offset;
+	int n;
+	uint64_t ts0;
+	uint64_t ts1;
+	int terminated_p;
+};
+
+static void* thread_main (void* ctxt)
+{
+	struct ThreadContext* context = ctxt;
+	int i;
+
+	context->ts0 = clock_microseconds(context->clock);
+
+	SPDR_BEGIN1(spdr, "thread_main", "main", SPDR_INT("i", context->offset));
+	for (i = 0; i < context->n; i++) {
+		SPDR_SCOPE(spdr, "thread_main", "::sin");
+		context->results[i] = sin(context->results[i]);
+	}
+	SPDR_END(spdr, "thread_main", "main");
+
+	context->ts1 = clock_microseconds(context->clock);
+
+	return NULL;
+}
+
+extern int main(int argc, char** argv)
+{
+	enum { LOG_N = 20 * 1024 * 1024 };
+	void* spdr_buffer = malloc(LOG_N);
+	struct Clock* clock;
+	struct Allocator std_allocator = { std_allocator_alloc, std_allocator_free };
+	clock_init(&clock, &std_allocator);
+
+	spdr_init(&spdr, spdr_buffer, LOG_N);
+	spdr_enable_trace(spdr, TRACING_ENABLED);
+
+	SPDR_METADATA1(spdr, "thread_name", SPDR_STR("name", "Main_Thread"));
+	{
+		SPDR_SCOPE(spdr, "main", "single_threaded_test");
+		int N = 10000;
+		uint64_t ts0 = clock_microseconds(clock);
+
+		while (N--) {
+			int IN = 64 * 1024;
+			volatile double results[IN];
+
+			SPDR_BEGIN1(spdr, "main", "::sin", SPDR_INT("i", IN));
+			while (IN--) {
+				results[IN] = sin(results[IN]);
+			}
+			SPDR_END(spdr, "main", "::sin");
+		}
+
+		printf("elapsed_ms: %llu\n", (clock_microseconds(clock) - ts0) / 1000);
+	}
+
+	{
+		SPDR_SCOPE(spdr, "main", "multi_threaded_test");
+		int N = 10;
+
+		while (N--) {
+			int IN = 8 * 1024 * 1024;
+			int const IN_TN = 8;
+			volatile double* results = malloc(IN * sizeof(*results));
+
+			struct ThreadContext threads[IN_TN];
+
+			{
+				int i;
+				int offset = 0;
+				int const n = IN / IN_TN;
+
+				for (i = 0; i < IN_TN; i++) {
+					threads[i].clock        = clock;
+					threads[i].results      = &results[offset];
+					threads[i].offset       = offset;
+					threads[i].n            = n;
+					threads[i].terminated_p = 0;
+					pthread_create(&threads[i].pthread, NULL, thread_main, &threads[i]);
+
+					offset += n;
+				}
+			}
+
+			{
+				uint64_t earlier_start = clock_microseconds(clock);
+				uint64_t later_end = earlier_start;
+				int i;
+
+				for (i = 0; i < IN_TN; i++) {
+					pthread_join (threads[i].pthread, NULL);
+					threads[i].terminated_p = 0;
+					if (threads[i].ts0 < earlier_start) {
+						earlier_start = threads[i].ts0;
+					}
+
+					if (threads[i].ts1 > later_end) {
+						later_end = threads[i].ts1;
+					}
+				}
+
+				printf("elapsed_ms: %llu\n", (later_end - earlier_start) / 1000);
+			}
+
+			free(results);
+		}
+	}
+
+	clock_deinit(&clock);
+	spdr_deinit(&spdr);
+	free(spdr_buffer);
+	spdr_buffer = NULL;
+
+	return 0;
+}
