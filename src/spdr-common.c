@@ -55,8 +55,8 @@ struct SpdrAllocator
 struct spdr
 {
 	int                  tracing_p;
-	AO_t                 blocks_next;
 	struct SpdrAllocator arena_allocator;
+	size_t               blocks_capacity;
 
 	struct Clock*        clock;
 	unsigned long long (*clock_fn)(void* user_data);
@@ -65,7 +65,10 @@ struct spdr
 	void               (*log_fn) (const char* line, void* user_data);
 	void*                log_user_data;
 
-	size_t               blocks_capacity;
+	/* a small buffer between read areas and write areas */
+	char buffer[1024];
+
+	AO_t                 blocks_next;
 	struct Block         blocks[1];
 };
 
