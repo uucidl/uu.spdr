@@ -59,10 +59,14 @@ struct SpdrAllocator
 struct spdr
 {
 	int                  tracing_p;
+	struct Clock*        clock;
+	char                 clock_buffer[32];
+	struct SpdrAllocator clock_allocator;
+
 	struct SpdrAllocator arena_allocator;
 	size_t               blocks_capacity;
 
-	struct Clock*        clock;
+
 	unsigned long long (*clock_fn)(void* user_data);
 	void*                clock_user_data;
 
@@ -70,7 +74,7 @@ struct spdr
 	void*                log_user_data;
 
 	/* a small buffer between read areas and write areas */
-	char buffer[128];
+	char buffer[1024];
 
 	AO_t                 blocks_next;
 	struct Block         blocks[1];
@@ -134,6 +138,16 @@ static void spdr_free(struct Allocator* _, void* ptr)
 	/* no op */
 }
 
+static void* spdr_clock_alloc(struct Allocator* allocator, size_t size)
+{
+	struct spdr* context = ((struct SpdrAllocator*) allocator)->spdr;
+	if (size > sizeof context->clock_buffer) {
+		return NULL;
+	}
+
+	return &context->clock_buffer;
+}
+
 extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size)
 {
 	const struct spdr null = { 0 };
@@ -153,7 +167,11 @@ extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size
 	context->arena_allocator.super.free  = spdr_free;
 	context->arena_allocator.spdr        = context;
 
-	if (clock_init(&context->clock, &context->arena_allocator.super) < 0) {
+	context->clock_allocator.super.alloc = spdr_clock_alloc;
+	context->clock_allocator.super.free  = spdr_free;
+	context->clock_allocator.spdr        = context;
+
+	if (clock_init(&context->clock, &context->clock_allocator.super) < 0) {
 		return -1;
 	}
 

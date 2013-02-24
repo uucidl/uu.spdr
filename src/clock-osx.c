@@ -38,11 +38,10 @@ extern void clock_deinit(struct Clock** clockp)
 	*clockp = NULL;
 }
 
-extern uint64_t clock_microseconds(struct Clock* clock)
+extern uint64_t clock_microseconds(const struct Clock* const clock)
 {
-	uint64_t micros = mach_absolute_time() *
-		clock->timebase_info.numer /
-		clock->timebase_info.denom / 1000;
+	uint64_t const micros = clock->timebase_info.numer * mach_absolute_time()
+		 / clock->timebase_info.denom / 1000;
 
 	return micros;
 }
