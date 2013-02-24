@@ -13,7 +13,11 @@
 #include "allocator_type.h"
 #include "allocator.h"
 
-
+/**
+ *  "documented" truth value, use like:
+ *
+ * T(use_defibrilator)
+ */
 #define T(x) (!0)
 
 struct Event
@@ -254,20 +258,6 @@ static void event_make(
 
 static void event_add_arg(struct spdr* context, struct Event* event, struct uu_spdr_arg arg)
 {
-	if (arg.type == SPDR_STR) {
-		/* take copy of strings */
-		int n = strlen(arg.value.str) + 1;
-		char* str = allocator_alloc(&context->arena_allocator.super, n);
-
-		if (!str) {
-			arg.value.str = "<Out of arg. memory>";
-		} else {
-			memcpy(str, arg.value.str, n);
-
-			arg.value.str = str;
-		}
-	}
-
 	event->args[event->arg_count++] = arg;
 }
 
@@ -288,7 +278,6 @@ static void event_log(const struct spdr* context,
 	if (with_newlines_p) {
 		prefix = "\n";
 	}
-
 
 	chars_catsprintf (&buffer,
 		"%s%llu %u %llu \"%s\" \"%s\" \"%c\"",
@@ -397,65 +386,90 @@ static void log_json(const struct Event* e,
 		print_fn(string.chars, user_data);
 	}
 }
-extern void uu_spdr_record(struct spdr *context,
-						   const char* cat,
-						   const char* name,
-						   enum uu_spdr_type type)
+
+static void record_event(struct spdr* context, struct Event* e)
 {
-	struct Event* e = growlog_until(context->blocks, context->blocks_capacity, &context->blocks_next);
-	if (!e) {
+	struct Event* ep = growlog_until(context->blocks, context->blocks_capacity, &context->blocks_next);
+	int i;
+
+	if (!ep) {
 		return;
 	}
 
-	event_make (context, e, cat, name, type);
+	memcpy(ep, e, sizeof *e);
+
+	for (i = 0; i < ep->arg_count; i++) {
+		struct uu_spdr_arg* arg = &ep->args[i];
+		if (arg->type == SPDR_STR) {
+			/* take copy of strings */
+			int n = strlen(arg->value.str) + 1;
+			char* str = allocator_alloc(&context->arena_allocator.super, n);
+
+			if (!str) {
+				arg->value.str = "<Out of arg. memory>";
+			} else {
+				memcpy(str, arg->value.str, n);
+
+				arg->value.str = str;
+			}
+		}
+	}
+}
+
+extern void uu_spdr_record(struct spdr *context,
+			   const char* cat,
+			   const char* name,
+			   enum uu_spdr_type type)
+{
+	struct Event e;
+	event_make (context, &e, cat, name, type);
 
 	if (context->log_fn) {
-		event_log (context, e, context->log_fn, context->log_user_data, !T(with_newlines));
+		event_log (context, &e, context->log_fn, context->log_user_data, !T(with_newlines));
 	}
+
+	record_event(context, &e);
 }
 
 extern void uu_spdr_record_1(struct spdr *context,
-							 const char* cat,
-							 const char* name,
-							 enum uu_spdr_type type,
-struct uu_spdr_arg arg0)
+			     const char* cat,
+			     const char* name,
+			     enum uu_spdr_type type,
+			     struct uu_spdr_arg arg0)
 {
-	struct Event* e = growlog_until(context->blocks, context->blocks_capacity, &context->blocks_next);
-	if (!e) {
-		return;
+	struct Event e;
+
+	event_make (context, &e, cat, name, type);
+	event_add_arg (context, &e, arg0);
+	if (context->log_fn) {
+		event_log (context, &e, context->log_fn, context->log_user_data, !T(with_newlines));
 	}
 
-	event_make (context, e, cat, name, type);
-	event_add_arg (context, e, arg0);
-	if (context->log_fn) {
-		event_log (context, e, context->log_fn, context->log_user_data, !T(with_newlines));
-	}
+	record_event(context, &e);
 }
 
 extern void uu_spdr_record_2(struct spdr *context,
-							 const char* cat,
-							 const char* name,
-							 enum uu_spdr_type type,
-struct uu_spdr_arg arg0,
-struct uu_spdr_arg arg1)
+			     const char* cat,
+			     const char* name,
+			     enum uu_spdr_type type,
+			     struct uu_spdr_arg arg0,
+			     struct uu_spdr_arg arg1)
 {
-	struct Event* e = growlog_until(context->blocks, context->blocks_capacity, &context->blocks_next);
-	if (!e) {
-		return;
+	struct Event e;
+	event_make (context, &e, cat, name, type);
+	event_add_arg (context, &e, arg0);
+	event_add_arg (context, &e, arg1);
+	if (context->log_fn) {
+		event_log (context, &e, context->log_fn, context->log_user_data, !T(with_newlines));
 	}
 
-	event_make (context, e, cat, name, type);
-	event_add_arg (context, e, arg0);
-	event_add_arg (context, e, arg1);
-	if (context->log_fn) {
-		event_log (context, e, context->log_fn, context->log_user_data, !T(with_newlines));
-	}
+	record_event(context, &e);
 }
 
 void spdr_report(struct spdr *context,
-				 enum spdr_report_type report_type,
-				 void (*print_fn) (const char* text, void* user_data),
-				 void* user_data)
+		 enum spdr_report_type report_type,
+		 void (*print_fn) (const char* text, void* user_data),
+		 void* user_data)
 {
 	struct spdr_capacity cap = spdr_capacity(context);
 	size_t i;
@@ -463,6 +477,9 @@ void spdr_report(struct spdr *context,
 	if (!print_fn) {
 		return;
 	}
+
+	/* blocks all further recording */
+	AO_store(&context->blocks_next, context->blocks_capacity);
 
 	if (SPDR_PLAIN_REPORT == report_type) {
 		for (i = 0; i < cap.count; i++) {
