@@ -13,7 +13,7 @@
 #define TRACING_ENABLED 0
 #endif
 
-static struct spdr* spdr;
+static struct spdr* gbl_spdr;
 
 static void* std_allocator_alloc(struct Allocator* self, size_t size)
 {
@@ -31,28 +31,46 @@ static void std_allocator_free(struct Allocator* self, void* ptr)
 
 struct ThreadContext
 {
-	struct Clock* clock;
-	pthread_t pthread;
 	volatile double* results;
 	int offset;
 	int n;
+
+	struct Clock* clock;
 	uint64_t ts0;
 	uint64_t ts1;
+
+	char buffer[1024];
 	int terminated_p;
+	pthread_t pthread;
 };
 
 static void* thread_main (void* ctxt)
 {
 	struct ThreadContext* context = ctxt;
+	int const chunks_n = 1024;
 	int i;
+	int j = 0;
+	struct spdr* spdr = gbl_spdr;
 
 	context->ts0 = clock_microseconds(context->clock);
 
-	SPDR_BEGIN1(spdr, "thread_main", "main", SPDR_INT("i", context->offset));
-	for (i = 0; i < context->n; i++) {
-		SPDR_SCOPE(spdr, "thread_main", "::sin");
-		context->results[i] = sin(context->results[i]);
+	SPDR_BEGIN1(spdr, "thread_main", "main",
+		    SPDR_INT("i", context->offset));
+
+	while (j < context->n) {
+		SPDR_BEGIN1(spdr, "main", "::sin", SPDR_INT("i", j));
+		for (i = 0; i < chunks_n; i++) {
+			if (j + i >= context->n) {
+				break;
+			}
+
+			context->results[j + i] = sin(context->results[j + i]);
+		}
+		SPDR_END(spdr, "main", "::sin");
+
+		j = j + chunks_n;
 	}
+
 	SPDR_END(spdr, "thread_main", "main");
 
 	context->ts1 = clock_microseconds(context->clock);
@@ -60,20 +78,26 @@ static void* thread_main (void* ctxt)
 	return NULL;
 }
 
+static void report(const char* str, void* user_data)
+{
+	fputs(str, (FILE*) user_data);
+}
+
 extern int main(int argc, char** argv)
 {
-	enum { LOG_N = 20 * 1024 * 1024 };
+	enum { LOG_N = 256 * 1024 * 1024 };
 	void* spdr_buffer = malloc(LOG_N);
+	uint64_t single_threaded_ms = 0;
 	struct Clock* clock;
 	struct Allocator std_allocator = { std_allocator_alloc, std_allocator_free };
 	clock_init(&clock, &std_allocator);
 
-	spdr_init(&spdr, spdr_buffer, LOG_N);
-	spdr_enable_trace(spdr, TRACING_ENABLED);
+	spdr_init(&gbl_spdr, spdr_buffer, LOG_N);
+	spdr_enable_trace(gbl_spdr, TRACING_ENABLED);
 
-	SPDR_METADATA1(spdr, "thread_name", SPDR_STR("name", "Main_Thread"));
+	SPDR_METADATA1(gbl_spdr, "thread_name", SPDR_STR("name", "Main_Thread"));
 	{
-		SPDR_SCOPE(spdr, "main", "single_threaded_test");
+		SPDR_SCOPE(gbl_spdr, "main", "single_threaded_test");
 		int N = 10000;
 		uint64_t ts0 = clock_microseconds(clock);
 
@@ -81,24 +105,25 @@ extern int main(int argc, char** argv)
 			int IN = 64 * 1024;
 			volatile double results[IN];
 
-			SPDR_BEGIN1(spdr, "main", "::sin", SPDR_INT("i", IN));
+			SPDR_BEGIN1(gbl_spdr, "main", "::sin", SPDR_INT("i", IN));
 			while (IN--) {
 				results[IN] = sin(results[IN]);
 			}
-			SPDR_END(spdr, "main", "::sin");
+			SPDR_END(gbl_spdr, "main", "::sin");
 		}
 
-		printf("elapsed_ms: %llu\n", (clock_microseconds(clock) - ts0) / 1000);
+		single_threaded_ms = (clock_microseconds(clock) - ts0) / 1000;
+		printf("elapsed_ms: %llu\n", single_threaded_ms);
 	}
 
 	{
-		SPDR_SCOPE(spdr, "main", "multi_threaded_test");
+		SPDR_SCOPE(gbl_spdr, "main", "multi_threaded_test");
 		int N = 10;
 
 		while (N--) {
-			int IN = 8 * 1024 * 1024;
 			int const IN_TN = 8;
-			volatile double* results = malloc(IN * sizeof(*results));
+			int IN = 8 * 100 * 64 * 1024;
+			double* results = malloc(IN * sizeof(*results));
 
 			struct ThreadContext threads[IN_TN];
 
@@ -113,6 +138,7 @@ extern int main(int argc, char** argv)
 					threads[i].offset       = offset;
 					threads[i].n            = n;
 					threads[i].terminated_p = 0;
+
 					pthread_create(&threads[i].pthread, NULL, thread_main, &threads[i]);
 
 					offset += n;
@@ -126,6 +152,7 @@ extern int main(int argc, char** argv)
 
 				for (i = 0; i < IN_TN; i++) {
 					pthread_join (threads[i].pthread, NULL);
+
 					threads[i].terminated_p = 0;
 					if (threads[i].ts0 < earlier_start) {
 						earlier_start = threads[i].ts0;
@@ -136,15 +163,29 @@ extern int main(int argc, char** argv)
 					}
 				}
 
-				printf("elapsed_ms: %llu\n", (later_end - earlier_start) / 1000);
+				{
+					uint64_t elapsed_ms = (later_end - earlier_start) / 1000;
+					uint64_t equivalent_ms = 10 * elapsed_ms;
+					double scaling = (double) single_threaded_ms / equivalent_ms;
+					printf("elapsed_ms: %llu\n", elapsed_ms);
+					printf("equivalent in ms: %llu (scaling: %f)\n", equivalent_ms, scaling);
+				}
 			}
 
 			free(results);
 		}
 	}
 
+	{
+		FILE* f = fopen("perf.json", "wb");
+		if (f) {
+			spdr_report(gbl_spdr, SPDR_CHROME_REPORT, report, f);
+			fclose(f);
+		}
+	}
+
 	clock_deinit(&clock);
-	spdr_deinit(&spdr);
+	spdr_deinit(&gbl_spdr);
 	free(spdr_buffer);
 	spdr_buffer = NULL;
 
