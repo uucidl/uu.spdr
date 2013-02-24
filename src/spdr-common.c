@@ -66,7 +66,7 @@ struct spdr
 	void*                log_user_data;
 
 	/* a small buffer between read areas and write areas */
-	char buffer[1024];
+	char buffer[128];
 
 	AO_t                 blocks_next;
 	struct Block         blocks[1];
