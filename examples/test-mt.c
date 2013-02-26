@@ -13,7 +13,7 @@
 #endif
 
 static struct spdr* spdr;
-enum { LOG_N = 5 * 1024 };
+enum { LOG_N = 6 * 1024 };
 static void* spdr_buffer;
 
 void trace (const char* line, void* user_data)
@@ -22,7 +22,7 @@ void trace (const char* line, void* user_data)
 	const char* msg = user_data;
 
 	assert(0 == strcmp(msg, "Hello"));
-	
+
 	strncat(buffer, line, sizeof buffer - 2);
 	strncat(buffer, "\n", sizeof buffer - 2);
 
