@@ -28,8 +28,12 @@ struct Event
 	const char*        cat;
 	const char*        name;
 	enum uu_spdr_type  phase;
-	int                arg_count;
-	struct uu_spdr_arg args[2];
+	int8_t             str_count;
+	int8_t             int_count;
+	int8_t             float_count;
+	struct { const char* key; const char* value; } str_args[2];
+	struct { const char* key; int value; }         int_args[2];
+	struct { const char* key; float value; }       float_args[2];
 };
 
 struct Block
@@ -269,12 +273,32 @@ static void event_make(
 	event->cat   = cat;
 	event->name  = name;
 	event->phase = type;
-	event->arg_count = 0;
+	event->str_count = 0;
+	event->int_count = 0;
+	event->float_count = 0;
 }
 
 static void event_add_arg(struct spdr* context, struct Event* event, struct uu_spdr_arg arg)
 {
-	event->args[event->arg_count++] = arg;
+	int i;
+
+	switch (arg.type) {
+	case SPDR_STR:
+		i = event->str_count++;
+		event->str_args[i].key   = arg.key;
+		event->str_args[i].value = arg.value.str;
+		break;
+	case SPDR_INT:
+		i = event->int_count++;
+		event->int_args[i].key   = arg.key;
+		event->int_args[i].value = arg.value.i;
+		break;
+	case SPDR_FLOAT:
+		i = event->float_count++;
+		event->float_args[i].key   = arg.key;
+		event->float_args[i].value = arg.value.d;
+		break;
+	}
 }
 
 static void event_log(const struct spdr* context,
@@ -305,29 +329,25 @@ static void event_log(const struct spdr* context,
 		event->name,
 		event->phase);
 
-	for (i = 0; i < event->arg_count; i++) {
-		const struct uu_spdr_arg* arg = &event->args[i];
+	for (i = 0; i < event->str_count; i++) {
+		chars_catsprintf(&buffer,
+				 " \"%s\" \"%s\"",
+				 event->str_args[i].key,
+				 event->str_args[i].value);
+	}
 
-		switch (arg->type) {
-		case SPDR_INT:
-			chars_catsprintf(&buffer,
-				" \"%s\" %d",
-				arg->key,
-				arg->value.i);
-			break;
-		case SPDR_FLOAT:
-			chars_catsprintf(&buffer,
-				" \"%s\" %f",
-				arg->key,
-				arg->value.d);
-			break;
-		case SPDR_STR:
-			chars_catsprintf(&buffer,
-				" \"%s\" \"%s\"",
-				arg->key,
-				arg->value.str);
-			break;
-		}
+	for (i = 0; i < event->int_count; i++) {
+		chars_catsprintf(&buffer,
+				 " \"%s\" %d",
+				 event->int_args[i].key,
+				 event->int_args[i].value);
+	}
+
+	for (i = 0; i < event->float_count; i++) {
+		chars_catsprintf(&buffer,
+				 " \"%s\" %f",
+				 event->float_args[i].key,
+				 event->float_args[i].value);
 	}
 
 	if (0 == buffer.error)
@@ -365,33 +385,32 @@ static void log_json(const struct Event* e,
 	chars_catsprintf(&string, ",\"ph\":\"%c\",\"args\":{", e->phase);
 
 
-	for (i = 0; i < e->arg_count; i++) {
-		const struct uu_spdr_arg* arg = &e->args[i];
+	for (i = 0; i < e->str_count; i++) {
+		chars_catsprintf(&string,
+				 "%s\"%s\":\"",
+				 arg_prefix,
+				 e->str_args[i].key);
+		chars_catjsonstr(&string, e->str_args[i].value);
+		chars_catsprintf(&string, "\"");
 
-		switch (arg->type) {
-		case SPDR_INT:
-			chars_catsprintf(&string,
-				"%s\"%s\":%d",
-				arg_prefix,
-				arg->key,
-				arg->value.i);
-			break;
-		case SPDR_FLOAT:
-			chars_catsprintf(&string,
-				"%s\"%s\":%f",
-				arg_prefix,
-				arg->key,
-				arg->value.d);
-			break;
-		case SPDR_STR:
-			chars_catsprintf(&string,
-				"%s\"%s\":\"",
-				arg_prefix,
-				arg->key);
-			chars_catjsonstr(&string, arg->value.str);
-			chars_catsprintf(&string, "\"");
-			break;
-		}
+		arg_prefix = ",";
+	}
+
+	for (i = 0; i < e->int_count; i++) {
+		chars_catsprintf(&string,
+				 "%s\"%s\":%d",
+				 arg_prefix,
+				 e->int_args[i].key,
+				 e->int_args[i].value);
+		arg_prefix = ",";
+	}
+
+	for (i = 0; i < e->float_count; i++) {
+		chars_catsprintf(&string,
+				 "%s\"%s\":%f",
+				 arg_prefix,
+				 e->float_args[i].key,
+				 e->float_args[i].value);
 		arg_prefix = ",";
 	}
 
@@ -414,20 +433,18 @@ static void record_event(struct spdr* context, struct Event* e)
 
 	memcpy(ep, e, sizeof *e);
 
-	for (i = 0; i < ep->arg_count; i++) {
-		struct uu_spdr_arg* arg = &ep->args[i];
-		if (arg->type == SPDR_STR) {
-			/* take copy of strings */
-			int n = strlen(arg->value.str) + 1;
-			char* str = allocator_alloc(&context->arena_allocator.super, n);
+	for (i = 0; i < ep->str_count; i++) {
+		const char* const str = ep->str_args[i].value;
+		/* take copy of strings */
+		int n = strlen(str) + 1;
 
-			if (!str) {
-				arg->value.str = "<Out of arg. memory>";
-			} else {
-				memcpy(str, arg->value.str, n);
+		char* new_str = allocator_alloc(&context->arena_allocator.super, n);
 
-				arg->value.str = str;
-			}
+		if (!new_str) {
+			ep->str_args[i].value = "<Out of arg. memory>";
+		} else {
+			memcpy(new_str, str, n);
+			ep->str_args[i].value = new_str;
 		}
 	}
 }
