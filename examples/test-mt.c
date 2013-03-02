@@ -13,7 +13,7 @@
 #endif
 
 static struct spdr* spdr;
-enum { LOG_N = 6 * 1024 };
+enum { LOG_N = 16 * 1024 };
 static void* spdr_buffer;
 
 void trace (const char* line, void* user_data)

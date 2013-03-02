@@ -64,7 +64,7 @@ struct Bucket
 {
 	struct BucketAllocator allocator;
 	int                    blocks_capacity;
-	char buffer[1024];
+	char buffer[128];
 	AO_t                   blocks_next;
 	struct Block           blocks[1];
 };
@@ -77,7 +77,10 @@ struct SpdrAllocator
 
 struct spdr
 {
-	enum { MAX_BUCKET_COUNT = 8 };
+	enum {
+		MAX_BUCKET_COUNT_BITS = 3,
+		MAX_BUCKET_COUNT      = 2 << MAX_BUCKET_COUNT_BITS
+	};
 
 	int                  tracing_p;
 	struct Clock*        clock;
@@ -214,21 +217,29 @@ extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size
 	context->clock_allocator.super.free  = spdr_free;
 	context->clock_allocator.spdr        = context;
 
-	context->buckets_n  = 1;
-	if (arena_size < context->buckets_n * sizeof *context->buckets[0]) {
+	if (clock_init(&context->clock, &context->clock_allocator.super) < 0) {
 		return -1;
 	}
 
+	context->buckets_n  = 8;
 	context->arena_size   = arena_size;
 	context->arena_offset = arena_offset;
 
-	int bucket_size = arena_size / context->buckets_n;
-	bucket_size = (bucket_size >> 9) << 9;
-	context->buckets[0] = arena;
-	bucket_init(context->buckets[0], bucket_size);
+	{
+		int n = context->buckets_n;
+		int i;
+		int bucket_size = arena_size / context->buckets_n;
+		bucket_size = (bucket_size >> 9) << 9;
 
-	if (clock_init(&context->clock, &context->clock_allocator.super) < 0) {
-		return -1;
+		if (bucket_size < sizeof *context->buckets[0]) {
+			return -1;
+		}
+
+		for (i = 0; i < n; i++) {
+			context->buckets[i] = arena + i * bucket_size;
+			bucket_init(context->buckets[i], bucket_size);
+		}
+
 	}
 
 	*context_ptr = context;
@@ -244,15 +255,23 @@ extern void spdr_deinit(struct spdr** context_ptr)
 
 extern void spdr_reset(struct spdr* context)
 {
-	AO_store(&context->buckets[0]->blocks_next, 0);
+	int i;
+
+	for (i = 0; i < context->buckets_n; i++) {
+		AO_store(&context->buckets[i]->blocks_next, 0);
+	}
 }
 
 extern struct spdr_capacity spdr_capacity(struct spdr* context)
 {
-	struct spdr_capacity cap;
+	struct spdr_capacity cap = {0};
+	int i;
 
-	cap.count    = AO_load(&context->buckets[0]->blocks_next);
-	cap.capacity = context->buckets[0]->blocks_capacity;
+	for (i = 0; i < context->buckets_n; i++) {
+		struct Bucket const* bucket = context->buckets[i];
+		cap.count    += AO_load(&bucket->blocks_next);
+		cap.capacity += bucket->blocks_capacity;
+	}
 
 	return cap;
 }
@@ -478,7 +497,9 @@ static void log_json(const struct Event* e,
 
 static void record_event(struct spdr* context, struct Event* e)
 {
-	struct Event* ep = growlog_until(context->buckets[0]->blocks, context->buckets[0]->blocks_capacity, &context->buckets[0]->blocks_next);
+	int const bucket_i = 0;
+	struct Bucket* bucket = context->buckets[bucket_i & MAX_BUCKET_COUNT_BITS];
+	struct Event* ep = growlog_until(bucket->blocks, bucket->blocks_capacity, &bucket->blocks_next);
 	int i;
 
 	if (!ep) {
@@ -492,7 +513,7 @@ static void record_event(struct spdr* context, struct Event* e)
 		/* take copy of strings */
 		int n = strlen(str) + 1;
 
-		char* new_str = allocator_alloc(&context->buckets[0]->allocator.super, n);
+		char* new_str = allocator_alloc(&bucket->allocator.super, n);
 
 		if (!new_str) {
 			ep->str_args[i].value = "<Out of arg. memory>";
@@ -558,7 +579,8 @@ void spdr_report(struct spdr *context,
 		 void (*print_fn) (const char* text, void* user_data),
 		 void* user_data)
 {
-	struct spdr_capacity cap = spdr_capacity(context);
+	size_t records_per_bucket[MAX_BUCKET_COUNT];
+	int    bucket_i;
 	size_t i;
 
 	if (!print_fn) {
@@ -566,31 +588,43 @@ void spdr_report(struct spdr *context,
 	}
 
 	/* blocks all further recording */
-	AO_store(&context->buckets[0]->blocks_next, context->buckets[0]->blocks_capacity);
+	for (bucket_i = 0; bucket_i < context->buckets_n; bucket_i++) {
+		struct Bucket* const bucket = context->buckets[bucket_i];
+		records_per_bucket[bucket_i] = AO_load_acquire(&bucket->blocks_next);
+		AO_store(&bucket->blocks_next, bucket->blocks_capacity);
+	}
 
 	if (SPDR_PLAIN_REPORT == report_type) {
-		for (i = 0; i < cap.count; i++) {
-			const struct Block *block = &context->buckets[0]->blocks[i];
-			if (block->type == EVENT_BLOCK)
-			{
-				event_log(context, &block->data.event, print_fn, user_data, T(with_newlines));
-			}
+		for (bucket_i = 0; bucket_i < context->buckets_n; bucket_i++) {
+			struct Bucket const * const bucket = context->buckets[bucket_i];
 
-			i += block->count;
+			for (i = 0; i < records_per_bucket[bucket_i]; i++) {
+				const struct Block *block = &bucket->blocks[i];
+				if (block->type == EVENT_BLOCK)
+				{
+					event_log(context, &block->data.event, print_fn, user_data, T(with_newlines));
+				}
+
+				i += block->count;
+			}
 		}
 	} else if (SPDR_CHROME_REPORT == report_type) {
 		const char* prefix = "";
 
 		print_fn("{\"traceEvents\":[", user_data);
-		for (i = 0; i < cap.count; i++) {
-			const struct Block *block = &context->buckets[0]->blocks[i];
-			if (block->type == EVENT_BLOCK)
-			{
-				log_json(&block->data.event, prefix, print_fn, user_data);
-				prefix = ",";
-			}
+		for (bucket_i = 0; bucket_i < context->buckets_n; bucket_i++) {
+			struct Bucket const * const bucket = context->buckets[bucket_i];
 
-			i += block->count;
+			for (i = 0; i < records_per_bucket[bucket_i]; i++) {
+				const struct Block *block = &bucket->blocks[i];
+				if (block->type == EVENT_BLOCK)
+				{
+					log_json(&block->data.event, prefix, print_fn, user_data);
+					prefix = ",";
+				}
+
+				i += block->count;
+			}
 		}
 		print_fn("]}", user_data);
 	}
