@@ -187,9 +187,9 @@ extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size
 	const struct spdr null = { 0 };
 	struct spdr* context;
 
-	int   arena_offset;
-	void* arena;
-	int   arena_size;
+	size_t arena_offset;
+	void*  arena;
+	size_t arena_size;
 
 	if (buffer_size < sizeof *context) {
 		return -1;
@@ -198,8 +198,15 @@ extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size
 	context = buffer;
 	*context = null;
 
-	/* arena memory starts right after the buffer */
+	/* arena memory starts right after the buffer, aligned to 64 bytes */
 	arena_offset = sizeof *context;
+	{
+		size_t abs_arena_offset = ((char*) buffer - ((char*) 0)) + arena_offset;
+		size_t aligned_arena_offset = (1 + (abs_arena_offset>>9))<<9;
+
+		arena_offset += (aligned_arena_offset - abs_arena_offset);
+	}
+
 	arena = ((char*) buffer) + arena_offset;
 	arena_size = buffer_size - arena_offset;
 
@@ -216,6 +223,7 @@ extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size
 	context->arena_offset = arena_offset;
 
 	int bucket_size = arena_size / context->buckets_n;
+	bucket_size = (bucket_size >> 9) << 9;
 	context->buckets[0] = arena;
 	bucket_init(context->buckets[0], bucket_size);
 
