@@ -6,12 +6,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 
 #include "spdr-internal.h"
 #include "chars.h"
 #include "clock.h"
 #include "allocator_type.h"
 #include "allocator.h"
+#include "murmur.h"
 
 /**
  *  "documented" truth value, use like:
@@ -33,7 +35,7 @@ struct Event
 	int8_t             float_count;
 	struct { const char* key; const char* value; } str_args[2];
 	struct { const char* key; int value; }         int_args[2];
-	struct { const char* key; float value; }       float_args[2];
+	struct { const char* key; double value; }      float_args[2];
 };
 
 struct Block
@@ -64,7 +66,6 @@ struct Bucket
 {
 	struct BucketAllocator allocator;
 	int                    blocks_capacity;
-	char buffer[128];
 	AO_t                   blocks_next;
 	struct Block           blocks[1];
 };
@@ -75,13 +76,14 @@ struct SpdrAllocator
 	struct spdr* spdr;
 };
 
+enum {
+	BUCKET_COUNT_BITS = 3,
+	BUCKET_COUNT      = 2 << BUCKET_COUNT_BITS,
+	BUCKET_COUNT_MASK = BUCKET_COUNT - 1
+};
+
 struct spdr
 {
-	enum {
-		MAX_BUCKET_COUNT_BITS = 3,
-		MAX_BUCKET_COUNT      = 2 << MAX_BUCKET_COUNT_BITS
-	};
-
 	int                  tracing_p;
 	struct Clock*        clock;
 	char                 clock_buffer[32];
@@ -103,15 +105,14 @@ struct spdr
 	/**
 	 * Pointers to the arena
 	 */
-	int             buckets_n;
-	struct Bucket*  buckets[MAX_BUCKET_COUNT];
+	struct Bucket*  buckets[BUCKET_COUNT];
 };
 
 /**
-* Grow the memory buffer until capacity is reached.
-*
-* @return a block or NULL if the capacity has been reached.
-*/
+ * Grow the memory buffer until capacity is reached.
+ *
+ * @return a block or NULL if the capacity has been reached.
+ */
 static struct Block* growblocks_until(struct Block* blocks, size_t blocks_capacity, volatile AO_t* next, int nblocks)
 {
 	AO_t i = AO_fetch_and_add_acquire(next, nblocks);
@@ -126,8 +127,8 @@ static struct Block* growblocks_until(struct Block* blocks, size_t blocks_capaci
 }
 
 /**
-* Allocate an event block
-*/
+ * Allocate an event block
+ */
 static struct Event* growlog_until(struct Block* blocks, size_t blocks_capacity, volatile AO_t* next)
 {
 	struct Block* block = growblocks_until(blocks, blocks_capacity, next, 1);
@@ -142,19 +143,23 @@ static struct Event* growlog_until(struct Block* blocks, size_t blocks_capacity,
 
 static void* bucket_alloc(struct Allocator* allocator, size_t size)
 {
-	struct Bucket* bucket = ((struct BucketAllocator*) allocator)->bucket;
-
-	int nblocks = 1 + size / sizeof(struct Block);
-
-	struct Block* first_block = growblocks_until(bucket->blocks, bucket->blocks_capacity, &bucket->blocks_next, nblocks);
-
-	if (!first_block) {
+	if (size > INT_MAX) {
 		return NULL;
 	}
 
-	first_block->type = STR_BLOCK;
+	{
+		struct Bucket* bucket = ((struct BucketAllocator*) allocator)->bucket;
+		int nblocks = 1 + (int) size / sizeof(struct Block);
+		struct Block* first_block = growblocks_until(bucket->blocks, bucket->blocks_capacity, &bucket->blocks_next, nblocks);
 
-	return &first_block->data.chars;
+		if (!first_block) {
+			return NULL;
+		}
+
+		first_block->type = STR_BLOCK;
+
+		return &first_block->data.chars;
+	}
 }
 
 static void spdr_free(struct Allocator* _, void* ptr)
@@ -175,7 +180,7 @@ static void* spdr_clock_alloc(struct Allocator* allocator, size_t size)
 	return &context->clock_buffer;
 }
 
-static void bucket_init(struct Bucket* bucket, size_t buffer_size)
+static void bucket_init(struct Bucket* bucket, int buffer_size)
 {
 	bucket->allocator.super.alloc = bucket_alloc;
 	bucket->allocator.super.free  = spdr_free;
@@ -185,14 +190,16 @@ static void bucket_init(struct Bucket* bucket, size_t buffer_size)
 	AO_store(&bucket->blocks_next, 0);
 }
 
-extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size)
+extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t _buffer_size)
 {
 	const struct spdr null = { 0 };
+	int const buffer_size = _buffer_size > INT_MAX ? INT_MAX : (int) _buffer_size;
+
 	struct spdr* context;
 
-	size_t arena_offset;
+	int arena_offset;
 	void*  arena;
-	size_t arena_size;
+	int arena_size;
 
 	if (buffer_size < sizeof *context) {
 		return -1;
@@ -205,13 +212,17 @@ extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size
 	arena_offset = sizeof *context;
 	{
 		size_t abs_arena_offset = ((char*) buffer - ((char*) 0)) + arena_offset;
-		size_t aligned_arena_offset = (1 + (abs_arena_offset>>9))<<9;
+		size_t aligned_arena_offset = (1 + (abs_arena_offset>>6))<<6;
 
-		arena_offset += (aligned_arena_offset - abs_arena_offset);
+		arena_offset += (int) (aligned_arena_offset - abs_arena_offset);
 	}
 
 	arena = ((char*) buffer) + arena_offset;
 	arena_size = buffer_size - arena_offset;
+
+	if (arena_size <= 0) {
+		return -1;
+	}
 
 	context->clock_allocator.super.alloc = spdr_clock_alloc;
 	context->clock_allocator.super.free  = spdr_free;
@@ -221,22 +232,21 @@ extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t buffer_size
 		return -1;
 	}
 
-	context->buckets_n  = 8;
 	context->arena_size   = arena_size;
 	context->arena_offset = arena_offset;
 
 	{
-		int n = context->buckets_n;
+		int const n = BUCKET_COUNT;
 		int i;
-		int bucket_size = arena_size / context->buckets_n;
-		bucket_size = (bucket_size >> 9) << 9;
+		int bucket_size = arena_size / n;
+		bucket_size = (bucket_size >> 6) << 6;
 
 		if (bucket_size < sizeof *context->buckets[0]) {
 			return -1;
 		}
 
 		for (i = 0; i < n; i++) {
-			context->buckets[i] = arena + i * bucket_size;
+			context->buckets[i] = (void*) (((char*) arena) + i * bucket_size);
 			bucket_init(context->buckets[i], bucket_size);
 		}
 
@@ -257,7 +267,7 @@ extern void spdr_reset(struct spdr* context)
 {
 	int i;
 
-	for (i = 0; i < context->buckets_n; i++) {
+	for (i = 0; i < BUCKET_COUNT; i++) {
 		AO_store(&context->buckets[i]->blocks_next, 0);
 	}
 }
@@ -267,7 +277,7 @@ extern struct spdr_capacity spdr_capacity(struct spdr* context)
 	struct spdr_capacity cap = {0};
 	int i;
 
-	for (i = 0; i < context->buckets_n; i++) {
+	for (i = 0; i < BUCKET_COUNT; i++) {
 		struct Bucket const* bucket = context->buckets[i];
 		cap.count    += AO_load(&bucket->blocks_next);
 		cap.capacity += bucket->blocks_capacity;
@@ -277,27 +287,27 @@ extern struct spdr_capacity spdr_capacity(struct spdr* context)
 }
 
 extern void spdr_set_clock_microseconds_fn(struct spdr *context,
-		     unsigned long long (*clock_microseconds_fn)(void* user_data),
-		     void *user_data)
+					   unsigned long long (*clock_microseconds_fn)(void* user_data),
+					   void *user_data)
 {
 	context->clock_fn        = clock_microseconds_fn;
 	context->clock_user_data = user_data;
 }
 
 /**
-* Provide your logging function if you want a trace stream to be produced.
-*/
+ * Provide your logging function if you want a trace stream to be produced.
+ */
 void spdr_set_log_fn(struct spdr *context,
-					 void (*log_fn) (const char* line, void* user_data),
-					 void* user_data)
+		     void (*log_fn) (const char* line, void* user_data),
+		     void* user_data)
 {
 	context->log_fn        = log_fn;
 	context->log_user_data = user_data;
 }
 
 /**
-* Activates the recording of traces (off by default)
-*/
+ * Activates the recording of traces (off by default)
+ */
 extern void spdr_enable_trace(struct spdr *context, int traceon)
 {
 	context->tracing_p = traceon;
@@ -375,13 +385,13 @@ static void event_add_arg(struct spdr* context, struct Event* event, struct uu_s
 }
 
 static void event_log(const struct spdr* context,
-					  const struct Event* event,
-					  void (*print_fn) (const char* string, void *user_data),
-					  void* user_data,
-					  int with_newlines_p)
+		      const struct Event* event,
+		      void (*print_fn) (const char* string, void *user_data),
+		      void* user_data,
+		      int with_newlines_p)
 {
 	int i;
-	char line[1024];
+	char line[2048];
 	struct Chars buffer = { 0 };
 	const char* prefix = "";
 
@@ -393,14 +403,14 @@ static void event_log(const struct spdr* context,
 	}
 
 	chars_catsprintf (&buffer,
-		"%s%llu %u %llu \"%s\" \"%s\" \"%c\"",
-		prefix,
-		event->ts_microseconds,
-		event->pid,
-		event->tid,
-		event->cat,
-		event->name,
-		event->phase);
+			  "%s%llu %u %llu \"%s\" \"%s\" \"%c\"",
+			  prefix,
+			  event->ts_microseconds,
+			  event->pid,
+			  event->tid,
+			  event->cat,
+			  event->name,
+			  event->phase);
 
 	for (i = 0; i < event->str_count; i++) {
 		chars_catsprintf(&buffer,
@@ -431,23 +441,23 @@ static void event_log(const struct spdr* context,
 
 
 static void log_json(const struct Event* e,
-					 const char* prefix,
-					 void (*print_fn) (const char* string, void* user_data),
-					 void* user_data)
+		     const char* prefix,
+		     void (*print_fn) (const char* string, void* user_data),
+		     void* user_data)
 {
 	int i;
 	const char* arg_prefix = "";
-	char buffer[512];
+	char buffer[2048];
 	struct Chars string = { 0 };
 	string.chars = buffer;
 	string.capacity = sizeof buffer;
 
 	chars_catsprintf(&string,
-		"%s{\"ts\":%llu,\"pid\":%u,\"tid\":%llu",
-		prefix,
-		e->ts_microseconds,
-		e->pid,
-		e->tid);
+			 "%s{\"ts\":%llu,\"pid\":%u,\"tid\":%llu",
+			 prefix,
+			 e->ts_microseconds,
+			 e->pid,
+			 e->tid);
 
 	chars_catsprintf(&string, ",\"cat\":\"");
 	chars_catjsonstr(&string, e->cat);
@@ -497,8 +507,9 @@ static void log_json(const struct Event* e,
 
 static void record_event(struct spdr* context, struct Event* e)
 {
-	int const bucket_i = 0;
-	struct Bucket* bucket = context->buckets[bucket_i & MAX_BUCKET_COUNT_BITS];
+	uint64_t const key[] = { e->pid, e->tid, e->ts_microseconds };
+	int const bucket_i = (murmurhash3_32(key, sizeof key, 0x4356))  & BUCKET_COUNT_MASK;
+	struct Bucket* bucket = context->buckets[bucket_i];
 	struct Event* ep = growlog_until(bucket->blocks, bucket->blocks_capacity, &bucket->blocks_next);
 	int i;
 
@@ -511,7 +522,7 @@ static void record_event(struct spdr* context, struct Event* e)
 	for (i = 0; i < ep->str_count; i++) {
 		const char* const str = ep->str_args[i].value;
 		/* take copy of strings */
-		int n = strlen(str) + 1;
+		size_t n = strlen(str) + 1;
 
 		char* new_str = allocator_alloc(&bucket->allocator.super, n);
 
@@ -574,58 +585,92 @@ extern void uu_spdr_record_2(struct spdr *context,
 	record_event(context, &e);
 }
 
-void spdr_report(struct spdr *context,
-		 enum spdr_report_type report_type,
-		 void (*print_fn) (const char* text, void* user_data),
-		 void* user_data)
+static int event_timecmp(void const * const _a, void const * const _b)
 {
-	size_t records_per_bucket[MAX_BUCKET_COUNT];
-	int    bucket_i;
-	size_t i;
+	struct Event const * const * ap = _a;
+	struct Event const * const * bp = _b;
+
+	struct Event const * a = *ap;
+	struct Event const * b = *bp;
+
+	if (a->ts_microseconds == b->ts_microseconds) {
+		if (a->pid == b->pid) {
+			if (a->tid == b->tid) {
+				/*
+				 * compare pointers, since within the same buckets,
+				 * they are in order.
+				 */
+				return a < b ? -1 : 1;
+			}
+
+			return a->tid < b->tid ? -1 : 1;
+		}
+
+		return a->pid < b->pid ? -1 : 1;
+	}
+
+	return a->ts_microseconds < b->ts_microseconds ? -1 : 1;
+}
+
+extern void spdr_report(struct spdr *context,
+			enum spdr_report_type report_type,
+			void (*print_fn) (const char* text, void* user_data),
+			void* user_data)
+{
+	size_t records_per_bucket[BUCKET_COUNT];
+	size_t block_count = 0;
+
+	struct Event const** events;
+	int events_n;
+	int i;
 
 	if (!print_fn) {
 		return;
 	}
 
 	/* blocks all further recording */
-	for (bucket_i = 0; bucket_i < context->buckets_n; bucket_i++) {
-		struct Bucket* const bucket = context->buckets[bucket_i];
-		records_per_bucket[bucket_i] = AO_load_acquire(&bucket->blocks_next);
+	for (i = 0; i < BUCKET_COUNT; i++) {
+		struct Bucket* const bucket = context->buckets[i];
+		records_per_bucket[i] = AO_load_acquire(&bucket->blocks_next);
 		AO_store(&bucket->blocks_next, bucket->blocks_capacity);
+		block_count += records_per_bucket[i];
 	}
 
-	if (SPDR_PLAIN_REPORT == report_type) {
-		for (bucket_i = 0; bucket_i < context->buckets_n; bucket_i++) {
-			struct Bucket const * const bucket = context->buckets[bucket_i];
+	events = malloc(block_count * sizeof events[0]);
+	events_n = 0;
 
-			for (i = 0; i < records_per_bucket[bucket_i]; i++) {
-				const struct Block *block = &bucket->blocks[i];
-				if (block->type == EVENT_BLOCK)
-				{
-					event_log(context, &block->data.event, print_fn, user_data, T(with_newlines));
-				}
+	for (i = 0; i < BUCKET_COUNT; i++) {
+		struct Bucket const * const bucket = context->buckets[i];
+		size_t j;
 
-				i += block->count;
+		for (j = 0; j < records_per_bucket[i]; j++) {
+			const struct Block* block = &bucket->blocks[j];
+			if (block->type == EVENT_BLOCK) {
+				events[events_n++] = &block->data.event;
 			}
 		}
+	}
+
+	qsort((void*)events, events_n, sizeof events[0], event_timecmp);
+
+	if (SPDR_PLAIN_REPORT == report_type) {
+		int i;
+
+		for (i = 0; i < events_n; i++) {
+			event_log(context, events[i], print_fn, user_data, T(with_newlines));
+		}
 	} else if (SPDR_CHROME_REPORT == report_type) {
+		int i;
 		const char* prefix = "";
 
 		print_fn("{\"traceEvents\":[", user_data);
-		for (bucket_i = 0; bucket_i < context->buckets_n; bucket_i++) {
-			struct Bucket const * const bucket = context->buckets[bucket_i];
-
-			for (i = 0; i < records_per_bucket[bucket_i]; i++) {
-				const struct Block *block = &bucket->blocks[i];
-				if (block->type == EVENT_BLOCK)
-				{
-					log_json(&block->data.event, prefix, print_fn, user_data);
-					prefix = ",";
-				}
-
-				i += block->count;
-			}
+		for (i = 0; i < events_n; i++) {
+			log_json(events[i], prefix, print_fn, user_data);
+			prefix = ",";
 		}
 		print_fn("]}", user_data);
 	}
+
+	free ((void*)events);
+	events = NULL;
 }
