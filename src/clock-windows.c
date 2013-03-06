@@ -25,7 +25,7 @@ extern int clock_init(struct Clock** clockp, struct Allocator* allocator)
 	}
 
 	QueryPerformanceCounter(&clock->origin);
-	
+
 	*clockp = clock;
 
 	return 0;
@@ -43,8 +43,26 @@ extern uint64_t clock_microseconds(struct Clock* clock)
 	uint64_t micros;
 	LARGE_INTEGER pc;
 	QueryPerformanceCounter(&pc);
-	
+
 	micros = ((uint64_t) 1000000) * (pc.QuadPart - clock->origin.QuadPart) / clock->qpf.QuadPart;
-		
+
 	return micros;
+}
+
+extern uint64_t clock_ticks(struct Clock const * clock)
+{
+	LARGE_INTEGER pc;
+	QueryPerformanceCounter(&pc);
+
+	return pc.QuadPart;
+}
+
+extern uint64_t clock_ticks_to_microseconds(struct Clock const * const clock, uint64_t const ticks)
+{
+	return ((uint64_t) 1000000) * ticks / clock->qpf.QuadPart;
+}
+
+extern uint64_t clock_microseconds(struct Clock const * const clock)
+{
+	return clock_ticks_to_microseconds(clock, clock_ticks(clock));
 }
