@@ -3,6 +3,7 @@ CFLAGS+=-I../include -I../deps
 LIB_SRC=../src/spdr-common.c
 LIB_SRC+=../src/chars-common.c
 LIB_SRC+=../src/allocator-common.c
+LIB_SRC+=../src/clock-common.c
 LIB=libspdr.a
 
 

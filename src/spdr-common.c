@@ -11,9 +11,11 @@
 #include "spdr-internal.h"
 #include "chars.h"
 #include "clock.h"
-#include "allocator_type.h"
 #include "allocator.h"
 #include "murmur.h"
+
+#include "clock_type.h"
+#include "allocator_type.h"
 
 /**
  *  "documented" truth value, use like:
@@ -86,7 +88,7 @@ struct spdr
 {
 	int                  tracing_p;
 	struct Clock*        clock;
-	char                 clock_buffer[32];
+	char                 clock_buffer[sizeof (struct Clock)];
 	unsigned long long (*clock_fn)(void* user_data);
 	void*                clock_user_data;
 
