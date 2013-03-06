@@ -26,7 +26,7 @@
 
 struct Event
 {
-	uint64_t           ts_microseconds;
+	uint64_t           ts_ticks;
 	uint32_t           pid;
 	uint64_t           tid;
 	const char*        cat;
@@ -349,9 +349,9 @@ static void event_make(
 	enum uu_spdr_type type)
 {
 	if (context->clock_fn) {
-		event->ts_microseconds = context->clock_fn(context->clock_user_data);
+		event->ts_ticks = context->clock_fn(context->clock_user_data);
 	} else {
-		event->ts_microseconds = clock_microseconds(context->clock);
+		event->ts_ticks = clock_ticks(context->clock);
 	}
 	event->pid   = uu_spdr_get_pid();
 	event->tid   = uu_spdr_get_tid();
@@ -396,6 +396,8 @@ static void event_log(const struct spdr* context,
 	char line[2048];
 	struct Chars buffer = { 0 };
 	const char* prefix = "";
+	uint64_t ts_microseconds = context->clock_fn ?
+		event->ts_ticks : clock_ticks_to_microseconds(context->clock, event->ts_ticks);
 
 	buffer.chars = line;
 	buffer.capacity = sizeof line;
@@ -407,7 +409,7 @@ static void event_log(const struct spdr* context,
 	chars_catsprintf (&buffer,
 			  "%s%llu %u %llu",
 			  prefix,
-			  event->ts_microseconds,
+			  ts_microseconds,
 			  event->pid,
 			  event->tid);
 
@@ -447,11 +449,15 @@ static void event_log(const struct spdr* context,
 }
 
 
-static void log_json(const struct Event* e,
-		     const char* prefix,
-		     void (*print_fn) (const char* string, void* user_data),
-		     void* user_data)
+static void log_json(
+	const struct spdr* context,
+	const struct Event* e,
+	const char* prefix,
+	void (*print_fn) (const char* string, void* user_data),
+	void* user_data)
 {
+	uint64_t ts_microseconds = context->clock_fn ?
+		e->ts_ticks : clock_ticks_to_microseconds(context->clock, e->ts_ticks);
 	int i;
 	const char* arg_prefix = "";
 	char buffer[2048];
@@ -462,7 +468,7 @@ static void log_json(const struct Event* e,
 	chars_catsprintf(&string,
 			 "%s{\"ts\":%llu,\"pid\":%u,\"tid\":%llu",
 			 prefix,
-			 e->ts_microseconds,
+			 ts_microseconds,
 			 e->pid,
 			 e->tid);
 
@@ -514,7 +520,7 @@ static void log_json(const struct Event* e,
 
 static void record_event(struct spdr* context, struct Event* e)
 {
-	uint64_t const key[] = { e->pid, e->tid, e->ts_microseconds };
+	uint64_t const key[] = { e->pid, e->tid, e->ts_ticks };
 	int const bucket_i = (murmurhash3_32(key, sizeof key, 0x4356))  & BUCKET_COUNT_MASK;
 	struct Bucket* bucket = context->buckets[bucket_i];
 	struct Event* ep = growlog_until(bucket->blocks, bucket->blocks_capacity, &bucket->blocks_next);
@@ -600,7 +606,7 @@ static int event_timecmp(void const * const _a, void const * const _b)
 	struct Event const * a = *ap;
 	struct Event const * b = *bp;
 
-	if (a->ts_microseconds == b->ts_microseconds) {
+	if (a->ts_ticks == b->ts_ticks) {
 		if (a->pid == b->pid) {
 			if (a->tid == b->tid) {
 				/*
@@ -616,7 +622,7 @@ static int event_timecmp(void const * const _a, void const * const _b)
 		return a->pid < b->pid ? -1 : 1;
 	}
 
-	return a->ts_microseconds < b->ts_microseconds ? -1 : 1;
+	return a->ts_ticks < b->ts_ticks ? -1 : 1;
 }
 
 extern void spdr_report(struct spdr *context,
@@ -672,7 +678,7 @@ extern void spdr_report(struct spdr *context,
 
 		print_fn("{\"traceEvents\":[", user_data);
 		for (i = 0; i < events_n; i++) {
-			log_json(events[i], prefix, print_fn, user_data);
+			log_json(context, events[i], prefix, print_fn, user_data);
 			prefix = ",";
 		}
 		print_fn("]}", user_data);
