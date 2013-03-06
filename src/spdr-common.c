@@ -403,20 +403,25 @@ static void event_log(const struct spdr* context,
 	}
 
 	chars_catsprintf (&buffer,
-			  "%s%llu %u %llu \"%s\" \"%s\" \"%c\"",
+			  "%s%llu %u %llu",
 			  prefix,
 			  event->ts_microseconds,
 			  event->pid,
-			  event->tid,
-			  event->cat,
-			  event->name,
-			  event->phase);
+			  event->tid);
+
+	chars_catsprintf(&buffer, " \"");
+	chars_catjsonstr(&buffer, event->cat);
+	chars_catsprintf(&buffer, "\" \"");
+	chars_catjsonstr(&buffer, event->name);
+	chars_catsprintf(&buffer, "\"");
+	chars_catsprintf(&buffer, " \"%c\"", event->phase);
 
 	for (i = 0; i < event->str_count; i++) {
 		chars_catsprintf(&buffer,
-				 " \"%s\" \"%s\"",
-				 event->str_args[i].key,
-				 event->str_args[i].value);
+				 " \"%s\" \"",
+				 event->str_args[i].key);
+		chars_catjsonstr(&buffer, event->str_args[i].value);
+		chars_catsprintf(&buffer, "\"");
 	}
 
 	for (i = 0; i < event->int_count; i++) {
