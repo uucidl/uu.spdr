@@ -97,9 +97,10 @@ extern int main(int argc, char** argv)
 
 	SPDR_METADATA1(gbl_spdr, "thread_name", SPDR_STR("name", "Main_Thread"));
 	{
-		SPDR_SCOPE(gbl_spdr, "main", "single_threaded_test");
 		int N = 10000;
 		uint64_t ts0 = clock_microseconds(clock);
+
+		SPDR_BEGIN(gbl_spdr, "main", "single_threaded_test");
 
 		while (N--) {
 			int IN = 64 * 1024;
@@ -114,11 +115,12 @@ extern int main(int argc, char** argv)
 
 		single_threaded_ms = (clock_microseconds(clock) - ts0) / 1000;
 		printf("elapsed_ms: %llu\n", single_threaded_ms);
+		SPDR_END(gbl_spdr, "main", "single_threaded_test");
 	}
 
 	{
-		SPDR_SCOPE(gbl_spdr, "main", "multi_threaded_test");
 		int N = 10;
+		SPDR_BEGIN(gbl_spdr, "main", "multi_threaded_test");
 
 		while (N--) {
 			int const IN_TN = 8;
@@ -174,6 +176,7 @@ extern int main(int argc, char** argv)
 
 			free(results);
 		}
+		SPDR_END(gbl_spdr, "main", "multi_threaded_test");
 	}
 
 	{
