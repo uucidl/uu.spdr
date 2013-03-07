@@ -29,7 +29,7 @@ static FORCE_INLINE uint32_t rotl32 (uint32_t const x, int8_t const r )
  * Block read - if your platform needs to do endian-swapping or can only
  * handle aligned reads, do the conversion here
  */
-static FORCE_INLINE uint32_t private_murmur3_getblock (uint32_t const * p, int const i)
+static FORCE_INLINE uint32_t private_murmur3_getblock (uint32_t const *p, int const i)
 {
 	return p[i];
 }
@@ -62,13 +62,11 @@ static uint32_t murmurhash3_32 (void const * key, int len, uint32_t const seed)
 	uint32_t c1 = 0x95543787;
 	uint32_t c2 = 0x2ad7eb25;
 
-	//----------
-	// body
-
-	const uint32_t * blocks = (const uint32_t *)(data + nblocks*4);
-
+	/* body */
 	{
 		int i;
+	        const uint32_t * blocks = (const uint32_t *)(data + nblocks*4);
+
 		for(i = -nblocks; i; i++)
 		{
 			uint32_t k1 = private_murmur3_getblock(blocks,i);
@@ -77,8 +75,7 @@ static uint32_t murmurhash3_32 (void const * key, int len, uint32_t const seed)
 		}
 	}
 
-	//----------
-	// tail
+	/* tail */
 	{
 		const uint8_t * tail = (const uint8_t*)(data + nblocks*4);
 
@@ -93,8 +90,7 @@ static uint32_t murmurhash3_32 (void const * key, int len, uint32_t const seed)
 		};
 	}
 
-	//----------
-	// finalization
+	/* finalization */
 
 	h1 ^= len;
 
