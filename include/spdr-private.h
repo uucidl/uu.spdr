@@ -4,7 +4,7 @@
 /**
  * Context for the library
  */
-struct spdr;
+struct spdr_context;
 
 enum uu_spdr_type
 {
@@ -44,20 +44,20 @@ struct uu_spdr_arg uu_spdr_arg_make_str(const char* key, const char* str);
 #endif
 
 
-int uu_spdr_musttrace(const struct spdr* context);
+int uu_spdr_musttrace(const struct spdr_context* context);
 
-void uu_spdr_record(struct spdr* context,
+void uu_spdr_record(struct spdr_context* context,
 		    const char* cat,
 		    const char* name,
 		    enum uu_spdr_type type);
 
-void uu_spdr_record_1(struct spdr* context,
+void uu_spdr_record_1(struct spdr_context* context,
 		      const char* cat,
 		      const char* name,
 		      enum uu_spdr_type type,
 		      struct uu_spdr_arg arg0);
 
-void uu_spdr_record_2(struct spdr* context,
+void uu_spdr_record_2(struct spdr_context* context,
 		      const char* cat,
 		      const char* name,
 		      enum uu_spdr_type type,
@@ -88,11 +88,11 @@ void uu_spdr_record_2(struct spdr* context,
 
 struct uu_spdr_scope
 {
-	struct spdr* spdr;
+	struct spdr_context* spdr;
 	const char* cat;
 	const char* name;
 
-	uu_spdr_scope(struct spdr* spdr, const char* cat, const char* name) :
+	uu_spdr_scope(struct spdr_context* spdr, const char* cat, const char* name) :
 	  spdr(spdr), cat(cat), name(name)
 	{}
 
@@ -108,7 +108,7 @@ struct uu_spdr_scope
 #  elif defined(__GNUC__) && !defined(__STRICT_ANSI__)
 struct uu_spdr_scope
 {
-	struct spdr* spdr;
+	struct spdr_context* spdr;
 	const char* cat;
 	const char* name;
 };

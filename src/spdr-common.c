@@ -75,7 +75,7 @@ struct Bucket
 struct SpdrAllocator
 {
 	struct Allocator super;
-	struct spdr* spdr;
+	struct spdr_context* spdr;
 };
 
 enum {
@@ -84,7 +84,7 @@ enum {
 	BUCKET_COUNT_MASK = BUCKET_COUNT - 1
 };
 
-struct spdr
+struct spdr_context
 {
 	int                  tracing_p;
 	struct Clock*        clock;
@@ -174,7 +174,7 @@ static void spdr_free(struct Allocator* _, void* ptr)
 
 static void* spdr_clock_alloc(struct Allocator* allocator, size_t size)
 {
-	struct spdr* context = ((struct SpdrAllocator*) allocator)->spdr;
+	struct spdr_context* context = ((struct SpdrAllocator*) allocator)->spdr;
 	if (size > sizeof context->clock_buffer) {
 		return NULL;
 	}
@@ -192,12 +192,12 @@ static void bucket_init(struct Bucket* bucket, int buffer_size)
 	AO_store(&bucket->blocks_next, 0);
 }
 
-extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t _buffer_size)
+extern int spdr_init(struct spdr_context **context_ptr, void* buffer, size_t _buffer_size)
 {
-	const struct spdr null = { 0 };
+	const struct spdr_context null = { 0 };
 	int const buffer_size = _buffer_size > INT_MAX ? INT_MAX : (int) _buffer_size;
 
-	struct spdr* context;
+	struct spdr_context* context;
 
 	int arena_offset;
 	void*  arena;
@@ -259,13 +259,13 @@ extern int spdr_init(struct spdr **context_ptr, void* buffer, size_t _buffer_siz
 	return 0;
 }
 
-extern void spdr_deinit(struct spdr** context_ptr)
+extern void spdr_deinit(struct spdr_context** context_ptr)
 {
 	clock_deinit(&(*context_ptr)->clock);
 	*context_ptr = NULL;
 }
 
-extern void spdr_reset(struct spdr* context)
+extern void spdr_reset(struct spdr_context* context)
 {
 	int i;
 
@@ -274,7 +274,7 @@ extern void spdr_reset(struct spdr* context)
 	}
 }
 
-extern struct spdr_capacity spdr_capacity(struct spdr* context)
+extern struct spdr_capacity spdr_capacity(struct spdr_context* context)
 {
 	struct spdr_capacity cap = {0};
 	int i;
@@ -288,7 +288,7 @@ extern struct spdr_capacity spdr_capacity(struct spdr* context)
 	return cap;
 }
 
-extern void spdr_set_clock_microseconds_fn(struct spdr *context,
+extern void spdr_set_clock_microseconds_fn(struct spdr_context *context,
 					   unsigned long long (*clock_microseconds_fn)(void* user_data),
 					   void *user_data)
 {
@@ -299,7 +299,7 @@ extern void spdr_set_clock_microseconds_fn(struct spdr *context,
 /**
  * Provide your logging function if you want a trace stream to be produced.
  */
-void spdr_set_log_fn(struct spdr *context,
+void spdr_set_log_fn(struct spdr_context *context,
 		     void (*log_fn) (const char* line, void* user_data),
 		     void* user_data)
 {
@@ -310,12 +310,12 @@ void spdr_set_log_fn(struct spdr *context,
 /**
  * Activates the recording of traces (off by default)
  */
-extern void spdr_enable_trace(struct spdr *context, int traceon)
+extern void spdr_enable_trace(struct spdr_context *context, int traceon)
 {
 	context->tracing_p = traceon;
 }
 
-int uu_spdr_musttrace(const struct spdr *context)
+int uu_spdr_musttrace(const struct spdr_context *context)
 {
 	return context->tracing_p;
 }
@@ -342,7 +342,7 @@ extern struct uu_spdr_arg uu_spdr_arg_make_str(const char* key, const char* valu
 }
 
 static void event_make(
-	struct spdr* context,
+	struct spdr_context* context,
 	struct Event* event,
 	const char* cat,
 	const char* name,
@@ -363,7 +363,7 @@ static void event_make(
 	event->float_count = 0;
 }
 
-static void event_add_arg(struct spdr* context, struct Event* event, struct uu_spdr_arg arg)
+static void event_add_arg(struct spdr_context* context, struct Event* event, struct uu_spdr_arg arg)
 {
 	int i;
 
@@ -386,7 +386,7 @@ static void event_add_arg(struct spdr* context, struct Event* event, struct uu_s
 	}
 }
 
-static void event_log(const struct spdr* context,
+static void event_log(const struct spdr_context* context,
 		      const struct Event* event,
 		      void (*print_fn) (const char* string, void *user_data),
 		      void* user_data,
@@ -450,7 +450,7 @@ static void event_log(const struct spdr* context,
 
 
 static void log_json(
-	const struct spdr* context,
+	const struct spdr_context* context,
 	const struct Event* e,
 	const char* prefix,
 	void (*print_fn) (const char* string, void* user_data),
@@ -518,7 +518,7 @@ static void log_json(
 	}
 }
 
-static void record_event(struct spdr* context, struct Event* e)
+static void record_event(struct spdr_context* context, struct Event* e)
 {
 	uint64_t const key[] = { e->pid, e->tid, e->ts_ticks };
 	int const bucket_i = (murmurhash3_32(key, sizeof key, 0x4356))  & BUCKET_COUNT_MASK;
@@ -548,7 +548,7 @@ static void record_event(struct spdr* context, struct Event* e)
 	}
 }
 
-extern void uu_spdr_record(struct spdr *context,
+extern void uu_spdr_record(struct spdr_context *context,
 			   const char* cat,
 			   const char* name,
 			   enum uu_spdr_type type)
@@ -563,7 +563,7 @@ extern void uu_spdr_record(struct spdr *context,
 	record_event(context, &e);
 }
 
-extern void uu_spdr_record_1(struct spdr *context,
+extern void uu_spdr_record_1(struct spdr_context *context,
 			     const char* cat,
 			     const char* name,
 			     enum uu_spdr_type type,
@@ -580,7 +580,7 @@ extern void uu_spdr_record_1(struct spdr *context,
 	record_event(context, &e);
 }
 
-extern void uu_spdr_record_2(struct spdr *context,
+extern void uu_spdr_record_2(struct spdr_context *context,
 			     const char* cat,
 			     const char* name,
 			     enum uu_spdr_type type,
@@ -625,7 +625,7 @@ static int event_timecmp(void const * const _a, void const * const _b)
 	return a->ts_ticks < b->ts_ticks ? -1 : 1;
 }
 
-extern void spdr_report(struct spdr *context,
+extern void spdr_report(struct spdr_context *context,
 			enum spdr_report_type report_type,
 			void (*print_fn) (const char* text, void* user_data),
 			void* user_data)
@@ -681,7 +681,9 @@ extern void spdr_report(struct spdr *context,
 			log_json(context, events[i], prefix, print_fn, user_data);
 			prefix = ",";
 		}
-		print_fn("]}", user_data);
+		print_fn("]", user_data);
+		print_fn(",\"createdBy\":\"uu.spdr -- http://github.com/uucidl/uu.spdr\"", user_data);
+		print_fn("}", user_data);
 	}
 
 	free ((void*)events);
