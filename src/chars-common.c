@@ -5,8 +5,10 @@
 /*
 *	http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
 */
-#define UTF8_ACCEPT 0
-#define UTF8_REJECT 1
+enum {
+	UTF8_ACCEPT = 0,
+	UTF8_REJECT = 1,
+};
 
 static const uint8_t utf8d[] = {
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 
@@ -25,6 +27,11 @@ static const uint8_t utf8d[] = {
 	1,3,1,1,1,1,1,3,1,3,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 
 };
 
+/**
+ * decodes UTF-8 streams.
+ *
+ * @param state must be UTF8_ACCEPT initially
+ */
 static uint32_t decode(uint32_t* state, uint32_t* codep, uint8_t byte) 
 {
 	uint32_t type = utf8d[byte];
@@ -59,9 +66,9 @@ void chars_catjsonstr(struct Chars* chars, const char* utf8)
 	} while (0); \
 	continue
 
-	uint32_t decoder_state = 0;
+	uint32_t decoder_state = UTF8_ACCEPT;
 	for (ch = utf8; ch[0]; ch++) {
-		uint32_t code_point;
+		uint32_t code_point = 0;
 
 		if (UTF8_ACCEPT == decode(&decoder_state, &code_point, ch[0])) {
 			if (code_point > 127) {

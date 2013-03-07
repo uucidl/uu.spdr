@@ -1,6 +1,7 @@
 allocator-common.c
 chars-common.c
 chars-posix.c
+clock-common.c
 clock-posix.c
 spdr-common.c
 spdr-posix.c
