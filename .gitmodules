@@ -1,3 +1,0 @@
-[submodule "deps/timer_lib"]
-	path = deps/timer_lib
-	url = https://github.com/uucidl/timer_lib
