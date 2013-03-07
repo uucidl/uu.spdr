@@ -50,6 +50,29 @@ overhead at the end of a tracing period, using the reporting
 function. You are expected to provide I/O functions to allow the
 library to write into a file/console or even produce a network stream.
 
+For instance the following example will produce a report into
+traces.json that can then be directly loaded in Chrome's tracing
+console.
+
+```C
+static void report(const char* line, void* user_data)
+{
+	FILE* file = user_data;
+
+	fputs(line, file);
+}
+
+static void foo()
+{
+	/* ... */
+
+	FILE* f = fopen("traces.json", "wb");
+	if (f) {
+		spdr_report(gbl_spdr, SPDR_CHROME_REPORT, report, f);
+		fclose(f);
+	}
+```
+
 ## Compilation
 
 This implementation should be comformant to ANSI C90, although it
@@ -79,14 +102,23 @@ include/spdr.hh header rather than spdr.h.
 
 ### Allocation
 
-The library does not do any allocation of its own, and uses a simple linear allocator. This allows you to control precisely how much memory is reserved for the tracing of events and reduces overhead.
+During tracing, the library does not do any allocation of its own, and
+uses a simple linear allocator. This allows you to control precisely
+how much memory is reserved for the tracing of events and reduces
+overhead.
 
 Arguments and traces are allocated on this pre-allocated memory arena.
+
+During reporting, some dynamic allocations may be performed.
 
 ### Threads
 
 Use from multiple thread is supported and expected. Lock-free atomic
 operations are used thanks to Hans Boehm's atomic_ops library.
+
+Traces are stored by linear allocation into a set of buckets so that
+concurrent accesses are as independant as possible. The number of
+buckets used is set at compile-time, and defaults to 8.
 
 ### Clocks
 
