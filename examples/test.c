@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "spdr.h"
 #include "sleep.h"
@@ -74,6 +75,11 @@ int main (int argc, char** argv)
 	SPDR_END(spdr, "Main", "printf");
 
 	stuff();
+
+	{
+	double a = 0.0;
+	SPDR_EVENT2(spdr, "Main", "Non Finites", SPDR_FLOAT("a", 1.0 / a), SPDR_FLOAT("b", sqrt(-1)));
+	}
 
 	SPDR_END(spdr, "Main", "main");
 

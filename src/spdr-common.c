@@ -8,10 +8,11 @@
 #include <string.h>
 #include <limits.h>
 
-#include "spdr-internal.h"
+#include "allocator.h"
 #include "chars.h"
 #include "clock.h"
-#include "allocator.h"
+#include "float.h"
+#include "spdr-internal.h"
 #include "murmur.h"
 
 #include "clock_type.h"
@@ -203,7 +204,7 @@ extern int spdr_init(struct spdr_context **context_ptr, void* buffer, size_t _bu
 	void*  arena;
 	int arena_size;
 
-	if (buffer_size < sizeof *context) {
+	if (buffer_size < (int) sizeof *context) {
 		return -1;
 	}
 
@@ -243,7 +244,7 @@ extern int spdr_init(struct spdr_context **context_ptr, void* buffer, size_t _bu
 		int bucket_size = arena_size / n;
 		bucket_size = (bucket_size >> 6) << 6;
 
-		if (bucket_size < sizeof *context->buckets[0]) {
+		if (bucket_size < (int) sizeof *context->buckets[0]) {
 			return -1;
 		}
 
@@ -502,11 +503,18 @@ static void log_json(
 	}
 
 	for (i = 0; i < e->float_count; i++) {
-		chars_catsprintf(&string,
+		if (!float_isfinite(e->float_args[i].value)) {
+			chars_catsprintf(&string,
+				 "%s\"%s\":null",
+				 arg_prefix,
+				 e->float_args[i].key);
+		} else {
+			chars_catsprintf(&string,
 				 "%s\"%s\":%f",
 				 arg_prefix,
 				 e->float_args[i].key,
 				 e->float_args[i].value);
+		}
 		arg_prefix = ",";
 	}
 
