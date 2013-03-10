@@ -37,10 +37,11 @@ static uint32_t decode(uint32_t* state, uint32_t* codep, uint8_t byte)
 	uint32_t type = utf8d[byte];
 
 	*codep = (*state != UTF8_ACCEPT) ?
-		(byte & 0x3fu) | (*codep << 6) :
-	(0xff >> type) & (byte);
+			(byte & 0x3fu) | (*codep << 6)
+		 	: (0xff >> type) & (byte);
 
 	*state = utf8d[256 + *state*16 + type];
+
 	return *state;
 }
 
@@ -67,8 +68,8 @@ void chars_catjsonstr(struct Chars* chars, const char* utf8)
 	continue
 
 	uint32_t decoder_state = UTF8_ACCEPT;
+	uint32_t code_point = 0;
 	for (ch = utf8; ch[0]; ch++) {
-		uint32_t code_point = 0;
 
 		if (UTF8_ACCEPT == decode(&decoder_state, &code_point, ch[0])) {
 			if (code_point > 127) {
