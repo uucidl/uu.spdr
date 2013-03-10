@@ -1,4 +1,5 @@
 CFLAGS+=-I../include -I../deps
+CFLAGS+=-Wall -Wextra
 
 LIB_SRC=../src/spdr-common.c
 LIB_SRC+=../src/chars-common.c
