@@ -21,6 +21,7 @@ LIB_SRC+=../src/spdr-posix.c
 LIB_SRC+=../src/chars-posix.c
 LIB_SRC+=../src/spdr-thread-posix.c
 LIB_SRC+=../src/clock-posix.c
+LIB_SRC+=../src/float-posix.c
 LIB_LIBS+=-lrt
 endif
 
@@ -29,24 +30,28 @@ LIB_SRC+=../src/spdr-posix.c
 LIB_SRC+=../src/chars-posix.c
 LIB_SRC+=../src/spdr-thread-posix.c
 LIB_SRC+=../src/clock-osx.c
+LIB_SRC+=../src/float-posix.c
 endif
 
 ifeq ($(PLATFORM),linux)
 LIB_SRC+=../src/spdr-posix.c
 LIB_SRC+=../src/chars-posix.c
 LIB_SRC+=../src/spdr-linux.c
+LIB_SRC+=../src/float-posix.c
 endif
 
 ifeq ($(PLATFORM),win32)
 LIB_SRC+=../src/spdr-windows.c
 LIB_SRC+=../src/clock-windows.c
 LIB_SRC+=../src/chars-windows.c
+LIB_SRC+=../src/float-windows.c
 endif
 
 ifeq ($(PLATFORM),win64)
 LIB_SRC+=../src/spdr-windows.c
 LIB_SRC+=../src/chars-windows.c
 LIB_SRC+=../src/clock-windows.c
+LIB_SRC+=../src/float-windows.c
 endif
 
 CFLAGS+=-lm $(LIB_LIBS)

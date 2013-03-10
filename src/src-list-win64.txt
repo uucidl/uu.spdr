@@ -3,5 +3,6 @@ chars-common.c
 chars-windows.c
 clock-common.c
 clock-windows.c
+float-windows.c
 spdr-common.c
 spdr-windows.c
