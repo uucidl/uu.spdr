@@ -169,6 +169,19 @@ void spdr_report(struct spdr_context *context,
 
 
 
+/* __ Counters __ */
+
+/**
+ * Track values over time.
+ *
+ * @param arg must be SPDR_INT or SPDR_FLOAT
+ */
+#define SPDR_COUNTER1(spdr, cat, name, arg0)	\
+	UU_SPDR_TRACE1(spdr, cat, name, SPDR_COUNTER, arg0)
+
+#define SPDR_COUNTER2(spdr, cat, name, arg0, arg1)			\
+	UU_SPDR_TRACE2(spdr, cat, name, SPDR_COUNTER, arg0, arg1)
+
 /* __ Metadata __ */
 
 /**

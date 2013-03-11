@@ -11,7 +11,8 @@ enum uu_spdr_type
 	SPDR_EVENT = 'I',
 	SPDR_BEGIN = 'B',
 	SPDR_END = 'E',
-	SPDR_METADATA = 'M'
+	SPDR_METADATA = 'M',
+	SPDR_COUNTER = 'C',
 };
 
 struct uu_spdr_arg

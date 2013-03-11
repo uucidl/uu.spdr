@@ -33,8 +33,8 @@ void print (const char* string, void* user_data)
 
 static void act(const char* a_string)
 {
-	SPDR_BEGIN2(spdr, "Main", "act", 
-		SPDR_INT("info-id", (int) a_string), 
+	SPDR_BEGIN2(spdr, "Main", "act",
+		SPDR_INT("info-id", (int) a_string),
 		SPDR_STR("info", a_string));
 
 	printf("%s\n", a_string);
@@ -82,6 +82,11 @@ int main (int argc, char** argv)
 	}
 
 	SPDR_END(spdr, "Main", "main");
+
+	for (int i = 0; i < 100; i++) {
+		SPDR_COUNTER2(spdr, "Main", "counter",
+			      SPDR_INT("i", i), SPDR_FLOAT("cos(i)", cos(M_PI*i/50)));
+	}
 
 	{
 		FILE* file = fopen("trace.json", "wb+");
