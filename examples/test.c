@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
+#if defined(_MSC_VER)
+#define _USE_MATH_DEFINES
+#endif
 #include <math.h>
 
 #include "spdr.h"
@@ -83,9 +87,12 @@ int main (int argc, char** argv)
 
 	SPDR_END(spdr, "Main", "main");
 
-	for (int i = 0; i < 100; i++) {
-		SPDR_COUNTER2(spdr, "Main", "counter",
+	{
+		int i;
+		for (i = 0; i < 100; i++) {
+			SPDR_COUNTER2(spdr, "Main", "counter",
 			      SPDR_INT("i", i), SPDR_FLOAT("cos(i)", cos(M_PI*i/50)));
+		}
 	}
 
 	{
