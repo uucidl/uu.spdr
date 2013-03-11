@@ -81,8 +81,10 @@ int main (int argc, char** argv)
 
 	SPDR_METADATA1(spdr, "thread_name", SPDR_STR("name", "Main_Thread"));
 
-	SPDR_BEGIN2(spdr, "Main", "main",
-		    SPDR_INT("argc", argc), SPDR_STR("argv[0]", argv[0]));
+	SPDR_BEGIN3(spdr, "Main", "main",
+		    SPDR_INT("argc", argc),
+		    SPDR_STR("argv[0]", argv[0]),
+		    SPDR_INT("cap", cap.capacity));
 
 	pthread_create(&thread, NULL, thread1, NULL);
 

@@ -125,6 +125,11 @@ void spdr_report(struct spdr_context *context,
 #define SPDR_EVENT2(spdr, cat, name, arg0, arg1)		\
 	UU_SPDR_TRACE2(spdr, cat, name, SPDR_EVENT, arg0, arg1)
 
+/**
+ * An instant event with two parameters
+ */
+#define SPDR_EVENT3(spdr, cat, name, arg0, arg1, arg2)		\
+	UU_SPDR_TRACE3(spdr, cat, name, SPDR_EVENT, arg0, arg1, arg2)
 
 
 /* __ Work slices __ */
@@ -148,6 +153,12 @@ void spdr_report(struct spdr_context *context,
 	UU_SPDR_TRACE2(spdr, cat, name, SPDR_BEGIN, arg0, arg1)
 
 /**
+ * Begin a slice of work, with three parameters
+ */
+#define SPDR_BEGIN3(spdr, cat, name, arg0, arg1, arg2)			\
+	UU_SPDR_TRACE3(spdr, cat, name, SPDR_BEGIN, arg0, arg1, arg2)
+
+/**
  * End a slice of work
  */
 #define SPDR_END(spdr, cat, name)			\
@@ -167,6 +178,8 @@ void spdr_report(struct spdr_context *context,
 #define SPDR_SCOPE2(spdr, cat, name, arg0, arg1)		\
 	UU_SPDR_SCOPE_TRACE2(spdr, cat, name, arg0, arg1)
 
+#define SPDR_SCOPE3(spdr, cat, name, arg0, arg1)		\
+	UU_SPDR_SCOPE_TRACE3(spdr, cat, name, arg0, arg1)
 
 
 /* __ Counters __ */
@@ -181,6 +194,9 @@ void spdr_report(struct spdr_context *context,
 
 #define SPDR_COUNTER2(spdr, cat, name, arg0, arg1)			\
 	UU_SPDR_TRACE2(spdr, cat, name, SPDR_COUNTER, arg0, arg1)
+
+#define SPDR_COUNTER3(spdr, cat, name, arg0, arg1)			\
+	UU_SPDR_TRACE3(spdr, cat, name, SPDR_COUNTER, arg0, arg1)
 
 /* __ Metadata __ */
 

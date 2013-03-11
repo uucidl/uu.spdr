@@ -36,9 +36,9 @@ struct Event
 	int8_t             str_count;
 	int8_t             int_count;
 	int8_t             float_count;
-	struct { const char* key; const char* value; } str_args[2];
-	struct { const char* key; int value; }         int_args[2];
-	struct { const char* key; double value; }      float_args[2];
+	struct { const char* key; const char* value; } str_args[3];
+	struct { const char* key; int value; }         int_args[3];
+	struct { const char* key; double value; }      float_args[3];
 };
 
 struct Block
@@ -599,6 +599,26 @@ extern void uu_spdr_record_2(struct spdr_context *context,
 	event_make (context, &e, cat, name, type);
 	event_add_arg (context, &e, arg0);
 	event_add_arg (context, &e, arg1);
+	if (context->log_fn) {
+		event_log (context, &e, context->log_fn, context->log_user_data, !T(with_newlines));
+	}
+
+	record_event(context, &e);
+}
+
+extern void uu_spdr_record_3(struct spdr_context *context,
+			     const char* cat,
+			     const char* name,
+			     enum uu_spdr_type type,
+			     struct uu_spdr_arg arg0,
+			     struct uu_spdr_arg arg1,
+			     struct uu_spdr_arg arg2)
+{
+	struct Event e;
+	event_make (context, &e, cat, name, type);
+	event_add_arg (context, &e, arg0);
+	event_add_arg (context, &e, arg1);
+	event_add_arg (context, &e, arg2);
 	if (context->log_fn) {
 		event_log (context, &e, context->log_fn, context->log_user_data, !T(with_newlines));
 	}
