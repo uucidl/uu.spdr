@@ -103,23 +103,31 @@ void spdr_report(struct spdr_context *context,
 #define SPDR_FLOAT(key, value) UU_SPDR_FLOAT(key, value)
 #define SPDR_STR(key, value)   UU_SPDR_STR(key, value)
 
+
+
+/* __ Instant events __ */
+
 /**
  * An instant event
  */
-#define SPDR_EVENT(spdr, cat, name)		\
+#define SPDR_EVENT(spdr, cat, name)			\
 	UU_SPDR_TRACE(spdr, cat, name, SPDR_EVENT)
 
 /**
  * An instant event with one parameter
  */
-#define SPDR_EVENT1(spdr, cat, name, arg0)				\
+#define SPDR_EVENT1(spdr, cat, name, arg0)			\
 	UU_SPDR_TRACE1(spdr, cat, name, SPDR_EVENT, arg0)
 
 /**
  * An instant event with two parameters
  */
-#define SPDR_EVENT2(spdr, cat, name, arg0, arg1)	\
+#define SPDR_EVENT2(spdr, cat, name, arg0, arg1)		\
 	UU_SPDR_TRACE2(spdr, cat, name, SPDR_EVENT, arg0, arg1)
+
+
+
+/* __ Work slices __ */
 
 /**
  * Begin a slice of work
@@ -130,34 +138,20 @@ void spdr_report(struct spdr_context *context,
 /**
  * Begin a slice of work, with one parameter.
  */
-#define SPDR_BEGIN1(spdr, cat, name, arg0)				\
+#define SPDR_BEGIN1(spdr, cat, name, arg0)			\
 	UU_SPDR_TRACE1(spdr, cat, name, SPDR_BEGIN, arg0)
 
 /**
  * Begin a slice of work, with two parameters
  */
-#define SPDR_BEGIN2(spdr, cat, name, arg0, arg1)	\
+#define SPDR_BEGIN2(spdr, cat, name, arg0, arg1)		\
 	UU_SPDR_TRACE2(spdr, cat, name, SPDR_BEGIN, arg0, arg1)
 
 /**
  * End a slice of work
  */
-#define SPDR_END(spdr, cat, name)		\
+#define SPDR_END(spdr, cat, name)			\
 	UU_SPDR_TRACE(spdr, cat, name, SPDR_END)
-
-/**
- * Metadata.
- *
- * For instance to set the thread name:
- * @code
- * SPDR_METADATA1("thread_name", SPDR_STR("name", "My_Thread"))
- * @code
- *
- * chrome://tracing will then display this name rather than the tid of
- * the thread.
- */
-#define SPDR_METADATA1(spdr, name, arg0)		\
-	UU_SPDR_TRACE1(spdr, "__metadata", name, SPDR_METADATA, arg0)
 
 /**
  * Mark the beginning and end of a scope
@@ -170,7 +164,26 @@ void spdr_report(struct spdr_context *context,
 #define SPDR_SCOPE1(spdr, cat, name, arg0)		\
 	UU_SPDR_SCOPE_TRACE1(spdr, cat, name, arg0)
 
-#define SPDR_SCOPE2(spdr, cat, name, arg0, arg1)	\
+#define SPDR_SCOPE2(spdr, cat, name, arg0, arg1)		\
 	UU_SPDR_SCOPE_TRACE2(spdr, cat, name, arg0, arg1)
+
+
+
+/* __ Metadata __ */
+
+/**
+ * Metadata.
+ *
+ * For instance to set the thread name:
+ * @code
+ * SPDR_METADATA1("thread_name", SPDR_STR("name", "My_Thread"))
+ * @code
+ *
+ * chrome://tracing will then display this name rather than the tid of
+ * the thread.
+ */
+#define SPDR_METADATA1(spdr, name, arg0)				\
+	UU_SPDR_TRACE1(spdr, "__metadata", name, SPDR_METADATA, arg0)
+
 
 #endif
