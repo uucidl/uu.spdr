@@ -19,6 +19,8 @@ extern uint64_t clock_ticks(struct Clock const * clock)
 	LARGE_INTEGER pc;
 	QueryPerformanceCounter(&pc);
 
+	(void) clock;
+
 	return pc.QuadPart;
 }
 

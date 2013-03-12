@@ -13,7 +13,7 @@
 #endif
 
 static struct spdr_context* spdr;
-enum { LOG_N = 16 * 1024 };
+enum { LOG_N = 256 * 1024 };
 static void* spdr_buffer;
 
 void trace (const char* line, void* user_data)
@@ -51,6 +51,7 @@ void* thread1(void* arg)
 		int pown = 32*65536;
 
 		SPDR_BEGIN2(spdr, "Main", "thread1", SPDR_INT("arg", (intptr_t) arg), SPDR_FLOAT("y", y));
+		SPDR_COUNTER1(spdr, "thread1", "iteration", SPDR_INT("value", n));
 		while (cosn--) {
 			x += cos(x);
 		}
@@ -80,8 +81,10 @@ int main (int argc, char** argv)
 
 	SPDR_METADATA1(spdr, "thread_name", SPDR_STR("name", "Main_Thread"));
 
-	SPDR_BEGIN2(spdr, "Main", "main",
-		    SPDR_INT("argc", argc), SPDR_STR("argv[0]", argv[0]));
+	SPDR_BEGIN3(spdr, "Main", "main",
+		    SPDR_INT("argc", argc),
+		    SPDR_STR("argv[0]", argv[0]),
+		    SPDR_INT("cap", cap.capacity));
 
 	pthread_create(&thread, NULL, thread1, NULL);
 

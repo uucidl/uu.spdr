@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
+#if defined(_MSC_VER)
+#define _USE_MATH_DEFINES
+#endif
 #include <math.h>
 
 #include "spdr.h"
@@ -20,6 +24,8 @@ void trace (const char* line, void* _)
 	strncat(buffer, line, sizeof buffer - 2);
 	strncat(buffer, "\n", sizeof buffer - 2);
 
+	(void) _;
+
 	/* fputs is thread-safe */
 	fputs (buffer, stdout);
 }
@@ -33,8 +39,8 @@ void print (const char* string, void* user_data)
 
 static void act(const char* a_string)
 {
-	SPDR_BEGIN2(spdr, "Main", "act", 
-		SPDR_INT("info-id", (int) a_string), 
+	SPDR_BEGIN2(spdr, "Main", "act",
+		SPDR_INT("info-id", (int) a_string),
 		SPDR_STR("info", a_string));
 
 	printf("%s\n", a_string);
@@ -82,6 +88,14 @@ int main (int argc, char** argv)
 	}
 
 	SPDR_END(spdr, "Main", "main");
+
+	{
+		int i;
+		for (i = 0; i < 100; i++) {
+			SPDR_COUNTER2(spdr, "Main", "counter",
+			      SPDR_INT("i", i), SPDR_FLOAT("cos(i)", cos(M_PI*i/50)));
+		}
+	}
 
 	{
 		FILE* file = fopen("trace.json", "wb+");

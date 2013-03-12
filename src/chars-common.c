@@ -61,10 +61,11 @@ void chars_catjsonstr(struct Chars* chars, const char* utf8)
 {
 	const char* ch;
 
-#define CCODE(c) do { \
-	chars_catchar(chars, '\\'); \
-	chars_catchar(chars, c); \
-	} while (0); \
+#define CCODE(c)					\
+	{								\
+		chars_catchar(chars, '\\'); \
+		chars_catchar(chars, c);	\
+	}								\
 	continue
 
 	uint32_t decoder_state = UTF8_ACCEPT;

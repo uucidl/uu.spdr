@@ -11,7 +11,8 @@ enum uu_spdr_type
 	SPDR_EVENT = 'I',
 	SPDR_BEGIN = 'B',
 	SPDR_END = 'E',
-	SPDR_METADATA = 'M'
+	SPDR_METADATA = 'M',
+	SPDR_COUNTER = 'C',
 };
 
 struct uu_spdr_arg
@@ -64,6 +65,14 @@ void uu_spdr_record_2(struct spdr_context* context,
 		      struct uu_spdr_arg arg0,
 		      struct uu_spdr_arg arg1);
 
+void uu_spdr_record_3(struct spdr_context* context,
+		      const char* cat,
+		      const char* name,
+		      enum uu_spdr_type type,
+		      struct uu_spdr_arg arg0,
+		      struct uu_spdr_arg arg1,
+		      struct uu_spdr_arg arg2);
+
 #define UU_SPDR_COND_EXPR(cond, expr) \
 	(void) (cond && ((expr), 1))
 
@@ -78,6 +87,10 @@ void uu_spdr_record_2(struct spdr_context* context,
 #define UU_SPDR_TRACE2(context, cat, name, type, arg0, arg1)		\
 	UU_SPDR_COND_EXPR(uu_spdr_musttrace(context),			\
 			  uu_spdr_record_2(context, cat, name, type, arg0, arg1))
+
+#define UU_SPDR_TRACE3(context, cat, name, type, arg0, arg1, arg2)	\
+	UU_SPDR_COND_EXPR(uu_spdr_musttrace(context),			\
+			  uu_spdr_record_3(context, cat, name, type, arg0, arg1, arg2))
 
 #if defined(__cplusplus) || (defined(__GNUC__) && !defined(__STRICT_ANSI__))
 
@@ -135,6 +148,10 @@ static inline void uu_spdr_scope_exit (struct uu_spdr_scope* scope)
 #define UU_SPDR_SCOPE_TRACE2(spdr, cat, name, arg0, arg1)	\
 	UU_SPDR_SCOPE_SETUP(spdr, cat, name);			\
 	UU_SPDR_TRACE2(spdr, cat, name, SPDR_BEGIN, arg0, arg1)
+
+#define UU_SPDR_SCOPE_TRACE3(spdr, cat, name, arg0, arg1, arg2)		\
+	UU_SPDR_SCOPE_SETUP(spdr, cat, name);				\
+	UU_SPDR_TRACE3(spdr, cat, name, SPDR_BEGIN, arg0, arg1, arg2)
 
 #endif
 
