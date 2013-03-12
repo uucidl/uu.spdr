@@ -1,5 +1,5 @@
 CFLAGS+=-I../include -I../deps
-CFLAGS+=-Wall -Wextra
+CFLAGS+=-Wall -Wextra -Wno-missing-field-initializers
 
 LIB_SRC=../src/spdr-common.c
 LIB_SRC+=../src/chars-common.c

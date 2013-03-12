@@ -18,5 +18,7 @@ extern int clock_init(struct Clock** clockp, struct Allocator* allocator)
 
 extern uint64_t clock_ticks(struct Clock const* const clock)
 {
+	(void) clock;
+
 	return mach_absolute_time();
 }

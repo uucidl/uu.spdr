@@ -1,1 +1,1 @@
-CFLAGS=-ansi make clean all
+CC=gcc CFLAGS=-ansi make clean all

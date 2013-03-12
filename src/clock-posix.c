@@ -22,5 +22,7 @@ extern uint64_t clock_ticks(struct Clock const * const clock)
 	struct timespec ts = { 0 };
 	clock_gettime(CLOCK_MONOTONIC, &ts);
 
+	(void) clock;
+
 	return ts.tv_nsec;
 }
