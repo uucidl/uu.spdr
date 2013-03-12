@@ -323,22 +323,28 @@ int uu_spdr_musttrace(const struct spdr_context *context)
 
 extern struct uu_spdr_arg uu_spdr_arg_make_int(const char* key, int value)
 {
-	struct uu_spdr_arg arg = { key, SPDR_INT, { 0 } };
+	struct uu_spdr_arg arg = { 0, SPDR_INT, { 0 } };
+	arg.key     = key;
 	arg.value.i = value;
+
 	return arg;
 }
 
 extern struct uu_spdr_arg uu_spdr_arg_make_double(const char* key, double value)
 {
-	struct uu_spdr_arg arg = { key, SPDR_FLOAT, { 0 } };
+	struct uu_spdr_arg arg = { 0, SPDR_FLOAT, { 0 } };
+	arg.key     = key;
 	arg.value.d = value;
+
 	return arg;
 }
 
 extern struct uu_spdr_arg uu_spdr_arg_make_str(const char* key, const char* value)
 {
-	struct uu_spdr_arg arg = { key, SPDR_STR, { 0 } };
+	struct uu_spdr_arg arg = { 0, SPDR_STR, { 0 } };
+	arg.key       = key;
 	arg.value.str = value;
+
 	return arg;
 }
 
@@ -364,7 +370,7 @@ static void event_make(
 	event->float_count = 0;
 }
 
-static void event_add_arg(struct spdr_context* context, struct Event* event, struct uu_spdr_arg arg)
+static void event_add_arg(struct Event* event, struct uu_spdr_arg arg)
 {
 	int i;
 
@@ -526,11 +532,20 @@ static void log_json(
 	}
 }
 
+static int get_bucket_i(struct Event const * const e)
+{
+		uint64_t key[3];
+
+		key[0] = e->pid;
+		key[1] = e->tid;
+		key[2] = e->ts_ticks;
+
+		return murmurhash3_32(key, sizeof key, 0x4356)  & BUCKET_COUNT_MASK;
+}
+
 static void record_event(struct spdr_context* context, struct Event* e)
 {
-	uint64_t const key[] = { e->pid, e->tid, e->ts_ticks };
-	int const bucket_i = (murmurhash3_32(key, sizeof key, 0x4356))  & BUCKET_COUNT_MASK;
-	struct Bucket* bucket = context->buckets[bucket_i];
+	struct Bucket* bucket = context->buckets[get_bucket_i(e)];
 	struct Event* ep = growlog_until(bucket->blocks, bucket->blocks_capacity, &bucket->blocks_next);
 	int i;
 
@@ -580,7 +595,7 @@ extern void uu_spdr_record_1(struct spdr_context *context,
 	struct Event e;
 
 	event_make (context, &e, cat, name, type);
-	event_add_arg (context, &e, arg0);
+	event_add_arg (&e, arg0);
 	if (context->log_fn) {
 		event_log (context, &e, context->log_fn, context->log_user_data, !T(with_newlines));
 	}
@@ -597,8 +612,8 @@ extern void uu_spdr_record_2(struct spdr_context *context,
 {
 	struct Event e;
 	event_make (context, &e, cat, name, type);
-	event_add_arg (context, &e, arg0);
-	event_add_arg (context, &e, arg1);
+	event_add_arg (&e, arg0);
+	event_add_arg (&e, arg1);
 	if (context->log_fn) {
 		event_log (context, &e, context->log_fn, context->log_user_data, !T(with_newlines));
 	}
@@ -616,9 +631,9 @@ extern void uu_spdr_record_3(struct spdr_context *context,
 {
 	struct Event e;
 	event_make (context, &e, cat, name, type);
-	event_add_arg (context, &e, arg0);
-	event_add_arg (context, &e, arg1);
-	event_add_arg (context, &e, arg2);
+	event_add_arg (&e, arg0);
+	event_add_arg (&e, arg1);
+	event_add_arg (&e, arg2);
 	if (context->log_fn) {
 		event_log (context, &e, context->log_fn, context->log_user_data, !T(with_newlines));
 	}

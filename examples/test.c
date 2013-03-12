@@ -24,6 +24,8 @@ void trace (const char* line, void* _)
 	strncat(buffer, line, sizeof buffer - 2);
 	strncat(buffer, "\n", sizeof buffer - 2);
 
+	(void) _;
+
 	/* fputs is thread-safe */
 	fputs (buffer, stdout);
 }
