@@ -1,0 +1,7 @@
+Changes
+=======
+
+0.1.1 -- bugfix for posix clock becoming incorrect when seconds boundaries
+         were crossed. [questor <questor@unseen-academy.de>]
+
+0.1.0 -- initial release

@@ -137,6 +137,9 @@ void spdr_set_clock_microseconds_fn(struct spdr_context *context,
 		     unsigned long long (*clock_microseconds_fn)(void* user_data),
 		     void *user_data);
 ```
+## Additional Contributors
+
+*     questor <questor@unseen-academy.de>
 
 ## Third-party code
 
