@@ -24,5 +24,5 @@ extern uint64_t clock_ticks(struct Clock const * const clock)
 
 	(void) clock;
 
-	return ts.tv_nsec;
+    return ts.tv_sec * 1000000000LL + ts.tv_nsec;
 }
