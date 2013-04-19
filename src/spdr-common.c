@@ -1,6 +1,9 @@
 /* -*- coding: utf-8; -*- */
 
 #include "../include/spdr.h"
+
+#ifndef SPDR_PROFILING_DISABLED
+
 #include "../deps/libatomic_ops-7.2/src/atomic_ops.h"
 
 #include <stdlib.h>
@@ -98,6 +101,8 @@ struct spdr_context
 
 	struct SpdrAllocator clock_allocator;
 
+	void*                 libraryAllocatedBuffer;
+
 	/*
 	 * the struct is immediately followed by the rest of the
 	 * buffer (the arena), where data will be allocated from
@@ -193,6 +198,13 @@ static void bucket_init(struct Bucket* bucket, int buffer_size)
 	AO_store(&bucket->blocks_next, 0);
 }
 
+extern int spdr_init_allocbuffer(struct spdr_context **context_ptr, size_t buffer_size) {
+	void *buffer = malloc(buffer_size);
+	int ret = spdr_init(context_ptr, buffer, buffer_size);
+	(*context_ptr)->libraryAllocatedBuffer = buffer;
+	return ret;
+}
+
 extern int spdr_init(struct spdr_context **context_ptr, void* buffer, size_t _buffer_size)
 {
 	const struct spdr_context null = { 0 };
@@ -263,6 +275,7 @@ extern int spdr_init(struct spdr_context **context_ptr, void* buffer, size_t _bu
 extern void spdr_deinit(struct spdr_context** context_ptr)
 {
 	clock_deinit(&(*context_ptr)->clock);
+	free((*context_ptr)->libraryAllocatedBuffer);
 	*context_ptr = NULL;
 }
 
@@ -732,3 +745,5 @@ extern void spdr_report(struct spdr_context *context,
 	free ((void*)events);
 	events = NULL;
 }
+
+#endif	//#ifndef SPDR_PROFILING_DISABLED

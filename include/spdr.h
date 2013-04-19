@@ -1,6 +1,9 @@
 #ifndef UU_SPDR_H
 #define UU_SPDR_H
 
+//with this define the complete profiler can be disabled
+//#define SPDR_PROFILING_DISABLED
+
 /**
  * A tracing library
  */
@@ -32,6 +35,14 @@ enum spdr_report_type
 	SPDR_CHROME_REPORT,
 };
 
+#ifdef SPDR_PROFILING_DISABLED
+	#define SPDR_FUNC(x) x{}
+	#define SPDR_FUNC_RET(x) x{return -1;}
+#else
+	#define SPDR_FUNC(x) x
+	#define SPDR_FUNC_RET(x) x
+#endif
+
 /**
  * Initializes the library
  *
@@ -43,27 +54,55 @@ enum spdr_report_type
  *
  * @return 0 on success
  */
-int spdr_init(struct spdr_context **context, void* buffer, size_t buffer_size);
+SPDR_FUNC_RET(int spdr_init(struct spdr_context **context, void* buffer, size_t buffer_size));
+
+/**
+ * Initializes the library
+ *
+ * but you provide informations about memory and buffer is allocated by the library itself
+ * this is easier to handle when profiling is disabled
+ *
+ * @return 0 on success
+ */
+SPDR_FUNC_RET(int spdr_init_allocbuffer(struct spdr_context **context, size_t buffer_size));
 
 /**
  * Shutdowns the library
  */
-void spdr_deinit(struct spdr_context** context);
+SPDR_FUNC(void spdr_deinit(struct spdr_context** context));
 
 /**
  * Activates the recording of traces (off by default)
  */
-void spdr_enable_trace(struct spdr_context *context, int traceon);
+SPDR_FUNC(void spdr_enable_trace(struct spdr_context *context, int traceon));
+
+/**
+ * Get status if profiling is available(compiled in) or not (can be used to not write files if not active)
+ */
+inline int spdr_is_available() { 
+#ifdef SPDR_PROFILING_DISABLED
+	return 0;
+#else
+	return 1;
+#endif
+}
 
 /**
  * Clears the log buffer to start anew
  */
-void spdr_reset(struct spdr_context* context);
+SPDR_FUNC(void spdr_reset(struct spdr_context* context));
 
 /**
  * Returns the current event count and total available capacity
  */
-struct spdr_capacity spdr_capacity(struct spdr_context* context);
+#ifndef SPDR_PROFILING_DISABLED
+	struct spdr_capacity spdr_capacity(struct spdr_context* context);
+#else
+	struct spdr_capacity spdr_capacity(struct spdr_context* context) {
+		struct spdr_capacity ret = {0};
+		return ret;
+	}
+#endif
 
 /**
  * Provide your own clock function.
@@ -74,62 +113,83 @@ struct spdr_capacity spdr_capacity(struct spdr_context* context);
  * It must be thread-safe: it will be called concurrently
  * from multiple threads
  */
-void spdr_set_clock_microseconds_fn(struct spdr_context *context,
+SPDR_FUNC(void spdr_set_clock_microseconds_fn(struct spdr_context *context,
 		     unsigned long long (*clock_microseconds_fn)(void* user_data),
-		     void *user_data);
+		     void *user_data));
 
 
 /**
  * Provide your logging function if you want a trace stream to be produced.
  */
-void spdr_set_log_fn(struct spdr_context *context,
+SPDR_FUNC(void spdr_set_log_fn(struct spdr_context *context,
 		     void (*log_fn) (const char* line, void* user_data),
-		     void *user_data);
+		     void *user_data));
 
 /**
  * Report the traces which have been recorded so far, using the
  * provided log function.
  */
-void spdr_report(struct spdr_context *context,
+SPDR_FUNC(void spdr_report(struct spdr_context *context,
 		 enum spdr_report_type report_type,
 		 void (*print_fn) (const char* string, void* user_data),
-		 void* user_data);
+		 void* user_data));
 
 
 /**
  * Builds arguments of various types
  */
-#define SPDR_INT(key, value)   UU_SPDR_INT(key, value)
-#define SPDR_FLOAT(key, value) UU_SPDR_FLOAT(key, value)
-#define SPDR_STR(key, value)   UU_SPDR_STR(key, value)
-
-
+#ifndef SPDR_PROFILING_DISABLED 
+	#define SPDR_INT(key, value)   UU_SPDR_INT(key, value)
+	#define SPDR_FLOAT(key, value) UU_SPDR_FLOAT(key, value)
+	#define SPDR_STR(key, value)   UU_SPDR_STR(key, value)
+#else
+	#define SPDR_INT(key, value)
+	#define SPDR_FLOAT(key, value)
+	#define SPDR_STR(key, value)
+#endif
 
 /* __ Instant events __ */
 
 /**
  * An instant event
  */
-#define SPDR_EVENT(spdr, cat, name)			\
-	UU_SPDR_TRACE(spdr, cat, name, SPDR_EVENT)
+#ifndef SPDR_PROFILING_DISABLED 
+	#define SPDR_EVENT(spdr, cat, name)			\
+		UU_SPDR_TRACE(spdr, cat, name, SPDR_EVENT)
+#else
+	#define SPDR_EVENT(spdr, cat, name)
+#endif
+
 
 /**
  * An instant event with one parameter
  */
-#define SPDR_EVENT1(spdr, cat, name, arg0)			\
-	UU_SPDR_TRACE1(spdr, cat, name, SPDR_EVENT, arg0)
+#ifndef SPDR_PROFILING_DISABLED 
+	#define SPDR_EVENT1(spdr, cat, name, arg0)			\
+		UU_SPDR_TRACE1(spdr, cat, name, SPDR_EVENT, arg0)
+#else
+	#define SPDR_EVENT1(spdr, cat, name, arg0)
+#endif
 
 /**
  * An instant event with two parameters
  */
-#define SPDR_EVENT2(spdr, cat, name, arg0, arg1)		\
-	UU_SPDR_TRACE2(spdr, cat, name, SPDR_EVENT, arg0, arg1)
+#ifndef SPDR_PROFILING_DISABLED 
+	#define SPDR_EVENT2(spdr, cat, name, arg0, arg1)		\
+		UU_SPDR_TRACE2(spdr, cat, name, SPDR_EVENT, arg0, arg1)
+#else
+	#define SPDR_EVENT2(spdr, cat, name, arg0, arg1)
+#endif
 
 /**
  * An instant event with two parameters
  */
-#define SPDR_EVENT3(spdr, cat, name, arg0, arg1, arg2)		\
-	UU_SPDR_TRACE3(spdr, cat, name, SPDR_EVENT, arg0, arg1, arg2)
+#ifndef SPDR_PROFILING_DISABLED 
+	#define SPDR_EVENT3(spdr, cat, name, arg0, arg1, arg2)		\
+		UU_SPDR_TRACE3(spdr, cat, name, SPDR_EVENT, arg0, arg1, arg2)
+#else
+	#define SPDR_EVENT3(spdr, cat, name, arg0, arg1, arg2)
+#endif
 
 
 /* __ Work slices __ */
@@ -137,49 +197,85 @@ void spdr_report(struct spdr_context *context,
 /**
  * Begin a slice of work
  */
-#define SPDR_BEGIN(spdr, cat, name)			\
-	UU_SPDR_TRACE(spdr, cat, name, SPDR_BEGIN)
+#ifndef SPDR_PROFILING_DISABLED 
+	#define SPDR_BEGIN(spdr, cat, name)			\
+		UU_SPDR_TRACE(spdr, cat, name, SPDR_BEGIN)
+#else
+	#define SPDR_BEGIN(spdr, cat, name)
+#endif
 
 /**
  * Begin a slice of work, with one parameter.
  */
-#define SPDR_BEGIN1(spdr, cat, name, arg0)			\
-	UU_SPDR_TRACE1(spdr, cat, name, SPDR_BEGIN, arg0)
+#ifndef SPDR_PROFILING_DISABLED 
+	#define SPDR_BEGIN1(spdr, cat, name, arg0)			\
+		UU_SPDR_TRACE1(spdr, cat, name, SPDR_BEGIN, arg0)
+#else
+	#define SPDR_BEGIN1(spdr, cat, name, arg0)
+#endif
 
 /**
  * Begin a slice of work, with two parameters
  */
-#define SPDR_BEGIN2(spdr, cat, name, arg0, arg1)		\
-	UU_SPDR_TRACE2(spdr, cat, name, SPDR_BEGIN, arg0, arg1)
+#ifndef SPDR_PROFILING_DISABLED 
+	#define SPDR_BEGIN2(spdr, cat, name, arg0, arg1)		\
+		UU_SPDR_TRACE2(spdr, cat, name, SPDR_BEGIN, arg0, arg1)
+#else
+	#define SPDR_BEGIN2(spdr, cat, name, arg0, arg1)
+#endif
 
 /**
  * Begin a slice of work, with three parameters
  */
-#define SPDR_BEGIN3(spdr, cat, name, arg0, arg1, arg2)			\
-	UU_SPDR_TRACE3(spdr, cat, name, SPDR_BEGIN, arg0, arg1, arg2)
+#ifndef SPDR_PROFILING_DISABLED 
+	#define SPDR_BEGIN3(spdr, cat, name, arg0, arg1, arg2)			\
+		UU_SPDR_TRACE3(spdr, cat, name, SPDR_BEGIN, arg0, arg1, arg2)
+#else
+	#define SPDR_BEGIN3(spdr, cat, name, arg0, arg1, arg2)
+#endif
 
 /**
  * End a slice of work
  */
-#define SPDR_END(spdr, cat, name)			\
-	UU_SPDR_TRACE(spdr, cat, name, SPDR_END)
+#ifndef SPDR_PROFILING_DISABLED 
+	#define SPDR_END(spdr, cat, name)			\
+		UU_SPDR_TRACE(spdr, cat, name, SPDR_END)
+#else
+	#define SPDR_END(spdr, cat, name)
+#endif
 
 /**
  * Mark the beginning and end of a scope
  *
  * Non standard. Only supported on select compilers.
  */
-#define SPDR_SCOPE(spdr, cat, name)		\
-	UU_SPDR_SCOPE_TRACE(spdr, cat, name)
+#ifndef SPDR_PROFILING_DISABLED 
+	#define SPDR_SCOPE(spdr, cat, name)		\
+		UU_SPDR_SCOPE_TRACE(spdr, cat, name)
+#else
+	#define SPDR_SCOPE(spdr, cat, name)
+#endif
 
-#define SPDR_SCOPE1(spdr, cat, name, arg0)		\
-	UU_SPDR_SCOPE_TRACE1(spdr, cat, name, arg0)
+#ifndef SPDR_PROFILING_DISABLED 
+	#define SPDR_SCOPE1(spdr, cat, name, arg0)		\
+		UU_SPDR_SCOPE_TRACE1(spdr, cat, name, arg0)
+#else
+	#define SPDR_SCOPE1(spdr, cat, name, arg0)
+#endif
 
-#define SPDR_SCOPE2(spdr, cat, name, arg0, arg1)		\
-	UU_SPDR_SCOPE_TRACE2(spdr, cat, name, arg0, arg1)
+#ifndef SPDR_PROFILING_DISABLED 
+	#define SPDR_SCOPE2(spdr, cat, name, arg0, arg1)		\
+		UU_SPDR_SCOPE_TRACE2(spdr, cat, name, arg0, arg1)
+#else
+	#define SPDR_SCOPE2(spdr, cat, name, arg0, arg1)
+#endif
 
-#define SPDR_SCOPE3(spdr, cat, name, arg0, arg1, arg2)		\
-	UU_SPDR_SCOPE_TRACE3(spdr, cat, name, arg0, arg1, arg2)
+#ifndef SPDR_PROFILING_DISABLED 
+	#define SPDR_SCOPE3(spdr, cat, name, arg0, arg1, arg2)		\
+		UU_SPDR_SCOPE_TRACE3(spdr, cat, name, arg0, arg1, arg2)
+#else
+	#define SPDR_SCOPE3(spdr, cat, name, arg0, arg1, arg2)
+#endif
 
 
 /* __ Counters __ */
@@ -189,14 +285,26 @@ void spdr_report(struct spdr_context *context,
  *
  * @param arg must be SPDR_INT or SPDR_FLOAT
  */
-#define SPDR_COUNTER1(spdr, cat, name, arg0)	\
-	UU_SPDR_TRACE1(spdr, cat, name, SPDR_COUNTER, arg0)
+#ifndef SPDR_PROFILING_DISABLED 
+	#define SPDR_COUNTER1(spdr, cat, name, arg0)	\
+		UU_SPDR_TRACE1(spdr, cat, name, SPDR_COUNTER, arg0)
+#else
+	#define SPDR_COUNTER1(spdr, cat, name, arg0)
+#endif
 
-#define SPDR_COUNTER2(spdr, cat, name, arg0, arg1)			\
-	UU_SPDR_TRACE2(spdr, cat, name, SPDR_COUNTER, arg0, arg1)
+#ifndef SPDR_PROFILING_DISABLED 
+	#define SPDR_COUNTER2(spdr, cat, name, arg0, arg1)			\
+		UU_SPDR_TRACE2(spdr, cat, name, SPDR_COUNTER, arg0, arg1)
+#else
+	#define SPDR_COUNTER2(spdr, cat, name, arg0, arg1)
+#endif
 
-#define SPDR_COUNTER3(spdr, cat, name, arg0, arg1, arg2)			\
-	UU_SPDR_TRACE3(spdr, cat, name, SPDR_COUNTER, arg0, arg1, arg2)
+#ifndef SPDR_PROFILING_DISABLED 
+	#define SPDR_COUNTER3(spdr, cat, name, arg0, arg1, arg2)			\
+		UU_SPDR_TRACE3(spdr, cat, name, SPDR_COUNTER, arg0, arg1, arg2)
+#else
+	#define SPDR_COUNTER3(spdr, cat, name, arg0, arg1, arg2)
+#endif
 
 /* __ Metadata __ */
 
@@ -211,8 +319,11 @@ void spdr_report(struct spdr_context *context,
  * chrome://tracing will then display this name rather than the tid of
  * the thread.
  */
-#define SPDR_METADATA1(spdr, name, arg0)				\
-	UU_SPDR_TRACE1(spdr, "__metadata", name, SPDR_METADATA, arg0)
-
+#ifndef SPDR_PROFILING_DISABLED 
+	#define SPDR_METADATA1(spdr, name, arg0)				\
+		UU_SPDR_TRACE1(spdr, "__metadata", name, SPDR_METADATA, arg0)
+#else
+	#define SPDR_METADATA1(spdr, name, arg0)
+#endif
 
 #endif
