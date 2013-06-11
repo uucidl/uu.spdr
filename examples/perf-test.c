@@ -13,7 +13,7 @@
 #define TRACING_ENABLED 0
 #endif
 
-static struct spdr_context* gbl_spdr;
+static struct SPDR_Context* gbl_spdr;
 
 static void* std_allocator_alloc(struct Allocator* self, size_t size)
 {
@@ -50,7 +50,7 @@ static void* thread_main (void* ctxt)
 	int const chunks_n = 1024;
 	int i;
 	int j = 0;
-	struct spdr_context* spdr = gbl_spdr;
+	struct SPDR_Context* spdr = gbl_spdr;
 
 	context->ts0 = clock_microseconds(context->clock);
 

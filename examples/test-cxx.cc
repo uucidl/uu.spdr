@@ -11,7 +11,7 @@
 #define TRACING_ENABLED 0
 #endif
 
-static struct spdr_context* spdr;
+static struct SPDR_Context* spdr;
 enum { LOG_N = 2 * 1024 * 1024 };
 
 void trace (const char* line, void* _)

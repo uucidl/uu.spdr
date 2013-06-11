@@ -12,7 +12,7 @@
 #define TRACING_ENABLED 0
 #endif
 
-static struct spdr_context* spdr;
+static struct SPDR_Context* spdr;
 enum { LOG_N = 256 * 1024 };
 static void* spdr_buffer;
 
@@ -69,7 +69,7 @@ void* thread1(void* arg)
 int main (int argc, char** argv)
 {
 	pthread_t thread;
-	struct spdr_capacity cap;
+	struct SPDR_Capacity cap;
 
 	spdr_buffer = malloc(LOG_N);
 	spdr_init(&spdr, spdr_buffer, LOG_N);

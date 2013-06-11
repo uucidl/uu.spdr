@@ -12,12 +12,12 @@
 /**
  * Context for the library
  */
-struct spdr_context_context;
+struct SPDR_Context;
 
 /**
  * Buffer capacity
  */
-struct spdr_capacity
+struct SPDR_Capacity
 {
 	size_t count;
 	size_t capacity;
@@ -26,7 +26,7 @@ struct spdr_capacity
 /**
  * Reporting type.
  */
-enum spdr_report_type
+enum SPDR_Report_Type
 {
 	SPDR_PLAIN_REPORT,
 	SPDR_CHROME_REPORT,
@@ -43,27 +43,27 @@ enum spdr_report_type
  *
  * @return 0 on success
  */
-int spdr_init(struct spdr_context **context, void* buffer, size_t buffer_size);
+int spdr_init(struct SPDR_Context **context, void* buffer, size_t buffer_size);
 
 /**
  * Shutdowns the library
  */
-void spdr_deinit(struct spdr_context** context);
+void spdr_deinit(struct SPDR_Context** context);
 
 /**
  * Activates the recording of traces (off by default)
  */
-void spdr_enable_trace(struct spdr_context *context, int traceon);
+void spdr_enable_trace(struct SPDR_Context *context, int traceon);
 
 /**
  * Clears the log buffer to start anew
  */
-void spdr_reset(struct spdr_context* context);
+void spdr_reset(struct SPDR_Context* context);
 
 /**
  * Returns the current event count and total available capacity
  */
-struct spdr_capacity spdr_capacity(struct spdr_context* context);
+struct SPDR_Capacity spdr_capacity(struct SPDR_Context* context);
 
 /**
  * Provide your own clock function.
@@ -74,7 +74,7 @@ struct spdr_capacity spdr_capacity(struct spdr_context* context);
  * It must be thread-safe: it will be called concurrently
  * from multiple threads
  */
-void spdr_set_clock_microseconds_fn(struct spdr_context *context,
+void spdr_set_clock_microseconds_fn(struct SPDR_Context *context,
 		     unsigned long long (*clock_microseconds_fn)(void* user_data),
 		     void *user_data);
 
@@ -82,7 +82,7 @@ void spdr_set_clock_microseconds_fn(struct spdr_context *context,
 /**
  * Provide your logging function if you want a trace stream to be produced.
  */
-void spdr_set_log_fn(struct spdr_context *context,
+void spdr_set_log_fn(struct SPDR_Context *context,
 		     void (*log_fn) (const char* line, void* user_data),
 		     void *user_data);
 
@@ -90,8 +90,8 @@ void spdr_set_log_fn(struct spdr_context *context,
  * Report the traces which have been recorded so far, using the
  * provided log function.
  */
-void spdr_report(struct spdr_context *context,
-		 enum spdr_report_type report_type,
+void spdr_report(struct SPDR_Context *context,
+		 enum SPDR_Report_Type report_type,
 		 void (*print_fn) (const char* string, void* user_data),
 		 void* user_data);
 

@@ -133,7 +133,7 @@ elapsed microseconds, overriding the default internal one.
 
 See:
 ```C
-void spdr_set_clock_microseconds_fn(struct spdr_context *context,
+void spdr_set_clock_microseconds_fn(struct SPDR_Context *context,
 		     unsigned long long (*clock_microseconds_fn)(void* user_data),
 		     void *user_data);
 ```
