@@ -14,7 +14,7 @@
 
 enum { LOG_N = 2 * 1024 * 1024 };
 static void* spdr_buffer;
-static struct spdr_context* spdr;
+static struct SPDR_Context* spdr;
 
 void trace (const char* line, void* user_data)
 {
