@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include "chars.h"
 
 #include <stdarg.h>
@@ -14,10 +15,9 @@ extern void chars_catsprintf(struct Chars* chars, const char* format, ...)
 		va_list args;
 		va_start(args, format);
 
-		count = _vsnprintf_s(
+		count = vsnprintf(
 			chars->chars + chars->len, 
 			chars->capacity - chars->len - 1, 
-			chars->capacity - chars->len, 
 			format,
 			args);
 		
