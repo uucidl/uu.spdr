@@ -1,6 +1,7 @@
 Changes
 =======
 
+0.2.1 -- compilation fix for mingw32-gcc
 0.2.0 -- changing code conventions
 	 
 	 moving to better code conventions, this however requires a minor
