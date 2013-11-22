@@ -455,6 +455,103 @@ static void event_log(const struct SPDR_Context* context,
 	}
 }
 
+static int has_non_json_arg(struct Event const * const event,
+			    struct SPDR_Event_Arg * const first_arg)
+{
+	int i;
+
+	for (i = 0; i < event->float_count; i++) {
+		if (!float_isfinite(event->float_args[i].value)) {
+			*first_arg = UU_SPDR_FLOAT(
+				event->float_args[i].key, event->float_args[i].value
+				);
+
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+static void log_json_arg_error(
+	const struct SPDR_Context* context,
+	const struct Event* e,
+	struct SPDR_Event_Arg* arg,
+	const char* prefix,
+	void (*print_fn) (const char* string, void* user_data),
+	void* user_data)
+{
+	uint64_t ts_microseconds = context->clock_fn ?
+		e->ts_ticks : clock_ticks_to_microseconds(context->clock, e->ts_ticks);
+	char buffer[2048];
+	struct Chars string = { 0 };
+	char arg_value_buffer[256];
+	struct Chars arg_value_string = { 0 };
+	const char* arg_prefix = "";
+
+	string.chars = buffer;
+	string.capacity = sizeof buffer;
+	arg_value_string.chars = arg_value_buffer;
+	arg_value_string.capacity = sizeof arg_value_buffer;
+
+	chars_catsprintf(&string,
+			 "%s{\"ts\":%llu,\"pid\":%u,\"tid\":%llu",
+			 prefix,
+			 ts_microseconds,
+			 e->pid,
+			 e->tid);
+
+	chars_catsprintf(&string, ",\"cat\":\"spdr-error\"");
+	chars_catsprintf(&string, ",\"name\":\"arg-serialization\"");
+	chars_catsprintf(&string, ",\"ph\":\"I\",\"args\":{");
+
+	switch (arg->type) {
+	case SPDR_INT:
+		chars_catsprintf(&arg_value_string, "%d", arg->value.i);
+		break;
+	case SPDR_FLOAT:
+		chars_catsprintf(&arg_value_string, "%f", arg->value.d);
+		break;
+	case SPDR_STR:
+		chars_catsprintf(&arg_value_string, "%s", arg->value.str);
+		break;
+	}
+
+	{
+		int i;
+		const char* arg_value =
+			arg_value_string.error ? "<format-error>" :
+			arg_value_string.chars;
+		struct {
+			const char* key;
+			const char* value;
+		} const str_args[] = {
+			{"cat", e->cat },
+			{"name", e->name },
+			{"failed-arg", arg->key },
+			{ arg->key, arg_value },
+		};
+		int str_args_n = sizeof str_args / sizeof *str_args;
+
+		for (i = 0; i < str_args_n; i++) {
+			chars_catsprintf(&string,
+					 "%s\"%s\":\"",
+					 arg_prefix,
+					 str_args[i].key);
+			chars_catjsonstr(&string, str_args[i].value);
+			chars_catsprintf(&string, "\"");
+
+			arg_prefix = ",";
+		}
+	}
+
+	chars_catsprintf(&string, "}}");
+
+	if (0 == string.error)
+	{
+		print_fn(string.chars, user_data);
+	}
+}
 
 static void log_json(
 	const struct SPDR_Context* context,
@@ -471,6 +568,15 @@ static void log_json(
 	struct Chars string = { 0 };
 	string.chars = buffer;
 	string.capacity = sizeof buffer;
+
+	{
+		struct SPDR_Event_Arg first_arg;
+		if (has_non_json_arg(e, &first_arg)) {
+			log_json_arg_error(
+				context, e, &first_arg, prefix, print_fn, user_data
+				);
+		}
+	}
 
 	chars_catsprintf(&string,
 			 "%s{\"ts\":%llu,\"pid\":%u,\"tid\":%llu",
@@ -511,7 +617,7 @@ static void log_json(
 	for (i = 0; i < e->float_count; i++) {
 		if (!float_isfinite(e->float_args[i].value)) {
 			chars_catsprintf(&string,
-				 "%s\"%s\":null",
+				 "%s\"%s\":0.0",
 				 arg_prefix,
 				 e->float_args[i].key);
 		} else {
