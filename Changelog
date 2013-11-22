@@ -1,14 +1,13 @@
 Changes
 =======
 
+0.2.2 -- handle NaN and Inf properly for latest chrome/trace event viewer
 0.2.1 -- compilation fix for mingw32-gcc
 0.2.0 -- changing code conventions
-	 
 	 moving to better code conventions, this however requires a minor
-         API change (spdr_context becomes SPDR_Context)
-	 
+	 API change (spdr_context becomes SPDR_Context)
 
 0.1.1 -- bugfix for posix clock becoming incorrect when seconds boundaries
-         were crossed. [questor <questor@unseen-academy.de>]
+	 were crossed. [questor <questor@unseen-academy.de>]
 
 0.1.0 -- initial release
