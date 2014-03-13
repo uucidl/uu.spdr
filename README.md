@@ -45,13 +45,13 @@ With:
 ```
 
 This will trace the printf call and associate a textual argument to
-it. The string arguments are copied so you may deallocate them,
-however all the keys and categories should be litterals or kept for
-the whole use of the library. 
+it. 
 
-Argument keys, categories and names are meant to be litteral or last for the duration of your instrument program, so as to limit their number. Traces were these values would grow with time would become hard to read and understand. Any time varying data should be kept in argument values (such as the "Hello, world." string above)
+Argument keys, categories and names are meant to be litteral or last for the duration of your instrument program, so as to limit their number. Traces where these values would grow with time would become hard to read and understand. Any time varying data should be kept in argument values (such as the "Hello, world." string above)
 
-The library will also keep direct pointers to them for performance reasons.
+The library will also keep direct pointers to them for performance reasons, so make sure these strings are valid for the entire use of the library.
+
+The string arguments however are copied so you may deallocate them. This is were your time-varying data should be stored.
 
 ### Reporting
 
