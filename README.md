@@ -37,11 +37,21 @@ Check examples/ for some typical uses.
     SPDR_END(spdr, "Main", "printf");
 ```
 
+With:
+
+```C
+    SPDR_BEGIN1(context, category, trace_name, argument);
+    SPDR_END(context, category, trace_name);
+```
+
 This will trace the printf call and associate a textual argument to
 it. The string arguments are copied so you may deallocate them,
 however all the keys and categories should be litterals or kept for
-the whole use of the library. The library will keep direct pointers to
-them for performance reasons.
+the whole use of the library. 
+
+Argument keys, categories and names are meant to be litteral or last for the duration of your instrument program, so as to limit their number. Traces were these values would grow with time would become hard to read and understand. Any time varying data should be kept in argument values (such as the "Hello, world." string above)
+
+The library will also keep direct pointers to them for performance reasons.
 
 ### Reporting
 
