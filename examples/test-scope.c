@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "spdr.h"
+#include <spdr/spdr.h>
 
 #include <math.h>
 #include <unistd.h>
@@ -18,57 +18,57 @@ static struct SPDR_Context* spdr;
 
 void trace (const char* line, void* user_data)
 {
-	const char* msg = user_data;
-	char buffer[512] = "";
+        const char* msg = user_data;
+        char buffer[512] = "";
 
-	assert(0 == strcmp(msg, "Hello"));
+        assert(0 == strcmp(msg, "Hello"));
 
-	strncat(buffer, line, sizeof buffer - 2);
-	strncat(buffer, "\n", sizeof buffer - 2);
+        strncat(buffer, line, sizeof buffer - 2);
+        strncat(buffer, "\n", sizeof buffer - 2);
 
-	// fputs is thread-safe
-	fputs (buffer, stderr);
+        // fputs is thread-safe
+        fputs (buffer, stderr);
 }
 
 void fun1()
 {
-	static double x = 0.5f;
-	static double y = -0.15f;
+        static double x = 0.5f;
+        static double y = -0.15f;
 
-	SPDR_SCOPE2(spdr, "Main", "fun1",
-		    SPDR_FLOAT("x", x),
-		    SPDR_FLOAT("y", y));
+        SPDR_SCOPE2(spdr, "Main", "fun1",
+                    SPDR_FLOAT("x", x),
+                    SPDR_FLOAT("y", y));
 
-	int N = 65536;
-	while (N--) {
-		y = cos(x + atan2(x, y));
-		x = sin(y);
-	}
+        int N = 65536;
+        while (N--) {
+                y = cos(x + atan2(x, y));
+                x = sin(y);
+        }
 }
 
 int main (int argc, char** argv)
 {
-	spdr_buffer = malloc(LOG_N);
-	spdr_init(&spdr, spdr_buffer, LOG_N);
-	spdr_enable_trace(spdr, TRACING_ENABLED);
-	spdr_set_log_fn(spdr, trace, "Hello");
+        spdr_buffer = malloc(LOG_N);
+        spdr_init(&spdr, spdr_buffer, LOG_N);
+        spdr_enable_trace(spdr, TRACING_ENABLED);
+        spdr_set_log_fn(spdr, trace, "Hello");
 
-	SPDR_BEGIN2(spdr, "Main", "main",
-		    SPDR_INT("argc", argc),
-		    SPDR_STR("argv[0]", argv[0]));
+        SPDR_BEGIN2(spdr, "Main", "main",
+                    SPDR_INT("argc", argc),
+                    SPDR_STR("argv[0]", argv[0]));
 
-	printf ("Hello,");
-	sleep (3);
-	printf (" 世界.\n");
+        printf ("Hello,");
+        sleep (3);
+        printf (" 世界.\n");
 
-	fun1();
-	fun1();
-	fun1();
+        fun1();
+        fun1();
+        fun1();
 
-	SPDR_END(spdr, "Main", "main");
+        SPDR_END(spdr, "Main", "main");
 
-	spdr_deinit(&spdr);
-	free(spdr_buffer);
+        spdr_deinit(&spdr);
+        free(spdr_buffer);
 
-	return 0;
+        return 0;
 }

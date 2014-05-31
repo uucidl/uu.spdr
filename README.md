@@ -25,7 +25,7 @@ See:
 
 ## Usage
 
-Check include/spdr.h it is hopefully small enough to be sufficient as documentation.
+Check include/spdr/spdr.h it is hopefully small enough to be sufficient as documentation.
 
 Check examples/ for some typical uses.
 
@@ -45,7 +45,7 @@ With:
 ```
 
 This will trace the printf call and associate a textual argument to
-it. 
+it.
 
 Argument keys, categories and names are meant to be litteral or last for the duration of your instrument program, so as to limit their number. Traces where these values would grow with time would become hard to read and understand. Any time varying data should be kept in argument values (such as the "Hello, world." string above)
 
@@ -67,20 +67,20 @@ console.
 ```C
 static void report(const char* line, void* user_data)
 {
-	FILE* file = user_data;
+    FILE* file = user_data;
 
-	fputs(line, file);
+    fputs(line, file);
 }
 
 static void foo()
 {
-	/* ... */
+    /* ... */
 
-	FILE* f = fopen("traces.json", "wb");
-	if (f) {
-		spdr_report(gbl_spdr, SPDR_CHROME_REPORT, report, f);
-		fclose(f);
-	}
+    FILE* f = fopen("traces.json", "wb");
+    if (f) {
+        spdr_report(gbl_spdr, SPDR_CHROME_REPORT, report, f);
+        fclose(f);
+    }
 ```
 
 ## Compilation
@@ -106,7 +106,7 @@ project and importing the header found in include/ should basically be
 sufficient.
 
 Use of the library in C++ is supported, you must include the
-include/spdr.hh header rather than spdr.h.
+include/spdr/spdr.hh header rather than spdr.h.
 
 ## Implementation & Design
 
@@ -144,8 +144,8 @@ elapsed microseconds, overriding the default internal one.
 See:
 ```C
 void spdr_set_clock_microseconds_fn(struct SPDR_Context *context,
-		     unsigned long long (*clock_microseconds_fn)(void* user_data),
-		     void *user_data);
+             unsigned long long (*clock_microseconds_fn)(void* user_data),
+             void *user_data);
 ```
 ## Additional Contributors
 
