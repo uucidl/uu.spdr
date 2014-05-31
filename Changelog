@@ -1,6 +1,7 @@
 Changes
 =======
 
+0.3.0 -- move header files to their own subdirectory
 0.2.2 -- handle NaN and Inf properly for latest chrome/trace event viewer
 0.2.1 -- compilation fix for mingw32-gcc
 0.2.0 -- changing code conventions
