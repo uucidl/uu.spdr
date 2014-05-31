@@ -58,7 +58,7 @@ CFLAGS+=-lm $(LIB_LIBS)
 
 all: without-tracing with-tracing mt-with-tracing mt-without-tracing cxx-tracing perf-tracing perf-without-tracing
 clean:
-	rm -f *-tracing $(LIB)
+	rm -f *-tracing $(LIB) ../src/*.o
 
 $(LIB): $(LIB_SRC:%.c=%.o)
 	ar rcs $@ $^
