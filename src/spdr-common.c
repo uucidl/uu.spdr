@@ -235,9 +235,6 @@ extern int spdr_init(struct SPDR_Context **context_ptr, void* buffer, size_t _bu
                 return -1;
         }
 
-        context->arena_size   = arena_size;
-        context->arena_offset = arena_offset;
-
         {
                 int const n = BUCKET_COUNT;
                 int i;
@@ -248,9 +245,13 @@ extern int spdr_init(struct SPDR_Context **context_ptr, void* buffer, size_t _bu
                         return -1;
                 }
 
+                context->arena_size   = arena_size;
+                context->arena_offset = arena_offset;
+
                 for (i = 0; i < n; i++) {
-                        context->buckets[i] = (void*) (((char*) arena) + i * bucket_size);
-                        bucket_init(context->buckets[i], bucket_size);
+                        struct Bucket* bucket = (void*) (((char*) arena) + i * bucket_size);
+                        context->buckets[i] = bucket;
+                        bucket_init(bucket, bucket_size);
                 }
 
         }
