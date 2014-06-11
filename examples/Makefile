@@ -56,7 +56,8 @@ endif
 
 CFLAGS+=-lm $(LIB_LIBS)
 
-all: without-tracing with-tracing mt-with-tracing mt-without-tracing cxx-tracing perf-tracing perf-without-tracing
+all: without-tracing with-tracing mt-with-tracing mt-without-tracing \
+  cxx-tracing perf-tracing perf-without-tracing filling-tracing
 clean:
 	rm -f *-tracing $(LIB) ../src/*.o
 
@@ -84,11 +85,15 @@ cxx-tracing: test-cxx.cc $(LIB)
 scope-tracing: test-scope.c $(LIB_SRC)
 	$(CC) $(CFLAGS) $^ -o $@
 
-tracing-with-external-clock: ../deps/timer_lib/timer.c test-external_clock.c $(LIB_SRC)
+tracing-with-external-clock: ../deps/timer_lib/timer.c \
+  test-external_clock.c $(LIB_SRC)
 	$(CC) $(CFLAGS) $^ -o $@
 
 perf-tracing: perf-test.c $(LIB_SRC)
 	$(CC) $(CFLAGS) $^ -o $@
 
 perf-without-tracing: perf-test.c $(LIB_SRC)
+	$(CC) $(CFLAGS) $^ -o $@
+
+filling-tracing: test-full.c $(LIB_SRC)
 	$(CC) $(CFLAGS) $^ -o $@
