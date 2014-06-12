@@ -650,13 +650,42 @@ static int get_bucket_i(struct Event const * const e)
                 return murmurhash3_32(key, sizeof key, 0x4356)  & BUCKET_COUNT_MASK;
 }
 
+
+struct EventAndBucket
+{
+        struct Event* event;
+        struct Bucket* bucket;
+};
+
+static struct EventAndBucket growlog(struct SPDR_Context* const context, int const start_bucket_i)
+{
+        int i;
+
+        /* allocate from main bucket and if it fails, try the other ones */
+        for (i = 0; i < BUCKET_COUNT; i++) {
+                int const bucket_i = (start_bucket_i + i) & BUCKET_COUNT_MASK;
+                struct Bucket* bucket = context->buckets[bucket_i];
+                struct Event* ep = growlog_until(
+                        bucket->blocks,
+                        bucket->blocks_capacity,
+                        &bucket->blocks_next);
+                if (ep) {
+                        return (struct EventAndBucket) { ep, bucket };
+                }
+        }
+
+        return (struct EventAndBucket) { 0 };
+}
+
 static void record_event(struct SPDR_Context* context, struct Event* e)
 {
-        struct Bucket* bucket = context->buckets[get_bucket_i(e)];
-        struct Event* ep = growlog_until(bucket->blocks, bucket->blocks_capacity, &bucket->blocks_next);
+        struct EventAndBucket pair = growlog(context, get_bucket_i(e));
+        struct Event* ep = pair.event;
+        struct Bucket* bucket = pair.bucket;
         int i;
 
         if (!ep) {
+                /* we've evidently reached full capacity */
                 return;
         }
 
