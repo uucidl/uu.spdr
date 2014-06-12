@@ -112,6 +112,11 @@ struct SPDR_Context
 };
 
 /**
+ * null context returned by spdr_init_null
+ */
+static struct SPDR_Context null_context;
+
+/**
  * Grow the memory buffer until capacity is reached.
  *
  * @return a block or NULL if the capacity has been reached.
@@ -262,6 +267,11 @@ extern int spdr_init(struct SPDR_Context **context_ptr, void* buffer, size_t _bu
         *context_ptr = context;
 
         return 0;
+}
+
+extern void spdr_init_null(struct SPDR_Context **context)
+{
+        spdr_init(context, &null_context, sizeof null_context);
 }
 
 extern void spdr_deinit(struct SPDR_Context** context_ptr)

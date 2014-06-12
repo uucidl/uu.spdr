@@ -46,6 +46,15 @@ enum SPDR_Report_Type
 int spdr_init(struct SPDR_Context **context, void* buffer, size_t buffer_size);
 
 /**
+ * Initializes a "null" version of library.
+ *
+ * It returns a context that is just sufficient enough to be passed to
+ * all the functions and macros, without being able to record any
+ * profiling event.
+ */
+void spdr_init_null(struct SPDR_Context **context);
+
+/**
  * Shutdowns the library
  */
 void spdr_deinit(struct SPDR_Context** context);
