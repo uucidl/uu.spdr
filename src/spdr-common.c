@@ -204,12 +204,23 @@ extern int spdr_init(struct SPDR_Context **context_ptr, void* buffer, size_t _bu
         void*  arena;
         int arena_size;
 
+        *context_ptr = NULL;
         if (buffer_size < (int) sizeof *context) {
                 return -1;
         }
 
         context = buffer;
         *context = null;
+
+        context->clock_allocator.super.alloc = spdr_clock_alloc;
+        context->clock_allocator.super.free  = spdr_free;
+        context->clock_allocator.spdr        = context;
+
+        if (clock_init(&context->clock, &context->clock_allocator.super) < 0) {
+                return -1;
+        }
+
+        *context_ptr = context;
 
         /* arena memory starts right after the buffer, aligned to 64 bytes */
         arena_offset = sizeof *context;
@@ -224,14 +235,6 @@ extern int spdr_init(struct SPDR_Context **context_ptr, void* buffer, size_t _bu
         arena_size = buffer_size - arena_offset;
 
         if (arena_size <= 0) {
-                return -1;
-        }
-
-        context->clock_allocator.super.alloc = spdr_clock_alloc;
-        context->clock_allocator.super.free  = spdr_free;
-        context->clock_allocator.spdr        = context;
-
-        if (clock_init(&context->clock, &context->clock_allocator.super) < 0) {
                 return -1;
         }
 
@@ -271,6 +274,10 @@ extern void spdr_reset(struct SPDR_Context* context)
 {
         int i;
 
+        if (!context->arena_size) {
+                return;
+        }
+
         for (i = 0; i < BUCKET_COUNT; i++) {
                 AO_store(&context->buckets[i]->blocks_next, 0);
         }
@@ -280,6 +287,10 @@ extern struct SPDR_Capacity spdr_capacity(struct SPDR_Context* context)
 {
         struct SPDR_Capacity cap = {0};
         int i;
+
+        if (!context->arena_size) {
+                return cap;
+        }
 
         for (i = 0; i < BUCKET_COUNT; i++) {
                 struct Bucket const* bucket = context->buckets[i];
@@ -314,6 +325,10 @@ void spdr_set_log_fn(struct SPDR_Context *context,
  */
 extern void spdr_enable_trace(struct SPDR_Context *context, int traceon)
 {
+        if (!context->arena_size) {
+                return;
+        }
+
         context->tracing_p = traceon;
 }
 
@@ -815,6 +830,10 @@ extern void spdr_report(struct SPDR_Context *context,
         struct Event const** events;
         int events_n;
         int i;
+
+        if (!context->arena_size) {
+                return;
+        }
 
         if (!print_fn) {
                 return;
