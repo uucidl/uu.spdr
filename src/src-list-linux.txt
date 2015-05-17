@@ -1,9 +1,0 @@
-allocator-common.c
-chars-common.c
-chars-posix.c
-clock-common.c
-clock-posix.c
-float-posix.c
-spdr-common.c
-spdr-posix.c
-spdr-thread-posix.c

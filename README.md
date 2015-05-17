@@ -91,19 +91,19 @@ besides a system's headers. This should let you compile on most
 platforms.
 
 Tested platforms as of 2012-11:
+
 *     Linux, GCC
 *     MacOSX, GCC and Clang
 *     Windows, Visual Studio 2012
 
-Sources to include for each platforms may be found in:
-*     src/src-list-linux.txt (you need -lrt to link)
-*     src/src-list-osx.txt
-*     src/src-list-win32.txt
-*     src/src-list-win64.txt
+You only need to compile one source file to add SPDR into your app,
+then simply import the headers found in include/ to use it.
 
-Dropping the implementation files inside src/ for your platform in a
-project and importing the header found in include/ should basically be
-sufficient.
+Depending on your platform:
+*     src/spdr_linux_unit.c  (you need -lrt to link)
+*     src/spdr_osx_unit.c
+*     src/spdr_win32_unit.c
+*     src/spdr_win64_unit.c
 
 Use of the library in C++ is supported, you must include the
 include/spdr/spdr.hh header rather than spdr.h.
