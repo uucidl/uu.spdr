@@ -532,12 +532,15 @@ static void log_json_arg_error(const struct SPDR_Context *context,
                 struct {
                         const char *key;
                         const char *value;
-                } const str_args[] = {
-                    {"cat", e->cat},
-                    {"name", e->name},
-                    {"failed-arg", arg->key},
-                    {arg->key, arg_value},
+                } str_args[] = {
+                    {"cat", 0}, {"name", 0}, {"failed-arg", 0}, {0, 0},
                 };
+                str_args[0].value = e->cat;
+                str_args[1].value = e->name;
+                str_args[2].value = arg->key;
+                str_args[3].key = arg->key;
+                str_args[3].value = arg_value;
+
                 int str_args_n = sizeof str_args / sizeof *str_args;
 
                 for (i = 0; i < str_args_n; i++) {
@@ -656,7 +659,10 @@ static struct EventAndBucket growlog(struct SPDR_Context *const context,
                     growlog_until(bucket->blocks, bucket->blocks_capacity,
                                   &bucket->blocks_next);
                 if (ep) {
-                        return (struct EventAndBucket){ep, bucket};
+                        struct EventAndBucket result;
+                        result.event = ep;
+                        result.bucket = bucket;
+                        return result;
                 }
         }
 
