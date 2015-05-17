@@ -38,7 +38,7 @@ int main()
         struct SPDR_Capacity capacity = spdr_capacity(spdr);
         printf("capacity: %ld/%ld\n", capacity.count, capacity.capacity);
 
-        int count = capacity.count, previous_count;
+        size_t count = capacity.count, previous_count;
         double result = 0.2;
         do {
                 SPDR_BEGIN(spdr, "test", "fill");
