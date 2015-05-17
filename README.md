@@ -1,6 +1,6 @@
 # SPDR
 
-Allow you to instrument code with traces.
+Allow you to instrument code with traces, for invasive profiling.
 
 ## License
 
@@ -21,11 +21,37 @@ The library also reports its results into a JSON format compatible with the trac
 The implementation is inspired by chrome's tracing capabilities yet was entirely written independently.
 
 See:
-    http://www.altdevblogaday.com/2012/08/21/using-chrometracing-to-view-your-inline-profiling-data/
+    https://www.chromium.org/developers/how-tos/trace-event-profiling-tool
 
 ## Usage
 
-Check include/spdr/spdr.h it is hopefully small enough to be sufficient as documentation.
+Include the `src/spdr_*_unit.c` file for your platform to your build.
+
+Import [spdr.h](./include/spdr/spdr.h). Hopefully it is small and easy
+enough to understand.
+
+You will initialize the library first, with your own memory buffer,
+enable the tracing to happen, then dump the results to disk in order
+to import them in chrome:tracing.
+
+```C
+        /* at program init */
+        assert(spdr_init(&spdr, spdr_buffer, spdr_buffer_size) == 0,
+            "could not initialize SPDR");
+        /* ... */
+        /* start a new recording */
+        spdr_enable_trace(spdr, TRACING_ENABLED);
+        /* ... */
+
+        /* stop recording and record result to disk */
+        FILE* file = fopen("trace.json", "rb");
+        spdr_report(spdr, SPDR_CHROME_REPORT, print, file);
+        fclose(file);
+        spdr_reset(spdr);
+        /* ... */
+        /* at program exit */
+        spdr_deinit(&spdr);
+```
 
 Check examples/ for some typical uses.
 
@@ -83,7 +109,7 @@ static void foo()
     }
 ```
 
-## Compilation
+### Compilation
 
 This implementation should be comformant to ANSI C90, although it
 requires C99's integer types. It does not use external dependencies
