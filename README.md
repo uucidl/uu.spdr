@@ -151,6 +151,11 @@ void spdr_set_clock_microseconds_fn(struct SPDR_Context *context,
 
 *     questor <questor@unseen-academy.de>
 
+## Contributing
+
+Simply submit a pull request on github. Run the pre-commit.sh script
+before-hand to ensure the code is well formatted.
+
 ## Third-party code
 
 The following third-party code are used:
