@@ -5,20 +5,20 @@
 
 #include "clock_type.h"
 
-extern int clock_init(struct Clock** clockp, struct Allocator* allocator)
+extern int clock_init(struct Clock **clockp, struct Allocator *allocator)
 {
-	mach_timebase_info_data_t info;
-	if (mach_timebase_info (&info))
-	{
-		return -1;
-	}
+        mach_timebase_info_data_t info;
+        if (mach_timebase_info(&info)) {
+                return -1;
+        }
 
-	return clock_init_base(clockp, allocator, info.numer, info.denom * 1000);
+        return clock_init_base(clockp, allocator, info.numer,
+                               info.denom * 1000);
 }
 
-extern uint64_t clock_ticks(struct Clock const* const clock)
+extern uint64_t clock_ticks(struct Clock const *const clock)
 {
-	(void) clock;
+        (void)clock;
 
-	return mach_absolute_time();
+        return mach_absolute_time();
 }

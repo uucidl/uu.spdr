@@ -4,8 +4,4 @@
 
 /* posix.1 or c99 provide isfinite */
 
-int float_isfinite(double value)
-{
-    return isfinite(value);
-}
-
+int float_isfinite(double value) { return isfinite(value); }

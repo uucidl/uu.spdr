@@ -4,29 +4,27 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-extern void chars_catsprintf(struct Chars* chars, const char* format, ...)
+extern void chars_catsprintf(struct Chars *chars, const char *format, ...)
 {
-	if (chars->error) {
-		return;
-	}
+        if (chars->error) {
+                return;
+        }
 
-	{
-		int count;
-		va_list args;
-		va_start(args, format);
+        {
+                int count;
+                va_list args;
+                va_start(args, format);
 
-		count = vsnprintf(
-			chars->chars + chars->len, 
-			chars->capacity - chars->len - 1, 
-			format,
-			args);
-		
-		if (count < 0) {
-			chars->error = 1;
-		} else {
-			chars->len += count;
-		}
+                count =
+                    vsnprintf(chars->chars + chars->len,
+                              chars->capacity - chars->len - 1, format, args);
 
-		va_end(args);
-	}
+                if (count < 0) {
+                        chars->error = 1;
+                } else {
+                        chars->len += count;
+                }
+
+                va_end(args);
+        }
 }
