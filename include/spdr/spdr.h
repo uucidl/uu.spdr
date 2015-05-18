@@ -158,7 +158,7 @@ void spdr_report(struct SPDR_Context *context,
 /**
  * Mark the beginning and end of a scope
  *
- * Non standard. Only supported on select compilers.
+ * Fully supported in C++. Only supported on select compilers for C.
  */
 #define SPDR_SCOPE(spdr, cat, name) UU_SPDR_SCOPE_TRACE(spdr, cat, name)
 
