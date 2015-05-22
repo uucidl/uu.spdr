@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS // we use vsnprintf carefully.
+
 #include "allocator.c"
 #include "chars.c"
 #include "chars_windows.c"
