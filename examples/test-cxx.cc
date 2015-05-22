@@ -11,17 +11,17 @@
 #define TRACING_ENABLED 0
 #endif
 
-static struct SPDR_Context* spdr;
+static struct SPDR_Context *spdr;
 enum { LOG_N = 2 * 1024 * 1024 };
 
-void trace (const char* line, void* _)
+void trace(const char *line, void *_)
 {
         char buffer[512] = "";
         strncat(buffer, line, sizeof buffer - 2);
         strncat(buffer, "\n", sizeof buffer - 2);
 
         /* fputs is thread-safe */
-        fputs (buffer, stderr);
+        fputs(buffer, stderr);
 }
 
 void fun1()
@@ -29,8 +29,7 @@ void fun1()
         static double x = 0.5f;
         static double y = -0.15f;
 
-        SPDR_SCOPE2(spdr, "Main", "fun1",
-                    SPDR_FLOAT("x", x),
+        SPDR_SCOPE2(spdr, "Main", "fun1", SPDR_FLOAT("x", x),
                     SPDR_FLOAT("y", y));
 
         int N = 65536;
@@ -40,22 +39,21 @@ void fun1()
         }
 }
 
-int main (int argc, char** argv)
+int main(int argc, char **argv)
 {
-        std::vector<char> buffer (LOG_N);
+        std::vector<char> buffer(LOG_N);
         spdr_init(&spdr, &buffer.front(), LOG_N);
         spdr_enable_trace(spdr, TRACING_ENABLED);
         spdr_set_log_fn(spdr, trace, NULL);
 
         SPDR_METADATA1(spdr, "thread_name", SPDR_STR("name", "Main_Thread"));
 
-        SPDR_BEGIN2(spdr, "Main", "main",
-                    SPDR_INT("argc", argc),
+        SPDR_BEGIN2(spdr, "Main", "main", SPDR_INT("argc", argc),
                     SPDR_STR("argv[0]", argv[0]));
 
-        printf ("Hello,");
-        sleep (3);
-        printf (" 世界.\n");
+        printf("Hello,");
+        sleep(3);
+        printf(" 世界.\n");
 
         fun1();
 

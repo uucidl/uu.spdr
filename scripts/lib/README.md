@@ -1,0 +1,1 @@
+Pieces of shell code which are reused across scripts.

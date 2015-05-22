@@ -1,0 +1,8 @@
+BasedOnStyle: LLVM
+AllowShortIfStatementsOnASingleLine: false
+BinPackParameters: false
+BreakBeforeBraces: Linux
+ColumnLimit: 80
+IndentCaseLabels: false
+IndentWidth: 8
+UseTab: Never
