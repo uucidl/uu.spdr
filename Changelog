@@ -1,6 +1,9 @@
 Changes
 =======
 
+0.4.0 -- project layout changed to simplify compilation:
+  - one _unit.c file per platform,
+  - fixed some warnings on MSVC.
 0.3.1 -- the library now logs more events for the same buffer size.
 0.3.0 -- move header files to their own subdirectory
 0.2.2 -- handle NaN and Inf properly for latest chrome/trace event viewer
