@@ -59,6 +59,7 @@ static void stuff()
                 char str[64] = "Another Dynamically Allocated String";
                 act(str);
         }
+        SPDR_ASYNC_EVENT_END(spdr, "Main", "stuff", 42);
 }
 
 int main(int argc, char **argv)
@@ -79,8 +80,8 @@ int main(int argc, char **argv)
         printf(" 世界.\n");
         SPDR_END(spdr, "Main", "printf");
 
+        SPDR_ASYNC_EVENT_BEGIN1(spdr, "Main", "stuff", 42, SPDR_INT("value", 1));
         stuff();
-
         {
                 double a = 0.0;
                 SPDR_EVENT2(spdr, "Main", "Non Finites",

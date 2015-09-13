@@ -621,6 +621,14 @@ spdr_internal void log_json(const struct SPDR_Context *context,
                 }
         }
 
+        int need_id = 0;
+        uint32_t id = 0;
+        if (e->phase == SPDR_ASYNC_EVENT_BEGIN ||
+            e->phase == SPDR_ASYNC_EVENT_STEP ||
+            e->phase == SPDR_ASYNC_EVENT_END) {
+                need_id = 1;
+        }
+
         chars_catsprintf(&string, "%s{\"ts\":%llu,\"pid\":%u,\"tid\":%llu",
                          prefix, ts_microseconds, e->pid, e->tid);
 
@@ -642,6 +650,10 @@ spdr_internal void log_json(const struct SPDR_Context *context,
         }
 
         for (i = 0; i < e->int_count; i++) {
+                if (need_id && 0 == strcmp("id", e->int_args[i].key)) {
+                        id = e->int_args[i].value;
+                        continue;
+                }
                 chars_catsprintf(&string, "%s\"%s\":%d", arg_prefix,
                                  e->int_args[i].key, e->int_args[i].value);
                 arg_prefix = ",";
@@ -659,7 +671,11 @@ spdr_internal void log_json(const struct SPDR_Context *context,
                 arg_prefix = ",";
         }
 
-        chars_catsprintf(&string, "}}");
+        chars_catsprintf(&string, "}");
+        if (need_id) {
+                chars_catsprintf(&string, ",\"id\": %d", id);
+        }
+        chars_catsprintf(&string, "}");
 
         if (0 == string.error) {
                 print_fn(string.chars, user_data);

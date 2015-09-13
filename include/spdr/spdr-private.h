@@ -12,6 +12,9 @@ enum SPDR_Event_Type {
         SPDR_END = 'E',
         SPDR_METADATA = 'M',
         SPDR_COUNTER = 'C',
+        SPDR_ASYNC_EVENT_BEGIN = 'S',
+        SPDR_ASYNC_EVENT_STEP = 'T',
+        SPDR_ASYNC_EVENT_END = 'F',
 };
 
 enum SPDR_Event_Arg_Type {
