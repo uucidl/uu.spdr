@@ -351,9 +351,10 @@ extern void spdr_enable_trace(struct SPDR_Context *context, int traceon)
         context->tracing_p = traceon;
 }
 
-int uu_spdr_musttrace(const struct SPDR_Context *context)
+extern int uu_spdr_musttrace(const struct SPDR_Context *context)
 {
-        return context->tracing_p;
+        /*  FEATURE: a null context is treated as a *never tracing* context */
+        return context && context->tracing_p;
 }
 
 extern struct SPDR_Event_Arg uu_spdr_arg_make_int(const char *key, int value)
