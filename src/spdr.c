@@ -8,6 +8,7 @@
 #include <string.h>
 #include <limits.h>
 
+#include "inlines.h"
 #include "allocator.h"
 #include "chars.h"
 #include "clock.h"
@@ -49,8 +50,14 @@ struct Event {
         } float_args[3];
 };
 
+enum BlockType
+{
+        EVENT_BLOCK,
+        STR_BLOCK
+};
+
 struct Block {
-        enum { EVENT_BLOCK, STR_BLOCK } type;
+        BlockType type;
 
         /*
          * extra block count.
@@ -230,7 +237,7 @@ spdr_init(struct SPDR_Context **context_ptr, void *buffer, size_t _buffer_size)
                 return -1;
         }
 
-        context = buffer;
+        context = VOID_PTR_CAST(SPDR_Context, buffer);
         *context = null_context;
 
         /* arena memory starts right after the buffer, aligned to 64 bytes */
@@ -274,7 +281,8 @@ spdr_init(struct SPDR_Context **context_ptr, void *buffer, size_t _buffer_size)
 
                 for (i = 0; i < n; i++) {
                         struct Bucket *bucket =
-                            (void *)(((char *)arena) + i * bucket_size);
+                                VOID_PTR_CAST(struct Bucket,
+                                              (((char *)arena) + i * bucket_size));
                         context->buckets[i] = bucket;
                         bucket_init(bucket, bucket_size);
                 }
@@ -704,7 +712,7 @@ static void record_event(struct SPDR_Context *context, struct Event *e)
                 /* take copy of strings */
                 size_t n = strlen(str) + 1;
 
-                char *new_str = allocator_alloc(&bucket->allocator.super, n);
+                char *new_str = VOID_PTR_CAST(char,allocator_alloc(&bucket->allocator.super, n));
 
                 if (!new_str) {
                         ep->str_args[i].value = "<Out of arg. memory>";
@@ -791,8 +799,8 @@ extern void uu_spdr_record_3(struct SPDR_Context *context,
 
 static int event_timecmp(void const *const _a, void const *const _b)
 {
-        struct Event const *const *ap = _a;
-        struct Event const *const *bp = _b;
+        struct Event const *const *ap = VOID_PTR_CAST(struct Event const * const, _a);
+        struct Event const *const *bp = VOID_PTR_CAST(struct Event const * const, _b);
 
         struct Event const *a = *ap;
         struct Event const *b = *bp;
@@ -841,7 +849,7 @@ extern void spdr_report(struct SPDR_Context *context,
                 block_count += records_per_bucket[i];
         }
 
-        events = malloc(block_count * sizeof events[0]);
+        events = VOID_PTR_CAST(struct Event const *, malloc(block_count * sizeof events[0]));
         events_n = 0;
 
         for (i = 0; i < BUCKET_COUNT; i++) {
