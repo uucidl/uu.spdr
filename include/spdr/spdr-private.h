@@ -20,7 +20,7 @@ enum SPDR_Event_Arg_Type {
 
 struct SPDR_Event_Arg {
         const char *key;
-        SPDR_Event_Arg_Type type;
+        enum SPDR_Event_Arg_Type type;
         union {
                 int i;
                 double d;

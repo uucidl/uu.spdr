@@ -57,7 +57,7 @@ enum BlockType
 };
 
 struct Block {
-        BlockType type;
+        enum BlockType type;
 
         /*
          * extra block count.
@@ -281,7 +281,7 @@ spdr_init(struct SPDR_Context **context_ptr, void *buffer, size_t _buffer_size)
 
                 for (i = 0; i < n; i++) {
                         struct Bucket *bucket =
-                                VOID_PTR_CAST(struct Bucket,
+                                VOID_PTR_CAST(struct Bucket, (void*)
                                               (((char *)arena) + i * bucket_size));
                         context->buckets[i] = bucket;
                         bucket_init(bucket, bucket_size);
