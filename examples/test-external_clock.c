@@ -1,11 +1,12 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include "sleep.h"
 
 #include <spdr/spdr.h>
 
-#include "sleep.h"
 #include <timer_lib/timer.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifndef TRACING_ENABLED
 #define TRACING_ENABLED 0

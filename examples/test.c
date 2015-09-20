@@ -1,16 +1,12 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdint.h>
-
-#if defined(_MSC_VER)
-#define _USE_MATH_DEFINES
-#endif
-#include <math.h>
+#include "sleep.h"
 
 #include <spdr/spdr.h>
 
-#include "sleep.h"
+#include <math.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifndef TRACING_ENABLED
 #define TRACING_ENABLED 0

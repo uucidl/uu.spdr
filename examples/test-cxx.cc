@@ -1,11 +1,11 @@
-#include <cstdio>
-#include <cstring>
-#include <cmath>
-
-#include <vector>
+#include "sleep.h"
 
 #include <spdr/spdr.hh>
-#include "sleep.h"
+
+#include <cmath>
+#include <cstdio>
+#include <cstring>
+#include <vector>
 
 #ifndef TRACING_ENABLED
 #define TRACING_ENABLED 0
