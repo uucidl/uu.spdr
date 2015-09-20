@@ -38,15 +38,30 @@ EXAMPLES="${HERE}"/examples
 # here is all you need:
 SPDR=(-I"${HERE}"/include "${HERE}"/src/spdr_posix_unit.c -lrt)
 
-"${CC}" "${cflags[@]}" -ansi "${EXAMPLES}"/test.c -lm -o "${OUTPUT}"/test "${SPDR[@]}"
+D="${OUTPUT}"/test \
+ "${CC}" "${cflags[@]}" -ansi "${EXAMPLES}"/test.c -lm "${SPDR[@]}" \
+ -o "${D}" \
+    && printf "PROGRAM\t%s" "${D}"
 
-"${CC}" "${cflags[@]}" "${EXAMPLES}"/test-scope.c -lm -o "${OUTPUT}"/test-scope  "${SPDR[@]}"
+D="${OUTPUT}"/test-scope \
+ "${CC}" "${cflags[@]}" "${EXAMPLES}"/test-scope.c -lm "${SPDR[@]}" \
+ -o "${D}" \
+    && printf "PROGRAM\t%s" "${D}"
 
-"${CC}" "${cflags[@]}" -ansi "${EXAMPLES}"/test-mt.c -lm -o "${OUTPUT}"/test-mt "${SPDR[@]}"
+D="${OUTPUT}"/test-mt \
+ "${CC}" "${cflags[@]}" -ansi "${EXAMPLES}"/test-mt.c -lm "${SPDR[@]}" \
+ -o "${D}" \
+    && printf "PROGRAM\t%s" "${D}"
 
-"${CC}" "${cflags[@]}" -ansi "${EXAMPLES}"/test-full.c -lm -o "${OUTPUT}"/test-full "${SPDR[@]}"
+D="${OUTPUT}"/test-full \
+ "${CC}" "${cflags[@]}" -ansi "${EXAMPLES}"/test-full.c -lm "${SPDR[@]}" \
+ -o "${D}" \
+    && printf "PROGRAM\t%s" "${D}"
 
-"${CXX}" "${cflags[@]}" "${EXAMPLES}"/test-cxx.cc -lm -o "${OUTPUT}"/test-cxx "${SPDR[@]}"
+D="${OUTPUT}"/test-cxx \
+ "${CXX}" "${cflags[@]}" "${EXAMPLES}"/test-cxx.cc -lm "${SPDR[@]}" \
+ -o "${D}" \
+    && printf "PROGRAM\t%s" "${D}"
 
 ## ..BUILD EXAMPLES>
 
