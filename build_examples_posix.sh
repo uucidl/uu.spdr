@@ -38,15 +38,15 @@ EXAMPLES="${HERE}"/examples
 # here is all you need:
 SPDR=(-I"${HERE}"/include "${HERE}"/src/spdr_posix_unit.c -lrt)
 
-"${CC}" "${cflags[@]}" "${EXAMPLES}"/test.c -lm "${SPDR[@]}" -o "${OUTPUT}"/test
+"${CC}" "${cflags[@]}" "${EXAMPLES}"/test.c -lm -o "${OUTPUT}"/test "${SPDR[@]}"
 
-"${CC}" "${cflags[@]}" "${EXAMPLES}"/test-scope.c "${HERE}"/src/spdr_posix_unit.c -o "${OUTPUT}"/test-scope
+"${CC}" "${cflags[@]}" "${EXAMPLES}"/test-scope.c -o "${OUTPUT}"/test-scope  "${SPDR[@]}"
 
-"${CC}" "${cflags[@]}" "${EXAMPLES}"/test-mt.c "${HERE}"/src/spdr_posix_unit.c -o "${OUTPUT}"/test-mt
+"${CC}" "${cflags[@]}" "${EXAMPLES}"/test-mt.c -o "${OUTPUT}"/test-mt "${SPDR[@]}"
 
-"${CC}" "${cflags[@]}" "${EXAMPLES}"/test-full.c "${HERE}"/src/spdr_posix_unit.c -o "${OUTPUT}"/test-full
+"${CC}" "${cflags[@]}" "${EXAMPLES}"/test-full.c -o "${OUTPUT}"/test-full "${SPDR[@]}"
 
-"${CXX}" "${cflags[@]}" "${EXAMPLES}"/test-cxx.cc "${HERE}"/src/spdr_posix_unit.c -o "${OUTPUT}"/test-cxx
+"${CXX}" "${cflags[@]}" "${EXAMPLES}"/test-cxx.cc -o "${OUTPUT}"/test-cxx "${SPDR[@]}"
 
 ## ..BUILD EXAMPLES>
 
