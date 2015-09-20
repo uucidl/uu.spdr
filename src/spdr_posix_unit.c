@@ -1,6 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 
-// generic modern POSIX platform
+/* generic modern POSIX platforms */
 
 #include "allocator.c"
 #include "chars.c"
