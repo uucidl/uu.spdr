@@ -14,9 +14,15 @@ enum SPDR_Event_Type {
         SPDR_COUNTER = 'C',
 };
 
+enum SPDR_Event_Arg_Type {
+        SPDR_INT,
+        SPDR_FLOAT,
+        SPDR_STR,
+};
+
 struct SPDR_Event_Arg {
         const char *key;
-        enum { SPDR_INT, SPDR_FLOAT, SPDR_STR } type;
+        enum SPDR_Event_Arg_Type type;
         union {
                 int i;
                 double d;

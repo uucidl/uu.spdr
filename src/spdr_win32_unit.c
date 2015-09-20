@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define _CRT_SECURE_NO_WARNINGS // we use vsnprintf carefully.
 
 #include "allocator.c"
@@ -8,3 +12,7 @@
 #include "float_windows.c"
 #include "spdr.c"
 #include "spdr_windows.c"
+
+#ifdef __cplusplus
+}
+#endif
