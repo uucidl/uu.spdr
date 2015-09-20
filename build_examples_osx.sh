@@ -63,6 +63,11 @@ D="${OUTPUT}"/test-cxx
          -o "${D}"
 printf "PROGRAM\t%s\n" "${D}"
 
+D="${OUTPUT}"/perf-test
+"${CC}" "${cflags[@]}" -DTRACING_ENABLED=1 "${EXAMPLES}"/perf-test.c -lm "${SPDR[@]}" \
+         -o "${D}"
+printf "PROGRAM\t%s\n" "${D}"
+
 ## ..BUILD EXAMPLES>
 
 set +x
