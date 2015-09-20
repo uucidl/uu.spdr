@@ -14,7 +14,7 @@
 static struct SPDR_Context *spdr;
 enum { LOG_N = 2 * 1024 * 1024 };
 
-void trace(const char *line, void *_)
+void trace(const char *line, void *)
 {
         char buffer[512] = "";
         strncat(buffer, line, sizeof buffer - 2);
