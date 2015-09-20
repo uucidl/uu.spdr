@@ -40,13 +40,13 @@ SPDR=(-I"${HERE}"/include "${HERE}"/src/spdr_posix_unit.c -lrt)
 
 "${CC}" "${cflags[@]}" -ansi "${EXAMPLES}"/test.c -lm -o "${OUTPUT}"/test "${SPDR[@]}"
 
-"${CC}" "${cflags[@]}" "${EXAMPLES}"/test-scope.c -o "${OUTPUT}"/test-scope  "${SPDR[@]}"
+"${CC}" "${cflags[@]}" "${EXAMPLES}"/test-scope.c -lm -o "${OUTPUT}"/test-scope  "${SPDR[@]}"
 
-"${CC}" "${cflags[@]}" -ansi "${EXAMPLES}"/test-mt.c -o "${OUTPUT}"/test-mt "${SPDR[@]}"
+"${CC}" "${cflags[@]}" -ansi "${EXAMPLES}"/test-mt.c -lm -o "${OUTPUT}"/test-mt "${SPDR[@]}"
 
 "${CC}" "${cflags[@]}" -ansi "${EXAMPLES}"/test-full.c -o "${OUTPUT}"/test-full "${SPDR[@]}"
 
-"${CXX}" "${cflags[@]}" "${EXAMPLES}"/test-cxx.cc -o "${OUTPUT}"/test-cxx "${SPDR[@]}"
+"${CXX}" "${cflags[@]}" "${EXAMPLES}"/test-cxx.cc -lm -o "${OUTPUT}"/test-cxx "${SPDR[@]}"
 
 ## ..BUILD EXAMPLES>
 
