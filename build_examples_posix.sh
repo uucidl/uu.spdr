@@ -27,7 +27,7 @@ printf "INFO building into %s\n" "${OUTPUT}"
 # just to print the timing information about builds
 origin="$(date "+%s")"
 printf "%s\n" "${origin}"
-PS4="T $(($(date "+%s") - ${origin}))\011"
+PS4='T $(($(date "+%s") - ${origin}))\011'
 set -x
 
 ## <BUILD EXAMPLES..
