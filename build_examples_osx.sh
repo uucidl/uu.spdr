@@ -65,5 +65,4 @@ printf "PROGRAM\t%s\n" "${D}"
 
 ## ..BUILD EXAMPLES>
 
-printf "\a"
 set +x
