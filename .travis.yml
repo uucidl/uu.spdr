@@ -1,0 +1,4 @@
+os:
+  - linux
+script:
+  ./build_examples_posix.sh
