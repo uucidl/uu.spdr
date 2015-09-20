@@ -3,10 +3,4 @@ os:
   - osx
 sudo: false
 script:
-  - case "${TRAVIS_OS_NAME}" in
-  - linux) ./build_examples_posix.sh ;;
-  - osx) ./build_examples_osx.sh ;;
-  - esac
-  - find -type f ./output | while read program ; do
-  - "${program}"
-  - done
+  - ./scripts/travis.sh --top . --os-name "${TRAVIS_OS_NAME}"
