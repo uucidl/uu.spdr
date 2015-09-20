@@ -1,5 +1,5 @@
 CFLAGS+=-I../include -I../deps
-CFLAGS+=-Wall -Wextra -Wno-missing-field-initializers
+CFLAGS+=-Wall -Wextra
 
 GUESSED_PLATFORM=posix
 ifeq ($(shell uname),Darwin)
