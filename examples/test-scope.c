@@ -1,12 +1,11 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
 #include <spdr/spdr.h>
 
-#include <math.h>
-#include <unistd.h>
 #include <assert.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #ifndef TRACING_ENABLED
 #define TRACING_ENABLED 0
@@ -26,7 +25,7 @@ void trace(const char *line, void *user_data)
         strncat(buffer, line, sizeof buffer - 2);
         strncat(buffer, "\n", sizeof buffer - 2);
 
-        // fputs is thread-safe
+        /* this is ok because fputs is thread-safe */
         fputs(buffer, stderr);
 }
 

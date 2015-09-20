@@ -1,15 +1,14 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#define _CRT_SECURE_NO_WARNINGS
 
-#if defined(_MSC_VER)
-#define _USE_MATH_DEFINES
-#endif
-#include <math.h>
+#include "sleep.h"
 
 #include <spdr/spdr.h>
 
-#include "sleep.h"
+#include <math.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifndef TRACING_ENABLED
 #define TRACING_ENABLED 0
@@ -40,7 +39,8 @@ void print(const char *string, void *user_data)
 
 static void act(const char *a_string)
 {
-        SPDR_BEGIN2(spdr, "Main", "act", SPDR_INT("info-id", (int)a_string),
+        SPDR_BEGIN2(spdr, "Main", "act",
+                    SPDR_INT("info-id", (int)(intptr_t)a_string),
                     SPDR_STR("info", a_string));
 
         printf("%s\n", a_string);
@@ -93,8 +93,9 @@ int main(int argc, char **argv)
         {
                 int i;
                 for (i = 0; i < 100; i++) {
-                        SPDR_COUNTER2(spdr, "Main", "counter", SPDR_INT("i", i),
-                                      SPDR_FLOAT("cos(i)", cos(M_PI * i / 50)));
+                        SPDR_COUNTER2(
+                            spdr, "Main", "counter", SPDR_INT("i", i),
+                            SPDR_FLOAT("cos(i)", cos(3.141592 * i / 50)));
                 }
         }
 

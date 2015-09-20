@@ -83,6 +83,8 @@ static void report(const char *str, void *user_data)
 
 extern int main(int argc, char **argv)
 {
+        (void)argc;
+        (void)argv;
         enum { LOG_N = 256 * 1024 * 1024 };
         void *spdr_buffer = malloc(LOG_N);
         uint64_t single_threaded_ms = 0;
