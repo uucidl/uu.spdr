@@ -1,5 +1,9 @@
 os:
   - linux
-script:
-  ./build_examples_posix.sh
+  - osx
 sudo: false
+script:
+  case "${TRAVIS_OS_NAME}" in
+  linux) ./build_examples_posix.sh ;;
+  osx) ./build_examples_osx.sh ;;
+  esac
