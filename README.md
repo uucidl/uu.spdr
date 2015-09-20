@@ -2,7 +2,7 @@
 
 Allow you to instrument code with traces, for invasive profiling.
 
-- Windows Build Status: ![Appveyor](https://ci.appveyor.com/api/projects/status/github/uu.spdr&svg=true)
+- Windows Build Status: ![Appveyor](https://ci.appveyor.com/api/projects/status/m8vd1c053x1kd0jt?svg=true)
 
 ## License
 
