@@ -1,3 +1,6 @@
+# Compilation directory
+output/
+
 # Compiled Object files
 *.slo
 *.lo
