@@ -18,7 +18,7 @@ CC=${CC:-$(which "cc")}
 CFLAGS=${CFLAGS:-}
 
 cflags=(${CFLAGS} -Wall -Wextra -ansi)
-cflags=(${cflags[@]} -I"${HERE}"/include)
+cflags=(${cflags[@]})
 
 [ -d "${OUTPUT}" ] || mkdir -p "${OUTPUT}"
 printf "INFO building into %s\n" "${OUTPUT}"
@@ -33,9 +33,12 @@ set -x
 
 EXAMPLES="${HERE}"/examples
 
-"${CC}" "${cflags[@]}" "${EXAMPLES}"/test.c "${HERE}"/src/spdr_posix_unit.c -o "${OUTPUT}"/test
+# here is all you need:
+SPDR=(-I"${HERE}"/include "${HERE}"/src/spdr_posix_unit.c -lrt)
 
-exit 1
+"${CC}" "${cflags[@]}" "${EXAMPLES}"/test.c -lm "${SPDR[@]}" -o "${OUTPUT}"/test
+
+exit 0
 
 "${CC}" "${cflags[@]}" "${EXAMPLES}"/test-scope.c "${HERE}"/src/spdr_posix_unit.c -o "${OUTPUT}"/test-scope
 
