@@ -21,7 +21,7 @@ static double take_some_time()
         int i;
         double result = 0.3;
         for (i = 0; i < 2048; i++) {
-                result += sin(result);
+                result += cos(result);
         }
         return result;
 }

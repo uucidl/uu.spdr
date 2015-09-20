@@ -435,7 +435,6 @@ static void event_log(const struct SPDR_Context *context,
                       void *user_data,
                       int with_newlines_p)
 {
-        int i;
         char line[2048];
         struct Chars buffer = NULL_CHARS;
         const char *prefix = "";
@@ -461,21 +460,30 @@ static void event_log(const struct SPDR_Context *context,
         chars_catsprintf(&buffer, "\"");
         chars_catsprintf(&buffer, " \"%c\"", event->phase);
 
-        for (i = 0; i < event->str_count; i++) {
-                chars_catsprintf(&buffer, " \"%s\" \"", event->str_args[i].key);
-                chars_catjsonstr(&buffer, event->str_args[i].value);
-                chars_catsprintf(&buffer, "\"");
+        {
+                int arg_i;
+                for (arg_i = 0; arg_i < event->str_count; arg_i++) {
+                        chars_catsprintf(&buffer, " \"%s\" \"", event->str_args[arg_i].key);
+                        chars_catjsonstr(&buffer, event->str_args[arg_i].value);
+                        chars_catsprintf(&buffer, "\"");
+                }
         }
 
-        for (i = 0; i < event->int_count; i++) {
-                chars_catsprintf(&buffer, " \"%s\" %d", event->int_args[i].key,
-                                 event->int_args[i].value);
+        {
+                int arg_i;
+                for (arg_i = 0; arg_i < event->int_count; arg_i++) {
+                        chars_catsprintf(&buffer, " \"%s\" %d", event->int_args[arg_i].key,
+                                         event->int_args[arg_i].value);
+                }
         }
 
-        for (i = 0; i < event->float_count; i++) {
-                chars_catsprintf(&buffer, " \"%s\" %f",
-                                 event->float_args[i].key,
-                                 event->float_args[i].value);
+        {
+                int arg_i;
+                for (arg_i = 0; arg_i < event->float_count; arg_i++) {
+                        chars_catsprintf(&buffer, " \"%s\" %f",
+                                         event->float_args[arg_i].key,
+                                         event->float_args[arg_i].value);
+                }
         }
 
         if (0 == buffer.error) {
@@ -834,29 +842,29 @@ extern void spdr_report(struct SPDR_Context *context,
 
         struct Event const **events;
         int events_n;
-        int i;
+        int bucket_i;
 
         if (!print_fn) {
                 return;
         }
 
         /* blocks all further recording */
-        for (i = 0; i < BUCKET_COUNT; i++) {
-                struct Bucket *const bucket = context->buckets[i];
-                records_per_bucket[i] = AO_load_acquire(&bucket->blocks_next);
+        for (bucket_i = 0; bucket_i < BUCKET_COUNT; bucket_i++) {
+                struct Bucket *const bucket = context->buckets[bucket_i];
+                records_per_bucket[bucket_i] = AO_load_acquire(&bucket->blocks_next);
                 AO_store(&bucket->blocks_next, bucket->blocks_capacity);
-                block_count += records_per_bucket[i];
+                block_count += records_per_bucket[bucket_i];
         }
 
         events = VOID_PTR_CAST(struct Event const *,
                                malloc(block_count * sizeof events[0]));
         events_n = 0;
 
-        for (i = 0; i < BUCKET_COUNT; i++) {
-                struct Bucket const *const bucket = context->buckets[i];
+        for (bucket_i = 0; bucket_i < BUCKET_COUNT; bucket_i++) {
+                struct Bucket const *const bucket = context->buckets[bucket_i];
                 size_t j;
 
-                for (j = 0; j < records_per_bucket[i]; j++) {
+                for (j = 0; j < records_per_bucket[bucket_i]; j++) {
                         const struct Block *block = &bucket->blocks[j];
                         if (block->type == EVENT_BLOCK) {
                                 events[events_n++] = &block->data.event;
@@ -867,19 +875,19 @@ extern void spdr_report(struct SPDR_Context *context,
         qsort((void *)events, events_n, sizeof events[0], event_timecmp);
 
         if (SPDR_PLAIN_REPORT == report_type) {
-                int i;
+                int event_i;
 
-                for (i = 0; i < events_n; i++) {
-                        event_log(context, events[i], print_fn, user_data,
+                for (event_i = 0; event_i < events_n; event_i++) {
+                        event_log(context, events[event_i], print_fn, user_data,
                                   T(with_newlines));
                 }
         } else if (SPDR_CHROME_REPORT == report_type) {
-                int i;
+                int event_i;
                 const char *prefix = "";
 
                 print_fn("{\"traceEvents\":[", user_data);
-                for (i = 0; i < events_n; i++) {
-                        log_json(context, events[i], prefix, print_fn,
+                for (event_i = 0; event_i < events_n; event_i++) {
+                        log_json(context, events[event_i], prefix, print_fn,
                                  user_data);
                         prefix = ",";
                 }

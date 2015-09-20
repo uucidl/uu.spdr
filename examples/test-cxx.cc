@@ -1,11 +1,13 @@
-#include <cstdio>
-#include <cstring>
-#include <cmath>
+#define _CRT_SECURE_NO_WARNINGS
 
-#include <vector>
+#include "sleep.h"
 
 #include <spdr/spdr.hh>
-#include "sleep.h"
+
+#include <cmath>
+#include <cstdio>
+#include <cstring>
+#include <vector>
 
 #ifndef TRACING_ENABLED
 #define TRACING_ENABLED 0
@@ -14,7 +16,7 @@
 static struct SPDR_Context *spdr;
 enum { LOG_N = 2 * 1024 * 1024 };
 
-void trace(const char *line, void *_)
+void trace(const char *line, void *)
 {
         char buffer[512] = "";
         strncat(buffer, line, sizeof buffer - 2);

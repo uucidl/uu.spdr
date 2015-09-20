@@ -1,12 +1,13 @@
-#include <stdio.h>
-#include <string.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <math.h>
-#include <stdlib.h>
-#include <assert.h>
-
 #include <spdr/spdr.h>
+
+#include <assert.h>
+#include <math.h>
+#include <pthread.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #ifndef TRACING_ENABLED
 #define TRACING_ENABLED 0
