@@ -8,6 +8,7 @@
 # - import the `./include` directory
 # - add one of its `_unit.c` source files to your project
 # - include "spdr/spdr.h" (C) or "spdr/spdr.hh" (C++)
+set -u
 
 RELH="$(dirname "${0}")"
 HERE="$(cd "${RELH}" && pwd)"
@@ -30,6 +31,7 @@ PS4="T $(($(date "+%s") - ${origin}))\011"
 set -x
 
 ## <BUILD EXAMPLES..
+set -o errexit
 
 EXAMPLES="${HERE}"/examples
 
@@ -37,8 +39,6 @@ EXAMPLES="${HERE}"/examples
 SPDR=(-I"${HERE}"/include "${HERE}"/src/spdr_posix_unit.c -lrt)
 
 "${CC}" "${cflags[@]}" "${EXAMPLES}"/test.c -lm "${SPDR[@]}" -o "${OUTPUT}"/test
-
-exit 0
 
 "${CC}" "${cflags[@]}" "${EXAMPLES}"/test-scope.c "${HERE}"/src/spdr_posix_unit.c -o "${OUTPUT}"/test-scope
 
