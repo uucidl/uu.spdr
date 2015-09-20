@@ -18,7 +18,7 @@ CXX=${CXX:-$(which "c++")}
 CC=${CC:-$(which "cc")}
 CFLAGS=${CFLAGS:-}
 
-cflags=(${CFLAGS} -Wall -Wextra -ansi)
+cflags=(${CFLAGS} -Wall -Wextra)
 cflags=(${cflags[@]})
 
 [ -d "${OUTPUT}" ] || mkdir -p "${OUTPUT}"
@@ -38,13 +38,13 @@ EXAMPLES="${HERE}"/examples
 # here is all you need:
 SPDR=(-I"${HERE}"/include "${HERE}"/src/spdr_posix_unit.c -lrt)
 
-"${CC}" "${cflags[@]}" "${EXAMPLES}"/test.c -lm -o "${OUTPUT}"/test "${SPDR[@]}"
+"${CC}" "${cflags[@]}" -ansi "${EXAMPLES}"/test.c -lm -o "${OUTPUT}"/test "${SPDR[@]}"
 
 "${CC}" "${cflags[@]}" "${EXAMPLES}"/test-scope.c -o "${OUTPUT}"/test-scope  "${SPDR[@]}"
 
-"${CC}" "${cflags[@]}" "${EXAMPLES}"/test-mt.c -o "${OUTPUT}"/test-mt "${SPDR[@]}"
+"${CC}" "${cflags[@]}" -ansi "${EXAMPLES}"/test-mt.c -o "${OUTPUT}"/test-mt "${SPDR[@]}"
 
-"${CC}" "${cflags[@]}" "${EXAMPLES}"/test-full.c -o "${OUTPUT}"/test-full "${SPDR[@]}"
+"${CC}" "${cflags[@]}" -ansi "${EXAMPLES}"/test-full.c -o "${OUTPUT}"/test-full "${SPDR[@]}"
 
 "${CXX}" "${cflags[@]}" "${EXAMPLES}"/test-cxx.cc -o "${OUTPUT}"/test-cxx "${SPDR[@]}"
 
