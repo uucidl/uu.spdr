@@ -1,7 +1,7 @@
 # SPDR
 
 Allow you to instrument code with traces, for invasive profiling.
-
+- Linux, OSX Build Status: [![Travis](https://travis-ci.org/uucidl/uu.spdr.svg?branch=master)](https://travis-ci.org/uucidl/uu.spdr)
 - Windows Build Status: ![Appveyor](https://ci.appveyor.com/api/projects/status/m8vd1c053x1kd0jt?svg=true)
 
 ## License
