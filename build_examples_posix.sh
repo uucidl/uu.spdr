@@ -41,27 +41,27 @@ SPDR=(-I"${HERE}"/include "${HERE}"/src/spdr_posix_unit.c -lrt)
 D="${OUTPUT}"/test
 "${CC}" "${cflags[@]}" -ansi "${EXAMPLES}"/test.c -lm "${SPDR[@]}" \
         -o "${D}"
-printf "PROGRAM\t%s" "${D}"
+printf "PROGRAM\t%s\n" "${D}"
 
 D="${OUTPUT}"/test-scope
 "${CC}" "${cflags[@]}" "${EXAMPLES}"/test-scope.c -lm "${SPDR[@]}" \
         -o "${D}"
-printf "PROGRAM\t%s" "${D}"
+printf "PROGRAM\t%s\n" "${D}"
 
 D="${OUTPUT}"/test-mt
 "${CC}" "${cflags[@]}" -ansi "${EXAMPLES}"/test-mt.c -lm "${SPDR[@]}" \
         -o "${D}"
-printf "PROGRAM\t%s" "${D}"
+printf "PROGRAM\t%s\n" "${D}"
 
 D="${OUTPUT}"/test-full
 "${CC}" "${cflags[@]}" -ansi "${EXAMPLES}"/test-full.c -lm "${SPDR[@]}" \
         -o "${D}"
-printf "PROGRAM\t%s" "${D}"
+printf "PROGRAM\t%s\n" "${D}"
 
 D="${OUTPUT}"/test-cxx
 "${CXX}" "${cflags[@]}" "${EXAMPLES}"/test-cxx.cc -lm "${SPDR[@]}" \
          -o "${D}"
-printf "PROGRAM\t%s" "${D}"
+printf "PROGRAM\t%s\n" "${D}"
 
 ## ..BUILD EXAMPLES>
 
