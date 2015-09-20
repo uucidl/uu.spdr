@@ -7,6 +7,6 @@
 #include "chars_posix.c"
 #include "clock_posix.c"
 #include "float_posix.c"
-#include "spdr"
+#include "spdr.c"
 #include "spdr-thread_posix.c"
 #include "spdr_posix.c"

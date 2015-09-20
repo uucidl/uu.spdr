@@ -6,7 +6,7 @@
 
 extern int clock_init(struct Clock **clockp, struct Allocator *allocator)
 {
-        struct timespec res = {0};
+        struct timespec res;
 
         if (clock_getres(CLOCK_MONOTONIC, &res) != 0 || res.tv_nsec > 1000) {
                 /* unknown clock or insufficient resolution */
@@ -18,7 +18,7 @@ extern int clock_init(struct Clock **clockp, struct Allocator *allocator)
 
 extern uint64_t clock_ticks(struct Clock const *const clock)
 {
-        struct timespec ts = {0};
+        struct timespec ts;
         clock_gettime(CLOCK_MONOTONIC, &ts);
 
         (void)clock;
