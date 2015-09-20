@@ -1,5 +1,6 @@
-#include "clock.h"
 #include "allocator.h"
+#include "clock.h"
+#include "inlines.h"
 
 #include "clock_type.h"
 
@@ -8,7 +9,8 @@ extern int clock_init_base(struct Clock **clockp,
                            uint64_t numerator,
                            uint64_t denominator)
 {
-        struct Clock *clock = allocator_alloc(allocator, sizeof *clock);
+        struct Clock *clock = VOID_PTR_CAST(
+                struct Clock, allocator_alloc(allocator, sizeof *clock));
         if (!clock) {
                 return -1;
         }
