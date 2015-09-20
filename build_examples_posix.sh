@@ -44,7 +44,7 @@ SPDR=(-I"${HERE}"/include "${HERE}"/src/spdr_posix_unit.c -lrt)
 
 "${CC}" "${cflags[@]}" -ansi "${EXAMPLES}"/test-mt.c -lm -o "${OUTPUT}"/test-mt "${SPDR[@]}"
 
-"${CC}" "${cflags[@]}" -ansi "${EXAMPLES}"/test-full.c -o "${OUTPUT}"/test-full "${SPDR[@]}"
+"${CC}" "${cflags[@]}" -ansi "${EXAMPLES}"/test-full.c -lm -o "${OUTPUT}"/test-full "${SPDR[@]}"
 
 "${CXX}" "${cflags[@]}" "${EXAMPLES}"/test-cxx.cc -lm -o "${OUTPUT}"/test-cxx "${SPDR[@]}"
 
