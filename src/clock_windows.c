@@ -4,7 +4,8 @@
 
 #include "clock_type.h"
 
-extern int clock_init(struct SPDR_Clock **clockp, struct SPDR_Allocator *allocator)
+extern int clock_init(struct SPDR_Clock **clockp,
+                      struct SPDR_Allocator *allocator)
 {
         LARGE_INTEGER qpf;
         if (!QueryPerformanceFrequency(&qpf)) {

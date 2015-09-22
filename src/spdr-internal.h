@@ -1,9 +1,10 @@
 #ifndef UU_SPDR_INTERNAL_H
 #define UU_SPDR_INTERNAL_H
 
+#include "inlines.h"
 #include "uu-stdint.h"
 
-extern uint32_t uu_spdr_get_pid();
-extern uint64_t uu_spdr_get_tid();
+spdr_internal uint32_t uu_spdr_get_pid();
+spdr_internal uint64_t uu_spdr_get_tid();
 
 #endif

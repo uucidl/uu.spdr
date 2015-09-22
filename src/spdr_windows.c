@@ -2,6 +2,6 @@
 
 #include <windows.h>
 
-uint32_t uu_spdr_get_pid() { return GetCurrentProcessId(); }
+spdr_internal uint32_t uu_spdr_get_pid() { return GetCurrentProcessId(); }
 
-uint64_t uu_spdr_get_tid() { return GetCurrentThreadId(); }
+spdr_internal uint64_t uu_spdr_get_tid() { return GetCurrentThreadId(); }

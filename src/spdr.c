@@ -120,10 +120,10 @@ struct SPDR_Context {
  *
  * @return a block or NULL if the capacity has been reached.
  */
-static struct SPDR_Block *growblocks_until(struct SPDR_Block *blocks,
-                                           size_t blocks_capacity,
-                                           volatile AO_t *next,
-                                           int nblocks)
+spdr_internal struct SPDR_Block *growblocks_until(struct SPDR_Block *blocks,
+                                                  size_t blocks_capacity,
+                                                  volatile AO_t *next,
+                                                  int nblocks)
 {
         AO_t i = AO_fetch_and_add_acquire(next, nblocks);
 
@@ -139,9 +139,9 @@ static struct SPDR_Block *growblocks_until(struct SPDR_Block *blocks,
 /**
  * Allocate an event block
  */
-static struct SPDR_Event *growlog_until(struct SPDR_Block *blocks,
-                                        size_t blocks_capacity,
-                                        volatile AO_t *next)
+spdr_internal struct SPDR_Event *growlog_until(struct SPDR_Block *blocks,
+                                               size_t blocks_capacity,
+                                               volatile AO_t *next)
 {
         struct SPDR_Block *block =
             growblocks_until(blocks, blocks_capacity, next, 1);
@@ -154,7 +154,7 @@ static struct SPDR_Event *growlog_until(struct SPDR_Block *blocks,
         return &block->data.event;
 }
 
-static void *bucket_alloc(struct SPDR_Allocator *allocator, size_t size)
+spdr_internal void *bucket_alloc(struct SPDR_Allocator *allocator, size_t size)
 {
         if (size > INT_MAX) {
                 return NULL;
@@ -178,7 +178,7 @@ static void *bucket_alloc(struct SPDR_Allocator *allocator, size_t size)
         }
 }
 
-static void spdr_free(struct SPDR_Allocator *_, void *ptr)
+spdr_internal void spdr_free(struct SPDR_Allocator *_, void *ptr)
 {
         (void)_;
         (void)ptr;
@@ -186,7 +186,8 @@ static void spdr_free(struct SPDR_Allocator *_, void *ptr)
         /* no op */
 }
 
-static void *spdr_clock_alloc(struct SPDR_Allocator *allocator, size_t size)
+spdr_internal void *spdr_clock_alloc(struct SPDR_Allocator *allocator,
+                                     size_t size)
 {
         struct SPDR_Context *context =
             ((struct SPDR_Main_Allocator *)allocator)->spdr;
@@ -197,7 +198,7 @@ static void *spdr_clock_alloc(struct SPDR_Allocator *allocator, size_t size)
         return &context->clock_buffer;
 }
 
-static void bucket_init(struct SPDR_Bucket *bucket, int buffer_size)
+spdr_internal void bucket_init(struct SPDR_Bucket *bucket, int buffer_size)
 {
         bucket->allocator.super.alloc = bucket_alloc;
         bucket->allocator.super.free = spdr_free;
@@ -389,11 +390,11 @@ extern struct SPDR_Event_Arg uu_spdr_arg_make_str(const char *key,
         return arg;
 }
 
-static void event_make(struct SPDR_Context *context,
-                       struct SPDR_Event *event,
-                       const char *cat,
-                       const char *name,
-                       enum SPDR_Event_Type type)
+spdr_internal void event_make(struct SPDR_Context *context,
+                              struct SPDR_Event *event,
+                              const char *cat,
+                              const char *name,
+                              enum SPDR_Event_Type type)
 {
         if (context->clock_fn) {
                 event->ts_ticks = context->clock_fn(context->clock_user_data);
@@ -410,7 +411,8 @@ static void event_make(struct SPDR_Context *context,
         event->float_count = 0;
 }
 
-static void event_add_arg(struct SPDR_Event *event, struct SPDR_Event_Arg arg)
+spdr_internal void event_add_arg(struct SPDR_Event *event,
+                                 struct SPDR_Event_Arg arg)
 {
         int i;
 
@@ -433,11 +435,12 @@ static void event_add_arg(struct SPDR_Event *event, struct SPDR_Event_Arg arg)
         }
 }
 
-static void event_log(const struct SPDR_Context *context,
-                      const struct SPDR_Event *event,
-                      void (*print_fn)(const char *string, void *user_data),
-                      void *user_data,
-                      int with_newlines_p)
+spdr_internal void event_log(const struct SPDR_Context *context,
+                             const struct SPDR_Event *event,
+                             void (*print_fn)(const char *string,
+                                              void *user_data),
+                             void *user_data,
+                             int with_newlines_p)
 {
         char line[2048];
         struct SPDR_Chars buffer = NULL_CHARS;
@@ -497,8 +500,8 @@ static void event_log(const struct SPDR_Context *context,
         }
 }
 
-static int has_non_json_arg(struct SPDR_Event const *const event,
-                            struct SPDR_Event_Arg *const first_arg)
+spdr_internal int has_non_json_arg(struct SPDR_Event const *const event,
+                                   struct SPDR_Event_Arg *const first_arg)
 {
         int i;
 
@@ -514,13 +517,13 @@ static int has_non_json_arg(struct SPDR_Event const *const event,
         return 0;
 }
 
-static void log_json_arg_error(const struct SPDR_Context *context,
-                               const struct SPDR_Event *e,
-                               struct SPDR_Event_Arg *arg,
-                               const char *prefix,
-                               void (*print_fn)(const char *string,
-                                                void *user_data),
-                               void *user_data)
+spdr_internal void log_json_arg_error(const struct SPDR_Context *context,
+                                      const struct SPDR_Event *e,
+                                      struct SPDR_Event_Arg *arg,
+                                      const char *prefix,
+                                      void (*print_fn)(const char *string,
+                                                       void *user_data),
+                                      void *user_data)
 {
         uint64_t ts_microseconds =
             context->clock_fn
@@ -592,11 +595,12 @@ static void log_json_arg_error(const struct SPDR_Context *context,
         }
 }
 
-static void log_json(const struct SPDR_Context *context,
-                     const struct SPDR_Event *e,
-                     const char *prefix,
-                     void (*print_fn)(const char *string, void *user_data),
-                     void *user_data)
+spdr_internal void log_json(const struct SPDR_Context *context,
+                            const struct SPDR_Event *e,
+                            const char *prefix,
+                            void (*print_fn)(const char *string,
+                                             void *user_data),
+                            void *user_data)
 {
         uint64_t ts_microseconds =
             context->clock_fn
@@ -662,7 +666,7 @@ static void log_json(const struct SPDR_Context *context,
         }
 }
 
-static int get_bucket_i(struct SPDR_Event const *const e)
+spdr_internal int get_bucket_i(struct SPDR_Event const *const e)
 {
         uint64_t key[3];
 
@@ -678,8 +682,8 @@ struct SPDR_EventAndBucket {
         struct SPDR_Bucket *bucket;
 };
 
-static struct SPDR_EventAndBucket growlog(struct SPDR_Context *const context,
-                                          int const start_bucket_i)
+spdr_internal struct SPDR_EventAndBucket
+growlog(struct SPDR_Context *const context, int const start_bucket_i)
 {
         struct SPDR_EventAndBucket result;
         int i;
@@ -703,7 +707,8 @@ static struct SPDR_EventAndBucket growlog(struct SPDR_Context *const context,
         return result;
 }
 
-static void record_event(struct SPDR_Context *context, struct SPDR_Event *e)
+spdr_internal void record_event(struct SPDR_Context *context,
+                                struct SPDR_Event *e)
 {
         struct SPDR_EventAndBucket pair = growlog(context, get_bucket_i(e));
         struct SPDR_Event *ep = pair.event;
@@ -808,7 +813,7 @@ extern void uu_spdr_record_3(struct SPDR_Context *context,
         record_event(context, &e);
 }
 
-static int event_timecmp(void const *const _a, void const *const _b)
+spdr_internal int event_timecmp(void const *const _a, void const *const _b)
 {
         struct SPDR_Event const *const *ap =
             VOID_PTR_CAST(struct SPDR_Event const *const, _a);

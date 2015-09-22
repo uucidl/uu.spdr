@@ -4,4 +4,4 @@
 
 /* posix.1 or c99 provide isfinite */
 
-int float_isfinite(double value) { return isfinite(value); }
+spdr_internal int float_isfinite(double value) { return isfinite(value); }

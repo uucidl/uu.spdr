@@ -20,7 +20,7 @@
 /**
  * rotate left a 32bit integer
  */
-static FORCE_INLINE uint32_t rotl32(uint32_t const x, int8_t const r)
+spdr_internal FORCE_INLINE uint32_t rotl32(uint32_t const x, int8_t const r)
 {
         return (x << r) | (x >> (32 - r));
 }
@@ -29,7 +29,7 @@ static FORCE_INLINE uint32_t rotl32(uint32_t const x, int8_t const r)
  * Block read - if your platform needs to do endian-swapping or can only
  * handle aligned reads, do the conversion here
  */
-static FORCE_INLINE uint32_t
+spdr_internal FORCE_INLINE uint32_t
 private_murmur3_getblock(uint32_t const *p, int const i)
 {
         return p[i];
@@ -38,10 +38,10 @@ private_murmur3_getblock(uint32_t const *p, int const i)
 /**
  * Murmur3 mix
  */
-static FORCE_INLINE void murmur3_bmix32(uint32_t *__restrict__ h1,
-                                        uint32_t *__restrict__ k1,
-                                        uint32_t *__restrict__ c1,
-                                        uint32_t *__restrict__ c2)
+spdr_internal FORCE_INLINE void murmur3_bmix32(uint32_t *__restrict__ h1,
+                                               uint32_t *__restrict__ k1,
+                                               uint32_t *__restrict__ c1,
+                                               uint32_t *__restrict__ c2)
 {
         *c1 = *c1 * 5 + 0x7b7d159c;
         *c2 = *c2 * 5 + 0x6bce6396;
@@ -55,7 +55,8 @@ static FORCE_INLINE void murmur3_bmix32(uint32_t *__restrict__ h1,
         *h1 ^= *k1;
 }
 
-static uint32_t murmurhash3_32(void const *key, int len, uint32_t const seed)
+spdr_internal uint32_t
+murmurhash3_32(void const *key, int len, uint32_t const seed)
 {
         const uint8_t *data = (const uint8_t *)key;
         const int nblocks = len / 4;

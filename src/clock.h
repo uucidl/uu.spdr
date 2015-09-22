@@ -1,10 +1,16 @@
 #ifndef UU_CLOCK_H
 #define UU_CLOCK_H
 
+#include "inlines.h"
 #include "uu-stdint.h" /* uint64_t */
 
 struct SPDR_Clock;
 struct SPDR_Allocator;
+
+extern int clock_init_base(struct SPDR_Clock **clockp,
+                           struct SPDR_Allocator *allocator,
+                           uint64_t numerator,
+                           uint64_t denominator);
 
 extern int clock_init(struct SPDR_Clock **clock,
                       struct SPDR_Allocator *allocator);

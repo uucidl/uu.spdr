@@ -11,9 +11,4 @@ struct SPDR_Clock {
         uint64_t microseconds_per_tick[2];
 };
 
-extern int clock_init_base(struct SPDR_Clock **clockp,
-                           struct SPDR_Allocator *allocator,
-                           uint64_t numerator,
-                           uint64_t denominator);
-
 #endif
