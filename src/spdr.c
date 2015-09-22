@@ -345,6 +345,8 @@ void spdr_set_log_fn(struct SPDR_Context *context,
 
 /**
  * Activates the recording of traces (off by default)
+ *
+ * FEATURE: tracing is activated and deactivated at runtime
  */
 extern void spdr_enable_trace(struct SPDR_Context *context, int traceon)
 {
