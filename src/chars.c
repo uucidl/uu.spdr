@@ -56,7 +56,7 @@ static uint32_t decode(uint32_t *state, uint32_t *codep, uint8_t byte)
         return *state;
 }
 
-void chars_catchar(struct Chars *chars, const char c)
+void chars_catchar(struct SPDR_Chars *chars, const char c)
 {
         if (chars->capacity - chars->len < 1) {
                 chars->error = 1;
@@ -67,7 +67,7 @@ void chars_catchar(struct Chars *chars, const char c)
         chars->len++;
 }
 
-void chars_catjsonstr(struct Chars *chars, const char *utf8)
+void chars_catjsonstr(struct SPDR_Chars *chars, const char *utf8)
 {
         const char *ch;
 

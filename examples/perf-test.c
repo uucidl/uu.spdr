@@ -14,14 +14,14 @@
 
 static struct SPDR_Context *gbl_spdr;
 
-static void *std_allocator_alloc(struct Allocator *self, size_t size)
+static void *std_allocator_alloc(struct SPDR_Allocator *self, size_t size)
 {
         (void)self;
 
         return malloc(size);
 }
 
-static void std_allocator_free(struct Allocator *self, void *ptr)
+static void std_allocator_free(struct SPDR_Allocator *self, void *ptr)
 {
         (void)self;
 
@@ -33,7 +33,7 @@ struct ThreadContext {
         int offset;
         int n;
 
-        struct Clock *clock;
+        struct SPDR_Clock *clock;
         uint64_t ts0;
         uint64_t ts1;
 
@@ -88,9 +88,9 @@ extern int main(int argc, char **argv)
         enum { LOG_N = 256 * 1024 * 1024 };
         void *spdr_buffer = malloc(LOG_N);
         uint64_t single_threaded_ms = 0;
-        struct Clock *clock;
-        struct Allocator std_allocator = {std_allocator_alloc,
-                                          std_allocator_free};
+        struct SPDR_Clock *clock;
+        struct SPDR_Allocator std_allocator = {std_allocator_alloc,
+                                               std_allocator_free};
         clock_init(&clock, &std_allocator);
 
         spdr_init(&gbl_spdr, spdr_buffer, LOG_N);

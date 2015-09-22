@@ -3,9 +3,9 @@
 
 #include <stddef.h> /* for size_t */
 
-struct Allocator;
+struct SPDR_Allocator;
 
-extern void *allocator_alloc(struct Allocator *allocator, size_t size);
-extern void allocator_free(struct Allocator *allocator, void *ptr);
+extern void *allocator_alloc(struct SPDR_Allocator *allocator, size_t size);
+extern void allocator_free(struct SPDR_Allocator *allocator, void *ptr);
 
 #endif

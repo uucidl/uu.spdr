@@ -3,7 +3,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-extern void chars_catsprintf(struct Chars *chars, const char *format, ...)
+extern void chars_catsprintf(struct SPDR_Chars *chars, const char *format, ...)
 {
         if (chars->error) {
                 return;

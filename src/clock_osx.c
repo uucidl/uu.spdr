@@ -5,7 +5,8 @@
 
 #include "clock_type.h"
 
-extern int clock_init(struct Clock **clockp, struct Allocator *allocator)
+extern int clock_init(struct SPDR_Clock **clockp,
+                      struct SPDR_Allocator *allocator)
 {
         mach_timebase_info_data_t info;
         if (mach_timebase_info(&info)) {
@@ -16,7 +17,7 @@ extern int clock_init(struct Clock **clockp, struct Allocator *allocator)
                                info.denom * 1000);
 }
 
-extern uint64_t clock_ticks(struct Clock const *const clock)
+extern uint64_t clock_ticks(struct SPDR_Clock const *const clock)
 {
         (void)clock;
 

@@ -4,7 +4,7 @@
 
 #include "clock_type.h"
 
-extern int clock_init(struct Clock **clockp, struct Allocator *allocator)
+extern int clock_init(struct SPDR_Clock **clockp, struct SPDR_Allocator *allocator)
 {
         LARGE_INTEGER qpf;
         if (!QueryPerformanceFrequency(&qpf)) {
@@ -14,7 +14,7 @@ extern int clock_init(struct Clock **clockp, struct Allocator *allocator)
         return clock_init_base(clockp, allocator, 1000000, qpf.QuadPart);
 }
 
-extern uint64_t clock_ticks(struct Clock const *clock)
+extern uint64_t clock_ticks(struct SPDR_Clock const *clock)
 {
         LARGE_INTEGER pc;
         QueryPerformanceCounter(&pc);

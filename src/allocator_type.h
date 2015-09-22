@@ -3,9 +3,9 @@
 
 #include <string.h>
 
-struct Allocator {
-        void *(*alloc)(struct Allocator *self, size_t size);
-        void (*free)(struct Allocator *self, void *ptr);
+struct SPDR_Allocator {
+        void *(*alloc)(struct SPDR_Allocator *self, size_t size);
+        void (*free)(struct SPDR_Allocator *self, void *ptr);
 };
 
 #endif
