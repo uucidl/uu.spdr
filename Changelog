@@ -1,6 +1,16 @@
 Changes
 =======
 
+0.4.2 -- SPDR learned how to emit Async event pairs:
+             SPDR_ASYNC_EVENT_BEGIN / SPDR_ASYNC_EVENT_END
+
+         An async event takes an identifier which allows the trace viewer to pair
+         the end and the beginning even if they come from different threads.
+
+      -- we allow building SPDR as a C++ program with Visual Studio and Clang.
+      -- the library is more hygienic with the symbols it exports
+
+0.4.1 -- compiling on windows without warnings
 0.4.0 -- project layout changed to simplify compilation:
   - one _unit.c file per platform,
   - fixed some warnings on MSVC.
@@ -9,10 +19,10 @@ Changes
 0.2.2 -- handle NaN and Inf properly for latest chrome/trace event viewer
 0.2.1 -- compilation fix for mingw32-gcc
 0.2.0 -- changing code conventions
-	 moving to better code conventions, this however requires a minor
-	 API change (spdr_context becomes SPDR_Context)
+         moving to better code conventions, this however requires a minor
+         API change (spdr_context becomes SPDR_Context)
 
 0.1.1 -- bugfix for posix clock becoming incorrect when seconds boundaries
-	 were crossed. [questor <questor@unseen-academy.de>]
+         were crossed. [questor <questor@unseen-academy.de>]
 
 0.1.0 -- initial release
