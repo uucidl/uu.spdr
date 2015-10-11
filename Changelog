@@ -7,8 +7,10 @@ Changes
          An async event takes an identifier which allows the trace viewer to pair
          the end and the beginning even if they come from different threads.
 
-      -- we allow building SPDR as a C++ program with Visual Studio and Clang.
-      -- the library is more hygienic with the symbols it exports
+      -- We allow building SPDR as a C++ program with Visual Studio and Clang.
+      -- The library is more hygienic with the symbols it exports
+      -- SPDR learned to accept a null SPDR_Context as indicating that no
+         tracing is to be done.
 
 0.4.1 -- compiling on windows without warnings
 0.4.0 -- project layout changed to simplify compilation:
