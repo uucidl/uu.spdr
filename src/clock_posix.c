@@ -4,7 +4,7 @@
 
 #include "clock_type.h"
 
-extern int clock_init(struct Clock **clockp, struct Allocator *allocator)
+extern int clock_init(struct SPDR_Clock **clockp, struct SPDR_Allocator *allocator)
 {
         struct timespec res;
 
@@ -16,7 +16,7 @@ extern int clock_init(struct Clock **clockp, struct Allocator *allocator)
         return clock_init_base(clockp, allocator, 1, 1000);
 }
 
-extern uint64_t clock_ticks(struct Clock const *const clock)
+extern uint64_t clock_ticks(struct SPDR_Clock const *const clock)
 {
         struct timespec ts;
         clock_gettime(CLOCK_MONOTONIC, &ts);
