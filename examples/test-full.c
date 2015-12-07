@@ -51,7 +51,8 @@ int main()
         printf("some computation: %f\n", result);
 
         capacity = spdr_capacity(spdr);
-        printf("capacity at the end: %ld/%ld\n", capacity.count,
+        printf("capacity at the end: %ld/%ld\n",
+               capacity.count,
                capacity.capacity);
 
         {

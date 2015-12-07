@@ -28,7 +28,8 @@ static void std_allocator_free(struct SPDR_Allocator *self, void *ptr)
         free(ptr);
 }
 
-struct ThreadContext {
+struct ThreadContext
+{
         volatile double *results;
         int offset;
         int n;
@@ -52,8 +53,8 @@ static void *thread_main(void *ctxt)
 
         context->ts0 = clock_microseconds(context->clock);
 
-        SPDR_BEGIN1(spdr, "thread_main", "main",
-                    SPDR_INT("i", context->offset));
+        SPDR_BEGIN1(
+            spdr, "thread_main", "main", SPDR_INT("i", context->offset));
 
         while (j < context->n) {
                 SPDR_BEGIN1(spdr, "main", "::sin", SPDR_INT("i", j));
@@ -96,8 +97,8 @@ extern int main(int argc, char **argv)
         spdr_init(&gbl_spdr, spdr_buffer, LOG_N);
         spdr_enable_trace(gbl_spdr, TRACING_ENABLED);
 
-        SPDR_METADATA1(gbl_spdr, "thread_name",
-                       SPDR_STR("name", "Main_Thread"));
+        SPDR_METADATA1(
+            gbl_spdr, "thread_name", SPDR_STR("name", "Main_Thread"));
         {
                 int N = 10000;
                 uint64_t ts0 = clock_microseconds(clock);
@@ -108,8 +109,8 @@ extern int main(int argc, char **argv)
                         int IN = 64 * 1024;
                         volatile double results[IN];
 
-                        SPDR_BEGIN1(gbl_spdr, "main", "::sin",
-                                    SPDR_INT("i", IN));
+                        SPDR_BEGIN1(
+                            gbl_spdr, "main", "::sin", SPDR_INT("i", IN));
                         while (IN--) {
                                 results[IN] = sin(results[IN]);
                         }
@@ -145,7 +146,8 @@ extern int main(int argc, char **argv)
                                         threads[i].terminated_p = 0;
 
                                         pthread_create(&threads[i].pthread,
-                                                       NULL, thread_main,
+                                                       NULL,
+                                                       thread_main,
                                                        &threads[i]);
 
                                         offset += n;

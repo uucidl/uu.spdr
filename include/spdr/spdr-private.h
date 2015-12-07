@@ -23,10 +23,12 @@ enum SPDR_Event_Arg_Type {
         SPDR_STR,
 };
 
-struct SPDR_Event_Arg {
+struct SPDR_Event_Arg
+{
         const char *key;
         enum SPDR_Event_Arg_Type type;
-        union {
+        union
+        {
                 int i;
                 double d;
                 const char *str;
@@ -109,7 +111,8 @@ void uu_spdr_record_3(struct SPDR_Context *context,
 
 #if defined(__cplusplus)
 
-struct SPDR_Scope {
+struct SPDR_Scope
+{
         struct SPDR_Context *spdr;
         const char *cat;
         const char *name;
@@ -126,7 +129,8 @@ struct SPDR_Scope {
         struct SPDR_Scope UU_SPDR_CONCAT(scope, __LINE__)(spdr, cat, name)
 
 #elif defined(__GNUC__) && !defined(__STRICT_ANSI__)
-struct SPDR_Scope {
+struct SPDR_Scope
+{
         struct SPDR_Context *spdr;
         const char *cat;
         const char *name;

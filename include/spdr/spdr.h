@@ -17,7 +17,8 @@ struct SPDR_Context;
 /**
  * Buffer capacity
  */
-struct SPDR_Capacity {
+struct SPDR_Capacity
+{
         size_t count;
         size_t capacity;
 };
@@ -192,25 +193,35 @@ void spdr_report(struct SPDR_Context *context,
 /**
  * An async event
  */
-#define SPDR_ASYNC_EVENT_BEGIN(spdr, cat, name, id) UU_SPDR_TRACE1(spdr, cat, name, SPDR_ASYNC_EVENT_BEGIN, SPDR_INT("id", id))
+#define SPDR_ASYNC_EVENT_BEGIN(spdr, cat, name, id)                            \
+        UU_SPDR_TRACE1(                                                        \
+            spdr, cat, name, SPDR_ASYNC_EVENT_BEGIN, SPDR_INT("id", id))
 
 /**
  * An async event with one parameter
  */
-#define SPDR_ASYNC_EVENT_BEGIN1(spdr, cat, name, id, arg0)               \
-        UU_SPDR_TRACE2(spdr, cat, name, SPDR_ASYNC_EVENT_BEGIN, SPDR_INT("id", id), arg0)
+#define SPDR_ASYNC_EVENT_BEGIN1(spdr, cat, name, id, arg0)                     \
+        UU_SPDR_TRACE2(                                                        \
+            spdr, cat, name, SPDR_ASYNC_EVENT_BEGIN, SPDR_INT("id", id), arg0)
 
 /**
  * An async event with two parameters
  */
-#define SPDR_ASYNC_EVENT_BEGIN2(spdr, cat, name, id, arg0, arg1)         \
-        UU_SPDR_TRACE3(spdr, cat, name, SPDR_ASYNC_EVENT_BEGIN, SPDR_INT("id", id), arg0, arg1)
+#define SPDR_ASYNC_EVENT_BEGIN2(spdr, cat, name, id, arg0, arg1)               \
+        UU_SPDR_TRACE3(spdr,                                                   \
+                       cat,                                                    \
+                       name,                                                   \
+                       SPDR_ASYNC_EVENT_BEGIN,                                 \
+                       SPDR_INT("id", id),                                     \
+                       arg0,                                                   \
+                       arg1)
 
 /**
  * Ends an async event
  */
-#define SPDR_ASYNC_EVENT_END(spdr, cat, name, id)                         \
-        UU_SPDR_TRACE1(spdr, cat, name, SPDR_ASYNC_EVENT_END, SPDR_INT("id", id))
+#define SPDR_ASYNC_EVENT_END(spdr, cat, name, id)                              \
+        UU_SPDR_TRACE1(                                                        \
+            spdr, cat, name, SPDR_ASYNC_EVENT_END, SPDR_INT("id", id))
 
 /* __ Metadata __ */
 

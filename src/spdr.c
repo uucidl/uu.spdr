@@ -26,7 +26,8 @@
  */
 #define T(x) (!0)
 
-struct SPDR_Event {
+struct SPDR_Event
+{
         uint64_t ts_ticks;
         uint32_t pid;
         uint64_t tid;
@@ -36,15 +37,18 @@ struct SPDR_Event {
         int8_t str_count;
         int8_t int_count;
         int8_t float_count;
-        struct {
+        struct
+        {
                 const char *key;
                 const char *value;
         } str_args[3];
-        struct {
+        struct
+        {
                 const char *key;
                 int value;
         } int_args[3];
-        struct {
+        struct
+        {
                 const char *key;
                 double value;
         } float_args[3];
@@ -52,7 +56,8 @@ struct SPDR_Event {
 
 enum BlockType { EVENT_BLOCK, STR_BLOCK };
 
-struct SPDR_Block {
+struct SPDR_Block
+{
         enum BlockType type;
 
         /*
@@ -63,25 +68,29 @@ struct SPDR_Block {
          *   count * sizeof(struct SPDR_Block)
          */
         int count;
-        union BlockData {
+        union BlockData
+        {
                 struct SPDR_Event event;
                 char chars[sizeof(struct SPDR_Event)];
         } data;
 };
 
-struct SPDR_Bucket_Allocator {
+struct SPDR_Bucket_Allocator
+{
         struct SPDR_Allocator super;
         struct SPDR_Bucket *bucket;
 };
 
-struct SPDR_Bucket {
+struct SPDR_Bucket
+{
         struct SPDR_Bucket_Allocator allocator;
         int blocks_capacity;
         AO_t blocks_next;
         struct SPDR_Block blocks[1];
 };
 
-struct SPDR_Main_Allocator {
+struct SPDR_Main_Allocator
+{
         struct SPDR_Allocator super;
         struct SPDR_Context *spdr;
 };
@@ -90,7 +99,8 @@ enum { BUCKET_COUNT_BITS = 3,
        BUCKET_COUNT = 2 << BUCKET_COUNT_BITS,
        BUCKET_COUNT_MASK = BUCKET_COUNT - 1 };
 
-struct SPDR_Context {
+struct SPDR_Context
+{
         int tracing_p;
         struct SPDR_Clock *clock;
         char clock_buffer[sizeof(struct SPDR_Clock)];
@@ -165,8 +175,10 @@ spdr_internal void *bucket_alloc(struct SPDR_Allocator *allocator, size_t size)
                     ((struct SPDR_Bucket_Allocator *)allocator)->bucket;
                 int nblocks = 1 + (int)size / sizeof(struct SPDR_Block);
                 struct SPDR_Block *first_block =
-                    growblocks_until(bucket->blocks, bucket->blocks_capacity,
-                                     &bucket->blocks_next, nblocks);
+                    growblocks_until(bucket->blocks,
+                                     bucket->blocks_capacity,
+                                     &bucket->blocks_next,
+                                     nblocks);
 
                 if (!first_block) {
                         return NULL;
@@ -457,8 +469,12 @@ spdr_internal void event_log(const struct SPDR_Context *context,
                 prefix = "\n";
         }
 
-        chars_catsprintf(&buffer, "%s%llu %u %llu", prefix, ts_microseconds,
-                         event->pid, event->tid);
+        chars_catsprintf(&buffer,
+                         "%s%llu %u %llu",
+                         prefix,
+                         ts_microseconds,
+                         event->pid,
+                         event->tid);
 
         chars_catsprintf(&buffer, " \"");
         chars_catjsonstr(&buffer, event->cat);
@@ -470,8 +486,8 @@ spdr_internal void event_log(const struct SPDR_Context *context,
         {
                 int arg_i;
                 for (arg_i = 0; arg_i < event->str_count; arg_i++) {
-                        chars_catsprintf(&buffer, " \"%s\" \"",
-                                         event->str_args[arg_i].key);
+                        chars_catsprintf(
+                            &buffer, " \"%s\" \"", event->str_args[arg_i].key);
                         chars_catjsonstr(&buffer, event->str_args[arg_i].value);
                         chars_catsprintf(&buffer, "\"");
                 }
@@ -480,7 +496,8 @@ spdr_internal void event_log(const struct SPDR_Context *context,
         {
                 int arg_i;
                 for (arg_i = 0; arg_i < event->int_count; arg_i++) {
-                        chars_catsprintf(&buffer, " \"%s\" %d",
+                        chars_catsprintf(&buffer,
+                                         " \"%s\" %d",
                                          event->int_args[arg_i].key,
                                          event->int_args[arg_i].value);
                 }
@@ -489,7 +506,8 @@ spdr_internal void event_log(const struct SPDR_Context *context,
         {
                 int arg_i;
                 for (arg_i = 0; arg_i < event->float_count; arg_i++) {
-                        chars_catsprintf(&buffer, " \"%s\" %f",
+                        chars_catsprintf(&buffer,
+                                         " \"%s\" %f",
                                          event->float_args[arg_i].key,
                                          event->float_args[arg_i].value);
                 }
@@ -540,8 +558,12 @@ spdr_internal void log_json_arg_error(const struct SPDR_Context *context,
         arg_value_string.chars = arg_value_buffer;
         arg_value_string.capacity = sizeof arg_value_buffer;
 
-        chars_catsprintf(&string, "%s{\"ts\":%llu,\"pid\":%u,\"tid\":%llu",
-                         prefix, ts_microseconds, e->pid, e->tid);
+        chars_catsprintf(&string,
+                         "%s{\"ts\":%llu,\"pid\":%u,\"tid\":%llu",
+                         prefix,
+                         ts_microseconds,
+                         e->pid,
+                         e->tid);
 
         chars_catsprintf(&string, ",\"cat\":\"spdr-error\"");
         chars_catsprintf(&string, ",\"name\":\"arg-serialization\"");
@@ -564,12 +586,13 @@ spdr_internal void log_json_arg_error(const struct SPDR_Context *context,
                 const char *arg_value = arg_value_string.error
                                             ? "<format-error>"
                                             : arg_value_string.chars;
-                struct {
+                struct
+                {
                         const char *key;
                         const char *value;
                 } str_args[] = {
-                    {"cat", 0}, {"name", 0}, {"failed-arg", 0}, {0, 0},
-                };
+                      {"cat", 0}, {"name", 0}, {"failed-arg", 0}, {0, 0},
+                  };
                 str_args[0].value = e->cat;
                 str_args[1].value = e->name;
                 str_args[2].value = arg->key;
@@ -579,7 +602,9 @@ spdr_internal void log_json_arg_error(const struct SPDR_Context *context,
                 int str_args_n = sizeof str_args / sizeof *str_args;
 
                 for (i = 0; i < str_args_n; i++) {
-                        chars_catsprintf(&string, "%s\"%s\":\"", arg_prefix,
+                        chars_catsprintf(&string,
+                                         "%s\"%s\":\"",
+                                         arg_prefix,
                                          str_args[i].key);
                         chars_catjsonstr(&string, str_args[i].value);
                         chars_catsprintf(&string, "\"");
@@ -616,8 +641,12 @@ spdr_internal void log_json(const struct SPDR_Context *context,
         {
                 struct SPDR_Event_Arg first_arg;
                 if (has_non_json_arg(e, &first_arg)) {
-                        log_json_arg_error(context, e, &first_arg, prefix,
-                                           print_fn, user_data);
+                        log_json_arg_error(context,
+                                           e,
+                                           &first_arg,
+                                           prefix,
+                                           print_fn,
+                                           user_data);
                 }
         }
 
@@ -629,8 +658,12 @@ spdr_internal void log_json(const struct SPDR_Context *context,
                 need_id = 1;
         }
 
-        chars_catsprintf(&string, "%s{\"ts\":%llu,\"pid\":%u,\"tid\":%llu",
-                         prefix, ts_microseconds, e->pid, e->tid);
+        chars_catsprintf(&string,
+                         "%s{\"ts\":%llu,\"pid\":%u,\"tid\":%llu",
+                         prefix,
+                         ts_microseconds,
+                         e->pid,
+                         e->tid);
 
         chars_catsprintf(&string, ",\"cat\":\"");
         chars_catjsonstr(&string, e->cat);
@@ -641,8 +674,8 @@ spdr_internal void log_json(const struct SPDR_Context *context,
         chars_catsprintf(&string, ",\"ph\":\"%c\",\"args\":{", e->phase);
 
         for (i = 0; i < e->str_count; i++) {
-                chars_catsprintf(&string, "%s\"%s\":\"", arg_prefix,
-                                 e->str_args[i].key);
+                chars_catsprintf(
+                    &string, "%s\"%s\":\"", arg_prefix, e->str_args[i].key);
                 chars_catjsonstr(&string, e->str_args[i].value);
                 chars_catsprintf(&string, "\"");
 
@@ -654,17 +687,24 @@ spdr_internal void log_json(const struct SPDR_Context *context,
                         id = e->int_args[i].value;
                         continue;
                 }
-                chars_catsprintf(&string, "%s\"%s\":%d", arg_prefix,
-                                 e->int_args[i].key, e->int_args[i].value);
+                chars_catsprintf(&string,
+                                 "%s\"%s\":%d",
+                                 arg_prefix,
+                                 e->int_args[i].key,
+                                 e->int_args[i].value);
                 arg_prefix = ",";
         }
 
         for (i = 0; i < e->float_count; i++) {
                 if (!float_isfinite(e->float_args[i].value)) {
-                        chars_catsprintf(&string, "%s\"%s\":0.0", arg_prefix,
+                        chars_catsprintf(&string,
+                                         "%s\"%s\":0.0",
+                                         arg_prefix,
                                          e->float_args[i].key);
                 } else {
-                        chars_catsprintf(&string, "%s\"%s\":%f", arg_prefix,
+                        chars_catsprintf(&string,
+                                         "%s\"%s\":%f",
+                                         arg_prefix,
                                          e->float_args[i].key,
                                          e->float_args[i].value);
                 }
@@ -693,7 +733,8 @@ spdr_internal int get_bucket_i(struct SPDR_Event const *const e)
         return murmurhash3_32(key, sizeof key, 0x4356) & BUCKET_COUNT_MASK;
 }
 
-struct SPDR_EventAndBucket {
+struct SPDR_EventAndBucket
+{
         struct SPDR_Event *event;
         struct SPDR_Bucket *bucket;
 };
@@ -708,9 +749,9 @@ growlog(struct SPDR_Context *const context, int const start_bucket_i)
         for (i = 0; i < BUCKET_COUNT; i++) {
                 int const bucket_i = (start_bucket_i + i) & BUCKET_COUNT_MASK;
                 struct SPDR_Bucket *bucket = context->buckets[bucket_i];
-                struct SPDR_Event *ep =
-                    growlog_until(bucket->blocks, bucket->blocks_capacity,
-                                  &bucket->blocks_next);
+                struct SPDR_Event *ep = growlog_until(bucket->blocks,
+                                                      bucket->blocks_capacity,
+                                                      &bucket->blocks_next);
                 if (ep) {
                         result.event = ep;
                         result.bucket = bucket;
@@ -764,7 +805,10 @@ extern void uu_spdr_record(struct SPDR_Context *context,
         event_make(context, &e, cat, name, type);
 
         if (context->log_fn) {
-                event_log(context, &e, context->log_fn, context->log_user_data,
+                event_log(context,
+                          &e,
+                          context->log_fn,
+                          context->log_user_data,
                           !T(with_newlines));
         }
 
@@ -782,7 +826,10 @@ extern void uu_spdr_record_1(struct SPDR_Context *context,
         event_make(context, &e, cat, name, type);
         event_add_arg(&e, arg0);
         if (context->log_fn) {
-                event_log(context, &e, context->log_fn, context->log_user_data,
+                event_log(context,
+                          &e,
+                          context->log_fn,
+                          context->log_user_data,
                           !T(with_newlines));
         }
 
@@ -801,7 +848,10 @@ extern void uu_spdr_record_2(struct SPDR_Context *context,
         event_add_arg(&e, arg0);
         event_add_arg(&e, arg1);
         if (context->log_fn) {
-                event_log(context, &e, context->log_fn, context->log_user_data,
+                event_log(context,
+                          &e,
+                          context->log_fn,
+                          context->log_user_data,
                           !T(with_newlines));
         }
 
@@ -822,7 +872,10 @@ extern void uu_spdr_record_3(struct SPDR_Context *context,
         event_add_arg(&e, arg1);
         event_add_arg(&e, arg2);
         if (context->log_fn) {
-                event_log(context, &e, context->log_fn, context->log_user_data,
+                event_log(context,
+                          &e,
+                          context->log_fn,
+                          context->log_user_data,
                           !T(with_newlines));
         }
 
@@ -907,7 +960,10 @@ extern void spdr_report(struct SPDR_Context *context,
                 int event_i;
 
                 for (event_i = 0; event_i < events_n; event_i++) {
-                        event_log(context, events[event_i], print_fn, user_data,
+                        event_log(context,
+                                  events[event_i],
+                                  print_fn,
+                                  user_data,
                                   T(with_newlines));
                 }
         } else if (SPDR_CHROME_REPORT == report_type) {
@@ -916,7 +972,10 @@ extern void spdr_report(struct SPDR_Context *context,
 
                 print_fn("{\"traceEvents\":[", user_data);
                 for (event_i = 0; event_i < events_n; event_i++) {
-                        log_json(context, events[event_i], prefix, print_fn,
+                        log_json(context,
+                                 events[event_i],
+                                 prefix,
+                                 print_fn,
                                  user_data);
                         prefix = ",";
                 }
