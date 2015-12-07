@@ -87,7 +87,7 @@ extern int main(int argc, char **argv)
         (void)argv;
         enum { LOG_N = 256 * 1024 * 1024 };
         void *spdr_buffer = malloc(LOG_N);
-        uint64_t single_threaded_ms = 0;
+        unsigned long long single_threaded_ms = 0;
         struct SPDR_Clock *clock;
         struct SPDR_Allocator std_allocator = {std_allocator_alloc,
                                                std_allocator_free};
@@ -172,9 +172,9 @@ extern int main(int argc, char **argv)
                                 }
 
                                 {
-                                        uint64_t elapsed_ms =
+                                        unsigned long long elapsed_ms =
                                             (later_end - earlier_start) / 1000;
-                                        uint64_t equivalent_ms =
+                                        unsigned long long equivalent_ms =
                                             10 * elapsed_ms;
                                         double scaling =
                                             (double)single_threaded_ms /
@@ -183,7 +183,8 @@ extern int main(int argc, char **argv)
                                                elapsed_ms);
                                         printf("equivalent in ms: %llu "
                                                "(scaling: %f)\n",
-                                               equivalent_ms, scaling);
+                                               equivalent_ms,
+                                               scaling);
                                 }
                         }
 
