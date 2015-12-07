@@ -25,6 +25,7 @@ done
 TOP=${TOP:?${USAGE}}
 OS_NAME=${OS_NAME:?${USAGE}}
 
+set -o errexit
 case "${OS_NAME}" in
     linux) "${TOP}"/build_examples_posix.sh ;;
     osx) "${TOP}"/build_examples_osx.sh ;;
@@ -41,7 +42,6 @@ PS4='T $(($(date "+%s") - ${origin}))\011'
 set -x
 
 ## <RUN EXAMPLES..
-set -o errexit
 
 find "${TOP}"/output -type f | while read program
 do
