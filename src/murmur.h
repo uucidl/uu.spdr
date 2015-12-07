@@ -8,19 +8,10 @@
  * domain. The author hereby disclaims copyright to this source code.
  */
 
-#if defined(__GNUC__)
-#define FORCE_INLINE __attribute__((always_inline))
-#endif
-
-#if defined(_MSC_VER)
-#define FORCE_INLINE __forceinline
-#define __restrict__ __restrict
-#endif
-
 /**
  * rotate left a 32bit integer
  */
-spdr_internal FORCE_INLINE uint32_t rotl32(uint32_t const x, int8_t const r)
+spdr_internal uint32_t rotl32(uint32_t const x, int8_t const r)
 {
         return (x << r) | (x >> (32 - r));
 }
@@ -29,8 +20,7 @@ spdr_internal FORCE_INLINE uint32_t rotl32(uint32_t const x, int8_t const r)
  * Block read - if your platform needs to do endian-swapping or can only
  * handle aligned reads, do the conversion here
  */
-spdr_internal FORCE_INLINE uint32_t
-private_murmur3_getblock(uint32_t const *p, int const i)
+spdr_internal uint32_t private_murmur3_getblock(uint32_t const *p, int const i)
 {
         return p[i];
 }
@@ -38,10 +28,10 @@ private_murmur3_getblock(uint32_t const *p, int const i)
 /**
  * Murmur3 mix
  */
-spdr_internal FORCE_INLINE void murmur3_bmix32(uint32_t *__restrict__ h1,
-                                               uint32_t *__restrict__ k1,
-                                               uint32_t *__restrict__ c1,
-                                               uint32_t *__restrict__ c2)
+spdr_internal void murmur3_bmix32(uint32_t * non_aliasing h1,
+                                  uint32_t * non_aliasing k1,
+                                  uint32_t * non_aliasing c1,
+                                  uint32_t * non_aliasing c2)
 {
         *c1 = *c1 * 5 + 0x7b7d159c;
         *c2 = *c2 * 5 + 0x6bce6396;
@@ -56,7 +46,7 @@ spdr_internal FORCE_INLINE void murmur3_bmix32(uint32_t *__restrict__ h1,
 }
 
 spdr_internal uint32_t
-murmurhash3_32(void const *key, int len, uint32_t const seed)
+    murmurhash3_32(void const *key, int len, uint32_t const seed)
 {
         const uint8_t *data = (const uint8_t *)key;
         const int nblocks = len / 4;

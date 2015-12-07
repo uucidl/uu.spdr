@@ -9,4 +9,15 @@
 
 #define spdr_internal static
 
+/* Define non_aliasing type qualifier */
+#if defined(_MSC_VER)
+#if _MSC_VER > 1600
+#define non_aliasing __restrict
+#else
+#define non_aliasing
+#endif
+#else
+#define non_aliasing __restrict__
+#endif
+
 #endif
