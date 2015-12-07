@@ -49,7 +49,7 @@ D="${OUTPUT}"/test-scope
 printf "PROGRAM\t%s\n" "${D}"
 
 D="${OUTPUT}"/test-mt
-"${CC}" "${cflags[@]}" -DTRACING_ENABLED=1 -ansi "${EXAMPLES}"/test-mt.c -lm "${SPDR[@]}" \
+"${CC}" "${cflags[@]}" -DTRACING_ENABLED=1 -ansi "${EXAMPLES}"/test-mt.c -lpthread -lm "${SPDR[@]}" \
         -o "${D}"
 printf "PROGRAM\t%s\n" "${D}"
 
@@ -64,7 +64,7 @@ D="${OUTPUT}"/test-cxx
 printf "PROGRAM\t%s\n" "${D}"
 
 D="${OUTPUT}"/perf-test
-"${CC}" "${cflags[@]}" -DTRACING_ENABLED=1 "${EXAMPLES}"/perf-test.c -lm "${SPDR[@]}" \
+"${CC}" "${cflags[@]}" -DTRACING_ENABLED=1 "${EXAMPLES}"/perf-test.c -lm -lpthread "${SPDR[@]}" \
          -o "${D}"
 printf "PROGRAM\t%s\n" "${D}"
 
