@@ -15,9 +15,10 @@ chars_catsprintf(struct SPDR_Chars *chars, const char *format, ...)
                 va_list args;
                 va_start(args, format);
 
-                count =
-                    vsnprintf(chars->chars + chars->len,
-                              chars->capacity - chars->len - 1, format, args);
+                count = vsnprintf(chars->chars + chars->len,
+                                  chars->capacity - chars->len - 1,
+                                  format,
+                                  args);
 
                 if (count < 0) {
                         chars->error = 1;

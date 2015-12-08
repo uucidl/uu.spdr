@@ -31,8 +31,8 @@ void fun1()
         static double x = 0.5f;
         static double y = -0.15f;
 
-        SPDR_SCOPE2(spdr, "Main", "fun1", SPDR_FLOAT("x", x),
-                    SPDR_FLOAT("y", y));
+        SPDR_SCOPE2(
+            spdr, "Main", "fun1", SPDR_FLOAT("x", x), SPDR_FLOAT("y", y));
 
         int N = 65536;
         while (N--) {
@@ -50,7 +50,10 @@ int main(int argc, char **argv)
 
         SPDR_METADATA1(spdr, "thread_name", SPDR_STR("name", "Main_Thread"));
 
-        SPDR_BEGIN2(spdr, "Main", "main", SPDR_INT("argc", argc),
+        SPDR_BEGIN2(spdr,
+                    "Main",
+                    "main",
+                    SPDR_INT("argc", argc),
                     SPDR_STR("argv[0]", argv[0]));
 
         printf("Hello,");

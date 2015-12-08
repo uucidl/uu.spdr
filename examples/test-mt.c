@@ -51,10 +51,13 @@ void *thread1(void *arg)
                 int cosn = 16 * 65536;
                 int pown = 32 * 65536;
 
-                SPDR_BEGIN2(spdr, "Main", "thread1",
-                            SPDR_INT("arg", (intptr_t)arg), SPDR_FLOAT("y", y));
-                SPDR_COUNTER1(spdr, "thread1", "iteration",
-                              SPDR_INT("value", n));
+                SPDR_BEGIN2(spdr,
+                            "Main",
+                            "thread1",
+                            SPDR_INT("arg", (intptr_t)arg),
+                            SPDR_FLOAT("y", y));
+                SPDR_COUNTER1(
+                    spdr, "thread1", "iteration", SPDR_INT("value", n));
                 while (cosn--) {
                         x += cos(x);
                 }
@@ -84,7 +87,10 @@ int main(int argc, char **argv)
 
         SPDR_METADATA1(spdr, "thread_name", SPDR_STR("name", "Main_Thread"));
 
-        SPDR_BEGIN3(spdr, "Main", "main", SPDR_INT("argc", argc),
+        SPDR_BEGIN3(spdr,
+                    "Main",
+                    "main",
+                    SPDR_INT("argc", argc),
                     SPDR_STR("argv[0]", argv[0]),
                     SPDR_INT("cap", cap.capacity));
 

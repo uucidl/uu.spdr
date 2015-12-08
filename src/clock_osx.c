@@ -13,8 +13,8 @@ extern int clock_init(struct SPDR_Clock **clockp,
                 return -1;
         }
 
-        return clock_init_base(clockp, allocator, info.numer,
-                               info.denom * 1000);
+        return clock_init_base(
+            clockp, allocator, info.numer, info.denom * 1000);
 }
 
 extern uint64_t clock_ticks(struct SPDR_Clock const *const clock)

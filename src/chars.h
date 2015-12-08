@@ -3,7 +3,8 @@
 
 #include "inlines.h"
 
-struct SPDR_Chars {
+struct SPDR_Chars
+{
         int error;
         char *chars;
         int len;

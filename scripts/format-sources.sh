@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 HERE="$(dirname ${0})"
 source "${HERE}"/lib/user.sh
 
