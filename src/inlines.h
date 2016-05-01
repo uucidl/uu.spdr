@@ -1,10 +1,22 @@
 #if !defined(SPDR_INLINES_H)
 #define SPDR_INLINES_H
 
-#if __cplusplus
-#define VOID_PTR_CAST(type, void_ptr) (type *)(void_ptr)
+#if defined(__cplusplus)
+#define SPDR_VOID_PTR_CAST(type, void_ptr) (type *)(void_ptr)
 #else
-#define VOID_PTR_CAST(type, void_ptr) void_ptr
+#define SPDR_VOID_PTR_CAST(type, void_ptr) void_ptr
+#endif
+
+#if defined(__has_cpp_attribute)
+#define spdr_has_cpp_attribute(x) __has_cpp_attribute(x)
+#else
+#define spdr_has_cpp_attribute(x) 0
+#endif
+
+#if spdr_has_cpp_attribute(clang::fallthrough)
+#define SPDR_FALLTHROUGH [[clang::fallthrough]]
+#else
+#define SPDR_FALLTHROUGH
 #endif
 
 #define spdr_internal static
@@ -12,12 +24,12 @@
 /* Define non_aliasing type qualifier */
 #if defined(_MSC_VER)
 #if _MSC_VER > 1600
-#define non_aliasing __restrict
+#define spdr_non_aliasing __restrict
 #else
-#define non_aliasing
+#define spdr_non_aliasing
 #endif
 #else
-#define non_aliasing __restrict__
+#define spdr_non_aliasing __restrict__
 #endif
 
 #endif

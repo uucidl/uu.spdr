@@ -1,6 +1,12 @@
-os:
-  - linux
-  - osx
+language: cpp
+matrix:
+  include:
+    - compiler: clang
+      os: osx
+      env: CFLAGS="-Weverything -Wno-padded"
+    - compiler: gcc
+      os: linux
+      env: CFLAGS=-pedantic
 sudo: false
 script:
   - ./scripts/travis.sh --top . --os-name "${TRAVIS_OS_NAME}"

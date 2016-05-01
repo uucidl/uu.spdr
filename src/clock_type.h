@@ -3,8 +3,7 @@
 
 struct SPDR_Allocator;
 
-struct SPDR_Clock
-{
+struct SPDR_Clock {
         struct SPDR_Allocator *allocator;
         /**
          * numerator/denominator to convert ticks to microseconds

@@ -35,6 +35,7 @@ mt-with-tracing: test-mt.c $(LIB)
 mt-without-tracing: test-mt.c $(LIB_SRC)
 	$(CC) $(CFLAGS) $^ -o $@
 
+cxx-tracing: CFLAGS+=-std=c++11
 cxx-tracing: test-cxx.cc $(LIB)
 	$(CXX) $(CFLAGS) $< -o $@ -L. -lspdr
 

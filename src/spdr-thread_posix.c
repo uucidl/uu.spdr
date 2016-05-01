@@ -2,4 +2,8 @@
 
 #include <pthread.h>
 
-spdr_internal uint64_t uu_spdr_get_tid() { return (intptr_t)pthread_self(); }
+spdr_internal uint64_t uu_spdr_get_tid()
+{
+        pthread_t x = pthread_self();
+        return (uintptr_t)x;
+}

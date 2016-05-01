@@ -9,7 +9,7 @@ extern int clock_init_base(struct SPDR_Clock **clockp,
                            uint64_t numerator,
                            uint64_t denominator)
 {
-        struct SPDR_Clock *clock = VOID_PTR_CAST(
+        struct SPDR_Clock *clock = SPDR_VOID_PTR_CAST(
             struct SPDR_Clock, allocator_alloc(allocator, sizeof *clock));
         if (!clock) {
                 return -1;

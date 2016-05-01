@@ -12,7 +12,8 @@ extern int clock_init(struct SPDR_Clock **clockp,
                 return -1;
         }
 
-        return clock_init_base(clockp, allocator, 1000000, qpf.QuadPart);
+        return clock_init_base(clockp, allocator, 1000000,
+                               (uint64_t)qpf.QuadPart);
 }
 
 extern uint64_t clock_ticks(struct SPDR_Clock const *clock)
@@ -22,5 +23,5 @@ extern uint64_t clock_ticks(struct SPDR_Clock const *clock)
 
         (void)clock;
 
-        return pc.QuadPart;
+        return (uint64_t)pc.QuadPart;
 }

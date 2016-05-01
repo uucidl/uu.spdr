@@ -1,4 +1,6 @@
+#if defined(_MSC_VER)
 #define _CRT_SECURE_NO_WARNINGS
+#endif
 
 #include "sleep.h"
 
@@ -16,7 +18,7 @@
 static struct SPDR_Context *spdr;
 enum { LOG_N = 2 * 1024 * 1024 };
 
-void trace(const char *line, void *)
+static void trace(const char *line, void *)
 {
         char buffer[512] = "";
         strncat(buffer, line, sizeof buffer - 2);
@@ -26,13 +28,13 @@ void trace(const char *line, void *)
         fputs(buffer, stderr);
 }
 
-void fun1()
+static void fun1()
 {
-        static double x = 0.5f;
-        static double y = -0.15f;
+        static double x = 0.5;
+        static double y = -0.15;
 
-        SPDR_SCOPE2(
-            spdr, "Main", "fun1", SPDR_FLOAT("x", x), SPDR_FLOAT("y", y));
+        SPDR_SCOPE2(spdr, "Main", "fun1", SPDR_FLOAT("x", x),
+                    SPDR_FLOAT("y", y));
 
         int N = 65536;
         while (N--) {
@@ -50,10 +52,7 @@ int main(int argc, char **argv)
 
         SPDR_METADATA1(spdr, "thread_name", SPDR_STR("name", "Main_Thread"));
 
-        SPDR_BEGIN2(spdr,
-                    "Main",
-                    "main",
-                    SPDR_INT("argc", argc),
+        SPDR_BEGIN2(spdr, "Main", "main", SPDR_INT("argc", argc),
                     SPDR_STR("argv[0]", argv[0]));
 
         printf("Hello,");
@@ -63,7 +62,18 @@ int main(int argc, char **argv)
         fun1();
 
         SPDR_END(spdr, "Main", "main");
-
+        {
+                FILE *file = fopen("test-cxx.json", "wb+");
+                if (file) {
+                        spdr_report(
+                            spdr, SPDR_CHROME_REPORT,
+                            [](const char *data, void *user_data) {
+                                    fputs(data, static_cast<FILE *>(user_data));
+                            },
+                            file);
+                        fclose(file);
+                }
+        }
         spdr_deinit(&spdr);
 
         return 0;
