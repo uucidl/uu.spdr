@@ -15,7 +15,7 @@ enum { LOG_N = 2 * 1024 * 1024 };
 static void *spdr_buffer;
 static struct SPDR_Context *spdr;
 
-void trace(const char *line, void *user_data)
+static void trace(const char *line, void *user_data)
 {
         const char *msg = user_data;
         char buffer[512] = "";
@@ -29,13 +29,13 @@ void trace(const char *line, void *user_data)
         fputs(buffer, stderr);
 }
 
-void fun1()
+static void fun1()
 {
-        static double x = 0.5f;
-        static double y = -0.15f;
+        static double x = 0.5;
+        static double y = -0.15;
 
-        SPDR_SCOPE2(
-            spdr, "Main", "fun1", SPDR_FLOAT("x", x), SPDR_FLOAT("y", y));
+        SPDR_SCOPE2(spdr, "Main", "fun1", SPDR_FLOAT("x", x),
+                    SPDR_FLOAT("y", y));
 
         int N = 65536;
         while (N--) {
@@ -51,10 +51,7 @@ int main(int argc, char **argv)
         spdr_enable_trace(spdr, TRACING_ENABLED);
         spdr_set_log_fn(spdr, trace, "Hello");
 
-        SPDR_BEGIN2(spdr,
-                    "Main",
-                    "main",
-                    SPDR_INT("argc", argc),
+        SPDR_BEGIN2(spdr, "Main", "main", SPDR_INT("argc", argc),
                     SPDR_STR("argv[0]", argv[0]));
 
         printf("Hello,");

@@ -13,6 +13,8 @@ extern "C" {
 #include "spdr.c"
 #include "spdr_windows.c"
 
+#undef _CRT_SECURE_NO_WARNINGS
+
 #ifdef __cplusplus
 }
 #endif

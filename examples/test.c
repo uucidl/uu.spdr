@@ -1,4 +1,6 @@
+#if defined(_MSC_VER)
 #define _CRT_SECURE_NO_WARNINGS
+#endif
 
 #include "sleep.h"
 
@@ -18,7 +20,7 @@ static struct SPDR_Context *spdr;
 enum { LOG_N = 2 * 1024 * 1024 };
 static void *spdr_buffer;
 
-void trace(const char *line, void *_)
+static void trace(const char *line, void *_)
 {
         char buffer[512] = "";
         strncat(buffer, line, sizeof buffer - 2);
@@ -30,7 +32,7 @@ void trace(const char *line, void *_)
         fputs(buffer, stdout);
 }
 
-void print(const char *string, void *user_data)
+static void print(const char *string, void *user_data)
 {
         FILE *file = user_data;
 
@@ -39,10 +41,8 @@ void print(const char *string, void *user_data)
 
 static void act(const char *a_string)
 {
-        SPDR_BEGIN2(spdr,
-                    "Main",
-                    "act",
-                    SPDR_INT("info-id", (int)(intptr_t) a_string),
+        SPDR_BEGIN2(spdr, "Main", "act",
+                    SPDR_INT("info-id", (int)(intptr_t)a_string),
                     SPDR_STR("info", a_string));
 
         printf("%s\n", a_string);
@@ -73,10 +73,7 @@ int main(int argc, char **argv)
 
         SPDR_METADATA1(spdr, "thread_name", SPDR_STR("name", "Main_Thread"));
 
-        SPDR_BEGIN2(spdr,
-                    "Main",
-                    "main",
-                    SPDR_INT("argc", argc),
+        SPDR_BEGIN2(spdr, "Main", "main", SPDR_INT("argc", argc),
                     SPDR_STR("argv[0]", argv[0]));
 
         printf("Hello,");
@@ -85,14 +82,12 @@ int main(int argc, char **argv)
         printf(" 世界.\n");
         SPDR_END(spdr, "Main", "printf");
 
-        SPDR_ASYNC_EVENT_BEGIN1(
-            spdr, "Main", "stuff", 42, SPDR_INT("value", 1));
+        SPDR_ASYNC_EVENT_BEGIN1(spdr, "Main", "stuff", 42,
+                                SPDR_INT("value", 1));
         stuff();
         {
                 double a = 0.0;
-                SPDR_EVENT2(spdr,
-                            "Main",
-                            "Non Finites",
+                SPDR_EVENT2(spdr, "Main", "Non Finites",
                             SPDR_FLOAT("a", 1.0 / a),
                             SPDR_FLOAT("b", sqrt(-1)));
         }
@@ -103,10 +98,7 @@ int main(int argc, char **argv)
                 int i;
                 for (i = 0; i < 100; i++) {
                         SPDR_COUNTER2(
-                            spdr,
-                            "Main",
-                            "counter",
-                            SPDR_INT("i", i),
+                            spdr, "Main", "counter", SPDR_INT("i", i),
                             SPDR_FLOAT("cos(i)", cos(3.141592 * i / 50)));
                 }
         }

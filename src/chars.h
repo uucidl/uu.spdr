@@ -1,17 +1,17 @@
-#ifndef CHARS_H
-#define CHARS_H
+#ifndef UU_SPDR_CHARS_H
+#define UU_SPDR_CHARS_H
 
 #include "inlines.h"
+#include "uu-stdint.h"
 
-struct SPDR_Chars
-{
-        int error;
+struct SPDR_Chars {
+        uint32_t error;
         char *chars;
-        int len;
-        int capacity;
+        size_t len;
+        size_t capacity;
 };
 
-#define NULL_CHARS                                                             \
+#define SPDR_Chars_NULL                                                        \
         {                                                                      \
                 0, NULL, 0, 0                                                  \
         }

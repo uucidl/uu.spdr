@@ -59,7 +59,9 @@ D="${OUTPUT}"/test-full
 printf "PROGRAM\t%s\n" "${D}"
 
 D="${OUTPUT}"/test-cxx
-"${CXX}" "${cflags[@]}" -DTRACING_ENABLED=1 "${EXAMPLES}"/test-cxx.cc -lm "${SPDR[@]}" \
+"${CXX}" "${cflags[@]}" -Wno-old-style-cast  -Wno-c++98-compat -stdlib=libc++ -std=c++11 \
+         -DTRACING_ENABLED=1 \
+         "${EXAMPLES}"/test-cxx.cc -lm "${SPDR[@]}" \
          -o "${D}"
 printf "PROGRAM\t%s\n" "${D}"
 

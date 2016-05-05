@@ -14,28 +14,28 @@ enum SPDR_Event_Type {
         SPDR_COUNTER = 'C',
         SPDR_ASYNC_EVENT_BEGIN = 'S',
         SPDR_ASYNC_EVENT_STEP = 'T',
-        SPDR_ASYNC_EVENT_END = 'F',
+        SPDR_ASYNC_EVENT_END = 'F'
 };
 
-enum SPDR_Event_Arg_Type {
-        SPDR_INT,
-        SPDR_FLOAT,
-        SPDR_STR,
-};
+enum SPDR_Event_Arg_Type { SPDR_INT, SPDR_FLOAT, SPDR_STR };
 
-struct SPDR_Event_Arg
-{
+struct SPDR_Event_Arg {
         const char *key;
         enum SPDR_Event_Arg_Type type;
-        union
-        {
+        union {
                 int i;
                 double d;
                 const char *str;
         } value;
 };
 
-#if __STDC_VERSION__ >= 199901L
+extern struct SPDR_Event_Arg uu_spdr_arg_make_int(const char *key, int value);
+extern struct SPDR_Event_Arg uu_spdr_arg_make_double(const char *key,
+                                                     double value);
+extern struct SPDR_Event_Arg uu_spdr_arg_make_str(const char *key,
+                                                  const char *str);
+
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 /* type checks possible on c99 */
 #define UU_SPDR_INT(argkey, argvalue)                                          \
         ((struct SPDR_Event_Arg){                                              \
@@ -47,10 +47,6 @@ struct SPDR_Event_Arg
         ((struct SPDR_Event_Arg){                                              \
             .key = argkey, .type = SPDR_STR, .value = {.str = argvalue}})
 #else
-struct SPDR_Event_Arg uu_spdr_arg_make_int(const char *key, int value);
-struct SPDR_Event_Arg uu_spdr_arg_make_double(const char *key, double value);
-struct SPDR_Event_Arg uu_spdr_arg_make_str(const char *key, const char *str);
-
 #define UU_SPDR_INT(key, value) uu_spdr_arg_make_int(key, value)
 #define UU_SPDR_FLOAT(key, value) uu_spdr_arg_make_double(key, value)
 #define UU_SPDR_STR(key, value) uu_spdr_arg_make_str(key, value)
@@ -111,26 +107,18 @@ void uu_spdr_record_3(struct SPDR_Context *context,
 
 #if defined(__cplusplus)
 
-struct SPDR_Scope
-{
+struct SPDR_Scope {
         struct SPDR_Context *spdr;
         const char *cat;
         const char *name;
-
-        SPDR_Scope(struct SPDR_Context *spdr, const char *cat, const char *name)
-            : spdr(spdr), cat(cat), name(name)
-        {
-        }
-
         ~SPDR_Scope() { UU_SPDR_TRACE(spdr, cat, name, SPDR_END); }
 };
 
 #define UU_SPDR_SCOPE_SETUP(spdr, cat, name)                                   \
-        struct SPDR_Scope UU_SPDR_CONCAT(scope, __LINE__)(spdr, cat, name)
+        struct SPDR_Scope UU_SPDR_CONCAT(scope, __LINE__) = {spdr, cat, name}
 
 #elif defined(__GNUC__) && !defined(__STRICT_ANSI__)
-struct SPDR_Scope
-{
+struct SPDR_Scope {
         struct SPDR_Context *spdr;
         const char *cat;
         const char *name;

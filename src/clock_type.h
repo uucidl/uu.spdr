@@ -1,10 +1,9 @@
-#ifndef UU_CLOCK_TYPE_H
-#define UU_CLOCK_TYPE_H
+#ifndef UU_SPDR_CLOCK_TYPE_H
+#define UU_SPDR_CLOCK_TYPE_H
 
 struct SPDR_Allocator;
 
-struct SPDR_Clock
-{
+struct SPDR_Clock {
         struct SPDR_Allocator *allocator;
         /**
          * numerator/denominator to convert ticks to microseconds

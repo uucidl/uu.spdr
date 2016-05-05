@@ -20,6 +20,7 @@ set BUILD=%TOP%\output
 
 REM Start with the most strict warning level
 set WARNINGS=-W4 -WX
+set DEFINES=-DTRACING_ENABLED=1
 set CLFLAGS=%CLFLAGS% -nologo -FC -EHsc -Z7 -Oi -GR- -Gm- -Od -Z7 %DEFINES% %WARNINGS% -Debug
 
 echo SRC=%SRC%, BUILD=%BUILD%

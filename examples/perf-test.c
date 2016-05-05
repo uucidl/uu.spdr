@@ -1,12 +1,12 @@
 #include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include <spdr/spdr.h>
 
-#include "../src/clock.h"
 #include "../src/allocator_type.h"
+#include "../src/clock.h"
 
 #ifndef TRACING_ENABLED
 #define TRACING_ENABLED 0
@@ -28,11 +28,10 @@ static void std_allocator_free(struct SPDR_Allocator *self, void *ptr)
         free(ptr);
 }
 
-struct ThreadContext
-{
+struct ThreadContext {
         volatile double *results;
         int offset;
-        int n;
+        size_t n;
 
         struct SPDR_Clock *clock;
         uint64_t ts0;
@@ -46,18 +45,18 @@ struct ThreadContext
 static void *thread_main(void *ctxt)
 {
         struct ThreadContext *context = ctxt;
-        int const chunks_n = 1024;
-        int i;
-        int j = 0;
+        size_t const chunks_n = 1024;
+        size_t i;
+        size_t j = 0;
         struct SPDR_Context *spdr = gbl_spdr;
 
         context->ts0 = clock_microseconds(context->clock);
 
-        SPDR_BEGIN1(
-            spdr, "thread_main", "main", SPDR_INT("i", context->offset));
+        SPDR_BEGIN1(spdr, "thread_main", "main",
+                    SPDR_INT("i", context->offset));
 
         while (j < context->n) {
-                SPDR_BEGIN1(spdr, "main", "::sin", SPDR_INT("i", j));
+                SPDR_BEGIN1(spdr, "main", "::sin", SPDR_INT("i", (int)j));
                 for (i = 0; i < chunks_n; i++) {
                         if (j + i >= context->n) {
                                 break;
@@ -97,26 +96,29 @@ extern int main(int argc, char **argv)
         spdr_init(&gbl_spdr, spdr_buffer, LOG_N);
         spdr_enable_trace(gbl_spdr, TRACING_ENABLED);
 
-        SPDR_METADATA1(
-            gbl_spdr, "thread_name", SPDR_STR("name", "Main_Thread"));
+        SPDR_METADATA1(gbl_spdr, "thread_name",
+                       SPDR_STR("name", "Main_Thread"));
         {
                 int N = 10000;
+                size_t IN = 64 * 1024;
+                double *results = malloc(sizeof *results * IN);
                 uint64_t ts0 = clock_microseconds(clock);
 
                 SPDR_BEGIN(gbl_spdr, "main", "single_threaded_test");
 
                 while (N--) {
-                        int IN = 64 * 1024;
-                        volatile double results[IN];
+                        size_t i;
+                        volatile double *data = results;
+                        SPDR_BEGIN1(gbl_spdr, "main", "::sin",
+                                    SPDR_INT("i", (int)IN));
 
-                        SPDR_BEGIN1(
-                            gbl_spdr, "main", "::sin", SPDR_INT("i", IN));
-                        while (IN--) {
-                                results[IN] = sin(results[IN]);
+                        for (i = 0; i < IN; ++i) {
+                                data[i] = sin(data[i]);
                         }
                         SPDR_END(gbl_spdr, "main", "::sin");
                 }
 
+                free(results);
                 single_threaded_ms = (clock_microseconds(clock) - ts0) / 1000;
                 printf("elapsed_ms: %llu\n", single_threaded_ms);
                 SPDR_END(gbl_spdr, "main", "single_threaded_test");
@@ -127,16 +129,16 @@ extern int main(int argc, char **argv)
                 SPDR_BEGIN(gbl_spdr, "main", "multi_threaded_test");
 
                 while (N--) {
-                        int const IN_TN = 8;
-                        int IN = 8 * 100 * 64 * 1024;
+#define IN_TN (8)
+                        size_t IN = 8 * 100 * 64 * 1024;
                         double *results = malloc(IN * sizeof(*results));
 
                         struct ThreadContext threads[IN_TN];
 
                         {
-                                int i;
+                                size_t i;
                                 int offset = 0;
-                                int const n = IN / IN_TN;
+                                size_t const n = IN / IN_TN;
 
                                 for (i = 0; i < IN_TN; i++) {
                                         threads[i].clock = clock;
@@ -146,8 +148,7 @@ extern int main(int argc, char **argv)
                                         threads[i].terminated_p = 0;
 
                                         pthread_create(&threads[i].pthread,
-                                                       NULL,
-                                                       thread_main,
+                                                       NULL, thread_main,
                                                        &threads[i]);
 
                                         offset += n;
@@ -185,8 +186,7 @@ extern int main(int argc, char **argv)
                                                elapsed_ms);
                                         printf("equivalent in ms: %llu "
                                                "(scaling: %f)\n",
-                                               equivalent_ms,
-                                               scaling);
+                                               equivalent_ms, scaling);
                                 }
                         }
 
