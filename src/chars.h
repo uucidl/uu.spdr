@@ -1,5 +1,5 @@
-#ifndef CHARS_H
-#define CHARS_H
+#ifndef UU_SPDR_CHARS_H
+#define UU_SPDR_CHARS_H
 
 #include "inlines.h"
 #include "uu-stdint.h"
@@ -11,7 +11,7 @@ struct SPDR_Chars {
         size_t capacity;
 };
 
-#define NULL_CHARS                                                             \
+#define SPDR_Chars_NULL                                                        \
         {                                                                      \
                 0, NULL, 0, 0                                                  \
         }

@@ -101,14 +101,14 @@ extern int main(int argc, char **argv)
         {
                 int N = 10000;
                 size_t IN = 64 * 1024;
-                double* results = malloc(sizeof *results * IN);
+                double *results = malloc(sizeof *results * IN);
                 uint64_t ts0 = clock_microseconds(clock);
 
                 SPDR_BEGIN(gbl_spdr, "main", "single_threaded_test");
 
                 while (N--) {
                         size_t i;
-                        volatile double* data = results;
+                        volatile double *data = results;
                         SPDR_BEGIN1(gbl_spdr, "main", "::sin",
                                     SPDR_INT("i", (int)IN));
 

@@ -1,5 +1,5 @@
-#ifndef UU_ALLOCATOR_H
-#define UU_ALLOCATOR_H
+#ifndef UU_SPDR_ALLOCATOR_H
+#define UU_SPDR_ALLOCATOR_H
 
 #include "inlines.h"
 

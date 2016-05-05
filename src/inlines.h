@@ -1,5 +1,5 @@
-#if !defined(SPDR_INLINES_H)
-#define SPDR_INLINES_H
+#ifndef UU_SPDR_INLINES_H
+#define UU_SPDR_INLINES_H
 
 #if defined(__cplusplus)
 #define SPDR_VOID_PTR_CAST(type, void_ptr) (type *)(void_ptr)

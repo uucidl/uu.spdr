@@ -1,5 +1,5 @@
-#ifndef UU_MURMUR_H
-#define UU_MURMUR_H
+#ifndef UU_SPDR_MURMUR_H
+#define UU_SPDR_MURMUR_H
 
 /*
  * The original implementation in C++ featured the following notice:

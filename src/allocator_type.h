@@ -1,5 +1,5 @@
-#ifndef UU_ALLOCATOR_TYPE_H
-#define UU_ALLOCATOR_TYPE_H
+#ifndef UU_SPDR_ALLOCATOR_TYPE_H
+#define UU_SPDR_ALLOCATOR_TYPE_H
 
 #include <string.h>
 

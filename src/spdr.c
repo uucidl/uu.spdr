@@ -32,9 +32,9 @@
 /**
  *  "documented" truth value, use like:
  *
- * T(use_defibrilator)
+ * SPDR_T(use_defibrilator)
  */
-#define T(x) (!0)
+#define SPDR_T(x) (!0)
 
 struct SPDR_Event {
         uint64_t ts_ticks;
@@ -445,7 +445,7 @@ spdr_internal void event_log(const struct SPDR_Context *context,
                              int with_newlines_p)
 {
         char line[2048];
-        struct SPDR_Chars buffer = NULL_CHARS;
+        struct SPDR_Chars buffer = SPDR_Chars_NULL;
         const char *prefix = "";
         uint64_t ts_microseconds =
             context->clock_fn
@@ -532,9 +532,9 @@ spdr_internal void log_json_arg_error(const struct SPDR_Context *context,
                 ? e->ts_ticks
                 : clock_ticks_to_microseconds(context->clock, e->ts_ticks);
         char buffer[2048];
-        struct SPDR_Chars string = NULL_CHARS;
+        struct SPDR_Chars string = SPDR_Chars_NULL;
         char arg_value_buffer[256];
-        struct SPDR_Chars arg_value_string = NULL_CHARS;
+        struct SPDR_Chars arg_value_string = SPDR_Chars_NULL;
         const char *arg_prefix = "";
 
         string.chars = buffer;
@@ -612,7 +612,7 @@ spdr_internal void log_json(const struct SPDR_Context *context,
         int need_id = 0;
         uint32_t id = 0;
         char buffer[2048];
-        struct SPDR_Chars string = NULL_CHARS;
+        struct SPDR_Chars string = SPDR_Chars_NULL;
 
         string.chars = buffer;
         string.capacity = sizeof buffer;
@@ -767,7 +767,7 @@ extern void uu_spdr_record(struct SPDR_Context *context,
 
         if (context->log_fn) {
                 event_log(context, &e, context->log_fn, context->log_user_data,
-                          !T(with_newlines));
+                          !SPDR_T(with_newlines));
         }
 
         record_event(context, &e);
@@ -785,7 +785,7 @@ extern void uu_spdr_record_1(struct SPDR_Context *context,
         event_add_arg(&e, arg0);
         if (context->log_fn) {
                 event_log(context, &e, context->log_fn, context->log_user_data,
-                          !T(with_newlines));
+                          !SPDR_T(with_newlines));
         }
 
         record_event(context, &e);
@@ -804,7 +804,7 @@ extern void uu_spdr_record_2(struct SPDR_Context *context,
         event_add_arg(&e, arg1);
         if (context->log_fn) {
                 event_log(context, &e, context->log_fn, context->log_user_data,
-                          !T(with_newlines));
+                          !SPDR_T(with_newlines));
         }
 
         record_event(context, &e);
@@ -825,7 +825,7 @@ extern void uu_spdr_record_3(struct SPDR_Context *context,
         event_add_arg(&e, arg2);
         if (context->log_fn) {
                 event_log(context, &e, context->log_fn, context->log_user_data,
-                          !T(with_newlines));
+                          !SPDR_T(with_newlines));
         }
 
         record_event(context, &e);
@@ -910,7 +910,7 @@ extern void spdr_report(struct SPDR_Context *context,
 
                 for (event_i = 0; event_i < events_n; event_i++) {
                         event_log(context, events[event_i], print_fn, user_data,
-                                  T(with_newlines));
+                                  SPDR_T(with_newlines));
                 }
         } else if (SPDR_CHROME_REPORT == report_type) {
                 size_t event_i;

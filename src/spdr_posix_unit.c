@@ -16,6 +16,8 @@ extern "C" {
 #include "spdr.c"
 #include "spdr_posix.c"
 
+#undef _POSIX_C_SOURCE 200809L
+
 #ifdef __cplusplus
 }
 #endif

@@ -356,8 +356,7 @@
  *  considered optional.
  */
 
-#if (defined(__SUNPRO_C) && __SUNPRO_C >= 0x420) &&                            \
-    !defined(PSTDINT_H_INCLUDED)
+#if (defined(__SUNPRO_C) && __SUNPRO_C >= 0x420) && !defined(PSTDINT_H_INCLUDED)
 #include <sys/inttypes.h>
 #define PSTDINT_H_INCLUDED
 #endif

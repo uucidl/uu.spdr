@@ -1,5 +1,5 @@
-#ifndef UU_CLOCK_TYPE_H
-#define UU_CLOCK_TYPE_H
+#ifndef UU_SPDR_CLOCK_TYPE_H
+#define UU_SPDR_CLOCK_TYPE_H
 
 struct SPDR_Allocator;
 
