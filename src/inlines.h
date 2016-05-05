@@ -7,7 +7,7 @@
 #define SPDR_VOID_PTR_CAST(type, void_ptr) void_ptr
 #endif
 
-#if defined(__has_cpp_attribute)
+#if defined(__cplusplus) && defined(__has_cpp_attribute)
 #define spdr_has_cpp_attribute(x) __has_cpp_attribute(x)
 #else
 #define spdr_has_cpp_attribute(x) 0
