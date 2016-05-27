@@ -219,7 +219,7 @@ spdr_internal void bucket_init(struct SPDR_Bucket *bucket, size_t buffer_size)
         AO_store(&bucket->blocks_next, 0);
 }
 
-spdr_internal struct SPDR_Context spdr_make_null_context()
+spdr_internal struct SPDR_Context spdr_make_null_context(void)
 {
         struct SPDR_Context null_context;
         null_context.tracing_p = 0;

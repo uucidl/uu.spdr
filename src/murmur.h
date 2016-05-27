@@ -11,7 +11,7 @@
 /**
  * rotate left a 32bit integer
  */
-spdr_internal uint32_t rotl32(uint32_t const x, int8_t const r)
+spdr_internal uint32_t private_murmur3_rotl32(uint32_t const x, int8_t const r)
 {
         return (x << r) | (x >> (32 - r));
 }
@@ -38,10 +38,10 @@ spdr_internal void murmur3_bmix32(uint32_t *spdr_non_aliasing h1,
         *c2 = *c2 * 5 + 0x6bce6396;
 
         *k1 *= *c1;
-        *k1 = rotl32(*k1, 11);
+        *k1 = private_murmur3_rotl32(*k1, 11);
         *k1 *= *c2;
 
-        *h1 = rotl32(*h1, 13);
+        *h1 = private_murmur3_rotl32(*h1, 13);
         *h1 = *h1 * 5 + 0x52dce729;
         *h1 ^= *k1;
 }
