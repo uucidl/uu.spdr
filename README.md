@@ -7,6 +7,9 @@ Compatible with chrome://tracing
 - Linux, OSX Build Status: [![Travis](https://travis-ci.org/uucidl/uu.spdr.svg?branch=master)](https://travis-ci.org/uucidl/uu.spdr)
 - Windows Build Status: ![Appveyor](https://ci.appveyor.com/api/projects/status/m8vd1c053x1kd0jt?svg=true)
 
+Other similar implementations:
+- minitrace at https://github.com/hrydgard/minitrace 
+
 # Development Status
 
 Stable and maintained. Under development as needs arise.
