@@ -113,16 +113,18 @@ static void foo()
 
 ### Compilation
 
-This implementation should be comformant to ANSI C90, although it
-requires C99's integer types. It does not use external dependencies
-besides a system's headers. This should let you compile on most
-platforms.
+This implementation is mostly comformant to ANSI C90, with common extensions,
+like the Long Long integer modifier.
 
-Tested platforms as of 2012-11:
+It also makes use of C99's integer types. It does not use external dependencies
+besides a system's headers. This should let you compile on most platforms.
+
+Tested platforms as of 2017-08:
 
 *     Linux, GCC
 *     MacOSX, GCC and Clang
-*     Windows, Visual Studio 2012
+*     Windows, Visual Studio 2015
+*     Windows, Visual Studio 2017
 
 You only need to compile one source file to add SPDR into your app,
 then simply import the headers found in include/ to use it.

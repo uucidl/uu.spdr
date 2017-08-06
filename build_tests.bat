@@ -1,9 +1,8 @@
 @echo off
 setlocal
-
 REM This script must be run after vcvarsall.bat has been run,
 REM so that cl.exe is in your path.
-where cl.exe || goto vsmissing_err
+where cl.exe || goto error_end_nocompiler
 
 REM HEREPATH is <drive_letter>:<script_directory>
 set HEREPATH=%~d0%~p0
@@ -15,40 +14,41 @@ cd %TOP%
 set TOP=%CD%
 popd
 
-set SRC=%TOP%\src
 IF not defined BUILD set BUILD=%TOP%\output
 
 REM Start with the most strict warning level
 set WARNINGS=-W4 -WX
-set DEFINES=-DTRACING_ENABLED=1
+REM ignore unknown pragmas
+set WARNINGS=%WARNINGS% -wd4068
 set CLFLAGS=%CLFLAGS% -nologo -FC -EHsc -Z7 -Oi -GR- -Gm- -O2 -Z7 %DEFINES% %WARNINGS% -DEBUG
 
-echo SRC=%SRC%, BUILD=%BUILD%
-echo Building SPDR examples with flags: %CLFLAGS%
-
 mkdir %BUILD%
-del /Q %BUILD%\
+del /Q %BUILD%
+set D=%BUILD%\spdr_basic_tests.exe
+cl.exe -Fe:%D% ^
+  %CLFLAGS% %TOP%\tests\spdr_basic_tests.c
+if %errorlevel% neq 0 goto error_end_build
+echo TEST	%D%
+%D%
+if %errorlevel% neq 0 goto error_end_test
 
-set EXAMPLES=%TOP%\examples
-set SPDR=-I "%TOP%\include" %TOP%\src\spdr_win32_unit.c
-
-cl.exe %CLFLAGS% %SPDR% %EXAMPLES%\test.c -Fe%BUILD%\test.exe
-if %errorlevel% neq 0 goto err
-echo PROGRAM	%BUILD%\test.exe
-
-cl.exe %CLFLAGS% %SPDR% -Tp %EXAMPLES%\test-cxx.cc -Fe%BUILD%\test-cxx.exe
-if %errorlevel% neq 0 goto err
-echo PROGRAM	%BUILD%\test-cxx.exe
-
-echo SUCCESS: Successfully built
 endlocal
 exit /b 0
 
-:vsmissing_err
+:error_end_nocompiler
 echo ERROR: CL.EXE missing. Have you run vcvarsall.bat?
+endlocal
 exit /b 1
 
-:err
-endlocal
+:error_end_build
 echo ERROR: Failed to build
+endlocal
 exit /b %errorlevel%
+
+:error_end_test
+echo ERROR: Test %D% failed
+endlocal
+exit /b %errorlevel%
+
+
+

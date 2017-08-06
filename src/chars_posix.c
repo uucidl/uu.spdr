@@ -4,8 +4,8 @@
 #include <stdio.h>
 
 #if defined(__clang__)
-__attribute__((__format__(__printf__, 2, 3))) spdr_internal
-    void chars_catsprintf(struct SPDR_Chars *chars, const char *format, ...);
+__attribute__((__format__(__printf__, 2, 3))) spdr_internal void
+chars_catsprintf(struct SPDR_Chars *chars, const char *format, ...);
 #endif
 
 spdr_internal void

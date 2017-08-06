@@ -411,7 +411,7 @@ typedef unsigned int uint16_t;
 #define PRINTF_INT16_MODIFIER ""
 #endif
 #define UINT16_C(v) ((uint16_t)(v))
-#elif(USHRT_MAX == UINT16_MAX)
+#elif (USHRT_MAX == UINT16_MAX)
 typedef unsigned short uint16_t;
 #define UINT16_C(v) ((uint16_t)(v))
 #ifndef PRINTF_INT16_MODIFIER
@@ -435,7 +435,7 @@ typedef signed int int16_t;
 #ifndef PRINTF_INT16_MODIFIER
 #define PRINTF_INT16_MODIFIER ""
 #endif
-#elif(SHRT_MAX == INT16_MAX)
+#elif (SHRT_MAX == INT16_MAX)
 typedef signed short int16_t;
 #define INT16_C(v) ((int16_t)(v))
 #ifndef PRINTF_INT16_MODIFIER
@@ -456,13 +456,13 @@ typedef unsigned long uint32_t;
 #ifndef PRINTF_INT32_MODIFIER
 #define PRINTF_INT32_MODIFIER "l"
 #endif
-#elif(UINT_MAX == UINT32_MAX)
+#elif (UINT_MAX == UINT32_MAX)
 typedef unsigned int uint32_t;
 #ifndef PRINTF_INT32_MODIFIER
 #define PRINTF_INT32_MODIFIER ""
 #endif
 #define UINT32_C(v) v##U
-#elif(USHRT_MAX == UINT32_MAX)
+#elif (USHRT_MAX == UINT32_MAX)
 typedef unsigned short uint32_t;
 #define UINT32_C(v) ((unsigned short)(v))
 #ifndef PRINTF_INT32_MODIFIER
@@ -486,13 +486,13 @@ typedef signed long int32_t;
 #ifndef PRINTF_INT32_MODIFIER
 #define PRINTF_INT32_MODIFIER "l"
 #endif
-#elif(INT_MAX == INT32_MAX)
+#elif (INT_MAX == INT32_MAX)
 typedef signed int int32_t;
 #define INT32_C(v) v
 #ifndef PRINTF_INT32_MODIFIER
 #define PRINTF_INT32_MODIFIER ""
 #endif
-#elif(SHRT_MAX == INT32_MAX)
+#elif (SHRT_MAX == INT32_MAX)
 typedef signed short int32_t;
 #define INT32_C(v) ((short)(v))
 #ifndef PRINTF_INT32_MODIFIER
@@ -545,7 +545,7 @@ typedef unsigned long long uint64_t;
 #ifndef PRINTF_INT64_MODIFIER
 #define PRINTF_INT64_MODIFIER "ll"
 #endif
-#elif(defined(__WATCOMC__) && defined(__WATCOM_INT64__)) ||                    \
+#elif (defined(__WATCOMC__) && defined(__WATCOM_INT64__)) ||                   \
     (defined(_MSC_VER) && _INTEGRAL_MAX_BITS >= 64) ||                         \
     (defined(__BORLANDC__) && __BORLANDC__ > 0x460) || defined(__alpha) ||     \
     defined(__DECC)

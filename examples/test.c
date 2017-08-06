@@ -86,10 +86,10 @@ int main(int argc, char **argv)
                                 SPDR_INT("value", 1));
         stuff();
         {
-                double a = 0.0;
-                SPDR_EVENT2(spdr, "Main", "Non Finites",
-                            SPDR_FLOAT("a", 1.0 / a),
-                            SPDR_FLOAT("b", sqrt(-1)));
+                double a = (double)INFINITY;
+                double b = (double)NAN;
+                SPDR_EVENT2(spdr, "Main", "Non Finites", SPDR_FLOAT("a", a),
+                            SPDR_FLOAT("b", b));
         }
 
         SPDR_END(spdr, "Main", "main");

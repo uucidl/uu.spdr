@@ -27,13 +27,15 @@ OS_NAME=${OS_NAME:?${USAGE}}
 
 set -o errexit
 case "${OS_NAME}" in
-    linux) "${TOP}"/build_examples_posix.sh ;;
-    osx) "${TOP}"/build_examples_osx.sh ;;
+    linux) bash "${TOP}"/build_examples_posix.sh ;;
+    osx) bash "${TOP}"/build_examples_osx.sh ;;
     *)
         printf -- "Unknown os name %s\n" "${OS_NAME}"
         exit 1
         ;;
 esac
+
+bash "${TOP}"/build_tests.sh
 
 # just to print the timing information about builds
 origin="$(date "+%s")"

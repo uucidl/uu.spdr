@@ -39,7 +39,7 @@ EXAMPLES="${HERE}"/examples
 SPDR=(-I"${HERE}"/include "${HERE}"/src/spdr_osx_unit.c)
 
 D="${OUTPUT}"/test
-"${CC}" "${cflags[@]}" -DTRACING_ENABLED=1 -ansi "${EXAMPLES}"/test.c -lm "${SPDR[@]}" \
+"${CC}" "${cflags[@]}" -DTRACING_ENABLED=1 -std=c99 "${EXAMPLES}"/test.c -lm "${SPDR[@]}" \
         -o "${D}"
 printf "PROGRAM\t%s\n" "${D}"
 
