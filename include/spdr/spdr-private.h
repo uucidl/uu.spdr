@@ -132,7 +132,7 @@ static inline void SPDR_Scope_exit(struct SPDR_Scope *scope)
 #define UU_SPDR_SCOPE_SETUP(spdr, cat, name)                                   \
         struct SPDR_Scope UU_SPDR_CONCAT(scope, __LINE__)                      \
             __attribute__((cleanup(SPDR_Scope_exit))) = {spdr, cat, name};     \
-        (void) UU_SPDR_CONCAT(scope, __LINE__)
+        (void)UU_SPDR_CONCAT(scope, __LINE__)
 
 #endif
 

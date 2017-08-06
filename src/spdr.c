@@ -25,9 +25,7 @@
 #include "inlines.h"
 #include "murmur.h"
 #include "spdr-internal.h"
-
-#include "allocator_type.h"
-#include "clock_type.h"
+#include "spdr_types.h"
 
 /**
  *  "documented" truth value, use like:
@@ -36,93 +34,7 @@
  */
 #define SPDR_T(x) (!0)
 
-struct SPDR_Event {
-        uint64_t ts_ticks;
-        uint32_t pid;
-        uint64_t tid;
-        const char *cat;
-        const char *name;
-        enum SPDR_Event_Type phase;
-        int8_t str_count;
-        int8_t int_count;
-        int8_t float_count;
-        struct {
-                const char *key;
-                const char *value;
-        } str_args[3];
-        struct {
-                const char *key;
-                int value;
-        } int_args[3];
-        struct {
-                const char *key;
-                double value;
-        } float_args[3];
-};
-
-enum BlockType { EVENT_BLOCK, STR_BLOCK };
-
-struct SPDR_Block {
-        enum BlockType type;
-
-        /*
-         * extra block count.
-         *
-         * Whenever a block is not sufficient, contiguous blocks of
-         * memory are allocated of exactly:
-         *   count * sizeof(struct SPDR_Block)
-         */
-        size_t count;
-        union BlockData {
-                struct SPDR_Event event;
-                char chars[sizeof(struct SPDR_Event)];
-        } data;
-};
-
-struct SPDR_Bucket_Allocator {
-        struct SPDR_Allocator super;
-        struct SPDR_Bucket *bucket;
-};
-
-struct SPDR_Bucket {
-        struct SPDR_Bucket_Allocator allocator;
-        size_t blocks_capacity;
-        AO_t blocks_next;
-        struct SPDR_Block blocks[1];
-};
-
-struct SPDR_Main_Allocator {
-        struct SPDR_Allocator super;
-        struct SPDR_Context *spdr;
-};
-
-enum { BUCKET_COUNT_BITS = 3,
-       BUCKET_COUNT = 2 << BUCKET_COUNT_BITS,
-       BUCKET_COUNT_MASK = BUCKET_COUNT - 1 };
-
-struct SPDR_Context {
-        int tracing_p;
-        struct SPDR_Clock *clock;
-        char clock_buffer[sizeof(struct SPDR_Clock)];
-        uint64_t (*clock_fn)(void *user_data);
-        void *clock_user_data;
-
-        void (*log_fn)(const char *line, void *user_data);
-        void *log_user_data;
-
-        struct SPDR_Main_Allocator clock_allocator;
-
-        /*
-         * the struct is immediately followed by the rest of the
-         * buffer (the arena), where data will be allocated from
-         */
-        size_t arena_size;
-
-        /**
-         * Pointers to the arena
-         */
-        struct SPDR_Bucket *buckets[BUCKET_COUNT];
-};
+#define SPDR_PRIu64 "%" PRINTF_INT64_MODIFIER "u"
 
 /**
  * Grow the memory buffer until capacity is reached.
@@ -459,8 +371,8 @@ spdr_internal void event_log(const struct SPDR_Context *context,
                 prefix = "\n";
         }
 
-        chars_catsprintf(&buffer, "%s%llu %u %llu", prefix, ts_microseconds,
-                         event->pid, event->tid);
+        chars_catsprintf(&buffer, "%s" SPDR_PRIu64 " %u " SPDR_PRIu64 "",
+                         prefix, ts_microseconds, event->pid, event->tid);
 
         chars_catsprintf(&buffer, " \"");
         chars_catjsonstr(&buffer, event->cat);
@@ -542,7 +454,8 @@ spdr_internal void log_json_arg_error(const struct SPDR_Context *context,
         arg_value_string.chars = arg_value_buffer;
         arg_value_string.capacity = sizeof arg_value_buffer;
 
-        chars_catsprintf(&string, "%s{\"ts\":%llu,\"pid\":%u,\"tid\":%llu",
+        chars_catsprintf(&string, "%s{\"ts\":" SPDR_PRIu64
+                                  ",\"pid\":%u,\"tid\":" SPDR_PRIu64 "",
                          prefix, ts_microseconds, e->pid, e->tid);
 
         chars_catsprintf(&string, ",\"cat\":\"spdr-error\"");
@@ -630,7 +543,8 @@ spdr_internal void log_json(const struct SPDR_Context *context,
                 need_id = 1;
         }
 
-        chars_catsprintf(&string, "%s{\"ts\":%llu,\"pid\":%u,\"tid\":%llu",
+        chars_catsprintf(&string, "%s{\"ts\":" SPDR_PRIu64
+                                  ",\"pid\":%u,\"tid\":" SPDR_PRIu64 "",
                          prefix, ts_microseconds, e->pid, e->tid);
 
         chars_catsprintf(&string, ",\"cat\":\"");
@@ -685,14 +599,15 @@ spdr_internal void log_json(const struct SPDR_Context *context,
 
 spdr_internal int get_bucket_i(struct SPDR_Event const *const e)
 {
-        uint64_t key[3];
-
-        key[0] = e->pid;
-        key[1] = e->tid;
-        key[2] = e->ts_ticks;
-
-        return murmurhash3_32((uint32_t *)key, sizeof key, 0x4356) &
-               BUCKET_COUNT_MASK;
+        uint8_t key[sizeof e->tid + sizeof e->ts_ticks];
+        {
+                uint8_t *d = key;
+                memcpy(d, &e->tid, sizeof e->tid);
+                d += sizeof e->tid;
+                memcpy(d, &e->ts_ticks, sizeof e->ts_ticks);
+                d += sizeof e->ts_ticks;
+        }
+        return murmurhash3_32(key, sizeof key, 0x4356) & BUCKET_COUNT_MASK;
 }
 
 struct SPDR_EventAndBucket {
@@ -932,3 +847,6 @@ extern void spdr_report(struct SPDR_Context *context,
         free((void *)events);
         events = NULL;
 }
+
+#undef SPDR_PRIu64
+#undef SPDR_T

@@ -95,6 +95,5 @@ int main(int argc, char **argv)
         spdr_report(spdr, SPDR_CHROME_REPORT, print, "Hello");
         spdr_deinit(&spdr);
         free(spdr_buffer);
-
-        pthread_exit(NULL);
+        return 0;
 }

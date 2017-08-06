@@ -3,10 +3,13 @@ matrix:
   include:
     - compiler: clang
       os: osx
-      env: CFLAGS="-Weverything -Wno-padded"
+      env: CFLAGS="-Weverything -Wno-padded -Wno-unknown-pragmas"
     - compiler: gcc
       os: linux
-      env: CFLAGS=-pedantic
+      env: CFLAGS="-Wextra -D_POSIX_C_SOURCE=200112L -Wno-unknown-pragmas"
+    - compiler: clang
+      os: linux
+      env: CFLAGS="-fsanitize=undefined -fsanitize=address -D_POSIX_C_SOURCE=200112L -Wno-unknown-pragmas"
 sudo: false
 script:
   - ./scripts/travis.sh --top . --os-name "${TRAVIS_OS_NAME}"

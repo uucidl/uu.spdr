@@ -20,10 +20,12 @@ spdr_internal uint32_t private_murmur3_rotl32(uint32_t const x, int8_t const r)
  * Block read - if your platform needs to do endian-swapping or can only
  * handle aligned reads, do the conversion here
  */
-spdr_internal uint32_t
-private_murmur3_getblock(uint32_t const *p, size_t const i)
+spdr_internal uint32_t private_murmur3_getblock(uint8_t const *key,
+                                                size_t const i)
 {
-        return p[i];
+        uint32_t y;
+        memcpy(&y, key + 4 * i, 4);
+        return y;
 }
 
 /**
@@ -46,8 +48,9 @@ spdr_internal void murmur3_bmix32(uint32_t *spdr_non_aliasing h1,
         *h1 ^= *k1;
 }
 
-spdr_internal uint32_t
-murmurhash3_32(uint32_t const *key, size_t len, uint32_t const seed)
+spdr_internal uint32_t murmurhash3_32(uint8_t const *key,
+                                      size_t len,
+                                      uint32_t const seed)
 {
         const size_t nblocks = len / 4;
 
@@ -59,18 +62,16 @@ murmurhash3_32(uint32_t const *key, size_t len, uint32_t const seed)
         /* body */
         {
                 size_t block_index;
-                const uint32_t *blocks = key;
-
                 for (block_index = 0; block_index != nblocks; ++block_index) {
                         uint32_t k1 =
-                            private_murmur3_getblock(blocks, block_index);
+                            private_murmur3_getblock(key, block_index);
                         murmur3_bmix32(&h1, &k1, &c1, &c2);
                 }
         }
 
         /* tail */
         {
-                const uint8_t *tail = (const uint8_t *)(key + nblocks);
+                const uint8_t *tail = key + 4 * nblocks;
 
                 uint32_t k1 = 0;
 

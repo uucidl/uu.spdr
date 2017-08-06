@@ -2,7 +2,9 @@
 extern "C" {
 #endif
 
-#define _POSIX_C_SOURCE 200809L
+#if _POSIX_C_SOURCE < 200112L
+#define _POSIX_C_SOURCE 200112L
+#endif
 
 /* generic modern POSIX platforms */
 
@@ -16,7 +18,7 @@ extern "C" {
 #include "spdr.c"
 #include "spdr_posix.c"
 
-#undef _POSIX_C_SOURCE 200809L
+#undef _POSIX_C_SOURCE
 
 #ifdef __cplusplus
 }

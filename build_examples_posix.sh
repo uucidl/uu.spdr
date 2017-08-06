@@ -39,7 +39,7 @@ EXAMPLES="${HERE}"/examples
 SPDR=(-I"${HERE}"/include "${HERE}"/src/spdr_posix_unit.c -lrt)
 
 D="${OUTPUT}"/test
-"${CC}" "${cflags[@]}" -DTRACING_ENABLED=1 -ansi "${EXAMPLES}"/test.c -lm "${SPDR[@]}" \
+"${CC}" "${cflags[@]}" -DTRACING_ENABLED=1 -std=c99  "${EXAMPLES}"/test.c -lm "${SPDR[@]}" \
         -o "${D}"
 printf "PROGRAM\t%s\n" "${D}"
 
@@ -59,7 +59,7 @@ D="${OUTPUT}"/test-full
 printf "PROGRAM\t%s\n" "${D}"
 
 D="${OUTPUT}"/test-cxx
-"${CXX}" "${cflags[@]}" -DTRACING_ENABLED=1 "${EXAMPLES}"/test-cxx.cc -lm "${SPDR[@]}" \
+"${CXX}" "${cflags[@]}" -DTRACING_ENABLED=1 "${EXAMPLES}"/test-cxx.cc -lm -std=c++11 "${SPDR[@]}" \
          -o "${D}"
 printf "PROGRAM\t%s\n" "${D}"
 
