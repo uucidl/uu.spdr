@@ -1,6 +1,11 @@
 Changes
 =======
 
+0.4.3 -- SPDR now supports Visual Studio 2017
+         
+         The reason this is the thing, is that an optimizer 
+         code generation defect popped up, that we had to workaround.
+         
 0.4.2 -- SPDR learned how to emit Async event pairs:
              SPDR_ASYNC_EVENT_BEGIN / SPDR_ASYNC_EVENT_END
 
