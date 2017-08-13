@@ -19,9 +19,9 @@ struct SPDR_Event {
         const char *cat;
         const char *name;
         enum SPDR_Event_Type phase;
-        int8_t str_count;
-        int8_t int_count;
-        int8_t float_count;
+        uint8_t str_count;
+        uint8_t int_count;
+        uint8_t float_count;
         struct {
                 const char *key;
                 const char *value;
