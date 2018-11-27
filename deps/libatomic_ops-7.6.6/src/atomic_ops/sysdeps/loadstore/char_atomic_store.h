@@ -25,11 +25,11 @@
 /* alignment).                                                          */
 
 AO_INLINE void
-AO_char_store(volatile unsigned/**/char *addr, unsigned/**/char new_val)
+AO_char_store(volatile unsigned char *addr, unsigned char new_val)
 {
 # ifdef AO_ACCESS_char_CHECK_ALIGNED
     assert(((size_t)addr & (sizeof(*addr) - 1)) == 0);
 # endif
-  *(unsigned/**/char *)addr = new_val;
+  *(unsigned char *)addr = new_val;
 }
 #define AO_HAVE_char_store

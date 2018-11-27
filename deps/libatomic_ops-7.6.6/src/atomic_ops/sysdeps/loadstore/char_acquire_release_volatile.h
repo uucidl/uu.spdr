@@ -40,10 +40,10 @@
 # endif
 #endif
 
-AO_INLINE unsigned/**/char
-AO_char_load_acquire(const volatile unsigned/**/char *addr)
+AO_INLINE unsigned char
+AO_char_load_acquire(const volatile unsigned char *addr)
 {
-  unsigned/**/char result = *addr;
+  unsigned char result = *addr;
 
   /* A normal volatile load generates an ld.acq (on IA-64).     */
   AO_GCC_BARRIER();
@@ -52,7 +52,7 @@ AO_char_load_acquire(const volatile unsigned/**/char *addr)
 #define AO_HAVE_char_load_acquire
 
 AO_INLINE void
-AO_char_store_release(volatile unsigned/**/char *addr, unsigned/**/char new_val)
+AO_char_store_release(volatile unsigned char *addr, unsigned char new_val)
 {
   AO_GCC_BARRIER();
   /* A normal volatile store generates an st.rel (on IA-64).    */

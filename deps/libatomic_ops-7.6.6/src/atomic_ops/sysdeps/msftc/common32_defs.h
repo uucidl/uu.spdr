@@ -44,7 +44,7 @@
 # define _InterlockedExchangeAdd     InterlockedExchangeAdd
 # define _InterlockedCompareExchange InterlockedCompareExchange
 
-# define AO_INTERLOCKED_VOLATILE /**/
+# define AO_INTERLOCKED_VOLATILE  
 
 #else /* elif _MSC_VER >= 1310 */
 

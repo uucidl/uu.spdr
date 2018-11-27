@@ -24,14 +24,14 @@
 /* atomic (either for suitably aligned data only or for any legal       */
 /* alignment).                                                          */
 
-AO_INLINE unsigned/**/char
-AO_char_load(const volatile unsigned/**/char *addr)
+AO_INLINE unsigned char
+AO_char_load(const volatile unsigned char *addr)
 {
 # ifdef AO_ACCESS_char_CHECK_ALIGNED
     assert(((size_t)addr & (sizeof(*addr) - 1)) == 0);
 # endif
   /* Cast away the volatile for architectures like IA64 where   */
   /* volatile adds barrier (fence) semantics.                   */
-  return *(const unsigned/**/char *)addr;
+  return *(const unsigned char *)addr;
 }
 #define AO_HAVE_char_load

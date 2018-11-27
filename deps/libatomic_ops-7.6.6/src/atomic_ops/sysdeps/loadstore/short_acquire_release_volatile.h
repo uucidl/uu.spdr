@@ -40,10 +40,10 @@
 # endif
 #endif
 
-AO_INLINE unsigned/**/short
-AO_short_load_acquire(const volatile unsigned/**/short *addr)
+AO_INLINE unsigned short
+AO_short_load_acquire(const volatile unsigned short *addr)
 {
-  unsigned/**/short result = *addr;
+  unsigned short result = *addr;
 
   /* A normal volatile load generates an ld.acq (on IA-64).     */
   AO_GCC_BARRIER();
@@ -52,7 +52,7 @@ AO_short_load_acquire(const volatile unsigned/**/short *addr)
 #define AO_HAVE_short_load_acquire
 
 AO_INLINE void
-AO_short_store_release(volatile unsigned/**/short *addr, unsigned/**/short new_val)
+AO_short_store_release(volatile unsigned short *addr, unsigned short new_val)
 {
   AO_GCC_BARRIER();
   /* A normal volatile store generates an st.rel (on IA-64).    */

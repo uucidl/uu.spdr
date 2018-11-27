@@ -17,15 +17,15 @@
 
 #if !defined(AO_GCC_HAVE_char_SYNC_CAS) || !defined(AO_PREFER_GENERALIZED)
 
-AO_INLINE unsigned/**/char
-AO_char_load(const volatile unsigned/**/char *addr)
+AO_INLINE unsigned char
+AO_char_load(const volatile unsigned char *addr)
 {
   return __atomic_load_n(addr, __ATOMIC_RELAXED);
 }
 #define AO_HAVE_char_load
 
-AO_INLINE unsigned/**/char
-AO_char_load_acquire(const volatile unsigned/**/char *addr)
+AO_INLINE unsigned char
+AO_char_load_acquire(const volatile unsigned char *addr)
 {
   return __atomic_load_n(addr, __ATOMIC_ACQUIRE);
 }
@@ -48,7 +48,7 @@ AO_char_load_acquire(const volatile unsigned/**/char *addr)
 
 #ifndef AO_SKIPATOMIC_char_store
   AO_INLINE void
-  AO_char_store(volatile unsigned/**/char *addr, unsigned/**/char value)
+  AO_char_store(volatile unsigned char *addr, unsigned char value)
   {
     __atomic_store_n(addr, value, __ATOMIC_RELAXED);
   }
@@ -57,7 +57,7 @@ AO_char_load_acquire(const volatile unsigned/**/char *addr)
 
 #ifndef AO_SKIPATOMIC_char_store_release
   AO_INLINE void
-  AO_char_store_release(volatile unsigned/**/char *addr, unsigned/**/char value)
+  AO_char_store_release(volatile unsigned char *addr, unsigned char value)
   {
     __atomic_store_n(addr, value, __ATOMIC_RELEASE);
   }
@@ -68,9 +68,9 @@ AO_char_load_acquire(const volatile unsigned/**/char *addr)
 
 #ifdef AO_GCC_HAVE_char_SYNC_CAS
 
-  AO_INLINE unsigned/**/char
-  AO_char_fetch_compare_and_swap(volatile unsigned/**/char *addr,
-                                  unsigned/**/char old_val, unsigned/**/char new_val)
+  AO_INLINE unsigned char
+  AO_char_fetch_compare_and_swap(volatile unsigned char *addr,
+                                  unsigned char old_val, unsigned char new_val)
   {
     (void)__atomic_compare_exchange_n(addr,
                                       &old_val /* p_expected */,
@@ -82,9 +82,9 @@ AO_char_load_acquire(const volatile unsigned/**/char *addr)
   }
 # define AO_HAVE_char_fetch_compare_and_swap
 
-  AO_INLINE unsigned/**/char
-  AO_char_fetch_compare_and_swap_acquire(volatile unsigned/**/char *addr,
-                                          unsigned/**/char old_val, unsigned/**/char new_val)
+  AO_INLINE unsigned char
+  AO_char_fetch_compare_and_swap_acquire(volatile unsigned char *addr,
+                                          unsigned char old_val, unsigned char new_val)
   {
     (void)__atomic_compare_exchange_n(addr, &old_val, new_val, 0,
                                       __ATOMIC_ACQUIRE, __ATOMIC_ACQUIRE);
@@ -92,9 +92,9 @@ AO_char_load_acquire(const volatile unsigned/**/char *addr)
   }
 # define AO_HAVE_char_fetch_compare_and_swap_acquire
 
-  AO_INLINE unsigned/**/char
-  AO_char_fetch_compare_and_swap_release(volatile unsigned/**/char *addr,
-                                          unsigned/**/char old_val, unsigned/**/char new_val)
+  AO_INLINE unsigned char
+  AO_char_fetch_compare_and_swap_release(volatile unsigned char *addr,
+                                          unsigned char old_val, unsigned char new_val)
   {
     (void)__atomic_compare_exchange_n(addr, &old_val, new_val, 0,
                                       __ATOMIC_RELEASE,
@@ -103,9 +103,9 @@ AO_char_load_acquire(const volatile unsigned/**/char *addr)
   }
 # define AO_HAVE_char_fetch_compare_and_swap_release
 
-  AO_INLINE unsigned/**/char
-  AO_char_fetch_compare_and_swap_full(volatile unsigned/**/char *addr,
-                                       unsigned/**/char old_val, unsigned/**/char new_val)
+  AO_INLINE unsigned char
+  AO_char_fetch_compare_and_swap_full(volatile unsigned char *addr,
+                                       unsigned char old_val, unsigned char new_val)
   {
     (void)__atomic_compare_exchange_n(addr, &old_val, new_val, 0,
                                       __ATOMIC_ACQ_REL,
@@ -116,8 +116,8 @@ AO_char_load_acquire(const volatile unsigned/**/char *addr)
 
 # ifndef AO_GENERALIZE_ASM_BOOL_CAS
     AO_INLINE int
-    AO_char_compare_and_swap(volatile unsigned/**/char *addr,
-                              unsigned/**/char old_val, unsigned/**/char new_val)
+    AO_char_compare_and_swap(volatile unsigned char *addr,
+                              unsigned char old_val, unsigned char new_val)
     {
       return (int)__atomic_compare_exchange_n(addr, &old_val, new_val, 0,
                                         __ATOMIC_RELAXED, __ATOMIC_RELAXED);
@@ -125,8 +125,8 @@ AO_char_load_acquire(const volatile unsigned/**/char *addr)
 #   define AO_HAVE_char_compare_and_swap
 
     AO_INLINE int
-    AO_char_compare_and_swap_acquire(volatile unsigned/**/char *addr,
-                                      unsigned/**/char old_val, unsigned/**/char new_val)
+    AO_char_compare_and_swap_acquire(volatile unsigned char *addr,
+                                      unsigned char old_val, unsigned char new_val)
     {
       return (int)__atomic_compare_exchange_n(addr, &old_val, new_val, 0,
                                         __ATOMIC_ACQUIRE, __ATOMIC_ACQUIRE);
@@ -134,8 +134,8 @@ AO_char_load_acquire(const volatile unsigned/**/char *addr)
 #   define AO_HAVE_char_compare_and_swap_acquire
 
     AO_INLINE int
-    AO_char_compare_and_swap_release(volatile unsigned/**/char *addr,
-                                      unsigned/**/char old_val, unsigned/**/char new_val)
+    AO_char_compare_and_swap_release(volatile unsigned char *addr,
+                                      unsigned char old_val, unsigned char new_val)
     {
       return (int)__atomic_compare_exchange_n(addr, &old_val, new_val, 0,
                                               __ATOMIC_RELEASE,
@@ -144,8 +144,8 @@ AO_char_load_acquire(const volatile unsigned/**/char *addr)
 #   define AO_HAVE_char_compare_and_swap_release
 
     AO_INLINE int
-    AO_char_compare_and_swap_full(volatile unsigned/**/char *addr,
-                                   unsigned/**/char old_val, unsigned/**/char new_val)
+    AO_char_compare_and_swap_full(volatile unsigned char *addr,
+                                   unsigned char old_val, unsigned char new_val)
     {
       return (int)__atomic_compare_exchange_n(addr, &old_val, new_val, 0,
                                               __ATOMIC_ACQ_REL,
@@ -175,15 +175,15 @@ AO_char_load_acquire(const volatile unsigned/**/char *addr)
 
 #if !defined(AO_GCC_HAVE_short_SYNC_CAS) || !defined(AO_PREFER_GENERALIZED)
 
-AO_INLINE unsigned/**/short
-AO_short_load(const volatile unsigned/**/short *addr)
+AO_INLINE unsigned short
+AO_short_load(const volatile unsigned short *addr)
 {
   return __atomic_load_n(addr, __ATOMIC_RELAXED);
 }
 #define AO_HAVE_short_load
 
-AO_INLINE unsigned/**/short
-AO_short_load_acquire(const volatile unsigned/**/short *addr)
+AO_INLINE unsigned short
+AO_short_load_acquire(const volatile unsigned short *addr)
 {
   return __atomic_load_n(addr, __ATOMIC_ACQUIRE);
 }
@@ -206,7 +206,7 @@ AO_short_load_acquire(const volatile unsigned/**/short *addr)
 
 #ifndef AO_SKIPATOMIC_short_store
   AO_INLINE void
-  AO_short_store(volatile unsigned/**/short *addr, unsigned/**/short value)
+  AO_short_store(volatile unsigned short *addr, unsigned short value)
   {
     __atomic_store_n(addr, value, __ATOMIC_RELAXED);
   }
@@ -215,7 +215,7 @@ AO_short_load_acquire(const volatile unsigned/**/short *addr)
 
 #ifndef AO_SKIPATOMIC_short_store_release
   AO_INLINE void
-  AO_short_store_release(volatile unsigned/**/short *addr, unsigned/**/short value)
+  AO_short_store_release(volatile unsigned short *addr, unsigned short value)
   {
     __atomic_store_n(addr, value, __ATOMIC_RELEASE);
   }
@@ -226,9 +226,9 @@ AO_short_load_acquire(const volatile unsigned/**/short *addr)
 
 #ifdef AO_GCC_HAVE_short_SYNC_CAS
 
-  AO_INLINE unsigned/**/short
-  AO_short_fetch_compare_and_swap(volatile unsigned/**/short *addr,
-                                  unsigned/**/short old_val, unsigned/**/short new_val)
+  AO_INLINE unsigned short
+  AO_short_fetch_compare_and_swap(volatile unsigned short *addr,
+                                  unsigned short old_val, unsigned short new_val)
   {
     (void)__atomic_compare_exchange_n(addr,
                                       &old_val /* p_expected */,
@@ -240,9 +240,9 @@ AO_short_load_acquire(const volatile unsigned/**/short *addr)
   }
 # define AO_HAVE_short_fetch_compare_and_swap
 
-  AO_INLINE unsigned/**/short
-  AO_short_fetch_compare_and_swap_acquire(volatile unsigned/**/short *addr,
-                                          unsigned/**/short old_val, unsigned/**/short new_val)
+  AO_INLINE unsigned short
+  AO_short_fetch_compare_and_swap_acquire(volatile unsigned short *addr,
+                                          unsigned short old_val, unsigned short new_val)
   {
     (void)__atomic_compare_exchange_n(addr, &old_val, new_val, 0,
                                       __ATOMIC_ACQUIRE, __ATOMIC_ACQUIRE);
@@ -250,9 +250,9 @@ AO_short_load_acquire(const volatile unsigned/**/short *addr)
   }
 # define AO_HAVE_short_fetch_compare_and_swap_acquire
 
-  AO_INLINE unsigned/**/short
-  AO_short_fetch_compare_and_swap_release(volatile unsigned/**/short *addr,
-                                          unsigned/**/short old_val, unsigned/**/short new_val)
+  AO_INLINE unsigned short
+  AO_short_fetch_compare_and_swap_release(volatile unsigned short *addr,
+                                          unsigned short old_val, unsigned short new_val)
   {
     (void)__atomic_compare_exchange_n(addr, &old_val, new_val, 0,
                                       __ATOMIC_RELEASE,
@@ -261,9 +261,9 @@ AO_short_load_acquire(const volatile unsigned/**/short *addr)
   }
 # define AO_HAVE_short_fetch_compare_and_swap_release
 
-  AO_INLINE unsigned/**/short
-  AO_short_fetch_compare_and_swap_full(volatile unsigned/**/short *addr,
-                                       unsigned/**/short old_val, unsigned/**/short new_val)
+  AO_INLINE unsigned short
+  AO_short_fetch_compare_and_swap_full(volatile unsigned short *addr,
+                                       unsigned short old_val, unsigned short new_val)
   {
     (void)__atomic_compare_exchange_n(addr, &old_val, new_val, 0,
                                       __ATOMIC_ACQ_REL,
@@ -274,8 +274,8 @@ AO_short_load_acquire(const volatile unsigned/**/short *addr)
 
 # ifndef AO_GENERALIZE_ASM_BOOL_CAS
     AO_INLINE int
-    AO_short_compare_and_swap(volatile unsigned/**/short *addr,
-                              unsigned/**/short old_val, unsigned/**/short new_val)
+    AO_short_compare_and_swap(volatile unsigned short *addr,
+                              unsigned short old_val, unsigned short new_val)
     {
       return (int)__atomic_compare_exchange_n(addr, &old_val, new_val, 0,
                                         __ATOMIC_RELAXED, __ATOMIC_RELAXED);
@@ -283,8 +283,8 @@ AO_short_load_acquire(const volatile unsigned/**/short *addr)
 #   define AO_HAVE_short_compare_and_swap
 
     AO_INLINE int
-    AO_short_compare_and_swap_acquire(volatile unsigned/**/short *addr,
-                                      unsigned/**/short old_val, unsigned/**/short new_val)
+    AO_short_compare_and_swap_acquire(volatile unsigned short *addr,
+                                      unsigned short old_val, unsigned short new_val)
     {
       return (int)__atomic_compare_exchange_n(addr, &old_val, new_val, 0,
                                         __ATOMIC_ACQUIRE, __ATOMIC_ACQUIRE);
@@ -292,8 +292,8 @@ AO_short_load_acquire(const volatile unsigned/**/short *addr)
 #   define AO_HAVE_short_compare_and_swap_acquire
 
     AO_INLINE int
-    AO_short_compare_and_swap_release(volatile unsigned/**/short *addr,
-                                      unsigned/**/short old_val, unsigned/**/short new_val)
+    AO_short_compare_and_swap_release(volatile unsigned short *addr,
+                                      unsigned short old_val, unsigned short new_val)
     {
       return (int)__atomic_compare_exchange_n(addr, &old_val, new_val, 0,
                                               __ATOMIC_RELEASE,
@@ -302,8 +302,8 @@ AO_short_load_acquire(const volatile unsigned/**/short *addr)
 #   define AO_HAVE_short_compare_and_swap_release
 
     AO_INLINE int
-    AO_short_compare_and_swap_full(volatile unsigned/**/short *addr,
-                                   unsigned/**/short old_val, unsigned/**/short new_val)
+    AO_short_compare_and_swap_full(volatile unsigned short *addr,
+                                   unsigned short old_val, unsigned short new_val)
     {
       return (int)__atomic_compare_exchange_n(addr, &old_val, new_val, 0,
                                               __ATOMIC_ACQ_REL,
