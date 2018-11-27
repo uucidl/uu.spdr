@@ -92,8 +92,6 @@ int main(int argc, char **argv)
                             SPDR_FLOAT("b", b));
         }
 
-        SPDR_END(spdr, "Main", "main");
-
         {
                 int i;
                 for (i = 0; i < 100; i++) {
@@ -102,6 +100,8 @@ int main(int argc, char **argv)
                             SPDR_FLOAT("cos(i)", cos(3.141592 * i / 50)));
                 }
         }
+
+        SPDR_END(spdr, "Main", "main");
 
         {
                 FILE *file = fopen("trace.json", "wb+");
