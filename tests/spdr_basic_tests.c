@@ -7,7 +7,7 @@
 #pragma clang diagnostic ignored "-Wbad-function-cast"
 #pragma clang diagnostic ignored "-Wcast-qual"
 #endif
-#include "../deps/libatomic_ops-7.2/src/atomic_ops.h"
+#include "../deps/libatomic_ops-7.6.6/src/atomic_ops.h"
 #if defined(__clang__)
 #pragma clang diagnostic pop
 #endif
