@@ -19,6 +19,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 static void bucket_init(struct SPDR_Bucket *bucket, size_t buffer_size);
 
