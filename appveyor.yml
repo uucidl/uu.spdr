@@ -5,6 +5,7 @@ version: 1.0.{build}
 os:
 - Visual Studio 2015
 - Visual Studio 2017
+build: off
 build_script:
 - '@echo off'
 - setlocal
