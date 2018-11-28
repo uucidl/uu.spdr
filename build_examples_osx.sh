@@ -13,7 +13,8 @@ set -u
 RELH="$(dirname "${0}")"
 HERE="$(cd "${RELH}" && pwd)"
 
-OUTPUT="${HERE}"/output
+OUTPUT="${HERE}"/output/programs
+OBJ_OUTPUT="${HERE}"/objects
 CXX=${CXX:-$(which "c++")}
 CC=${CC:-$(which "cc")}
 CFLAGS=${CFLAGS:-}
@@ -22,6 +23,7 @@ cflags=(${CFLAGS} -Wall -Wextra)
 cflags=(${cflags[@]})
 
 [ -d "${OUTPUT}" ] || mkdir -p "${OUTPUT}"
+[ -d "${OBJ_OUTPUT}" ] || mkdir -p "${OBJ_OUTPUT}"
 printf "INFO building into %s\n" "${OUTPUT}"
 
 # just to print the timing information about builds
@@ -36,7 +38,8 @@ set -o errexit
 EXAMPLES="${HERE}"/examples
 
 # here is all you need:
-SPDR=(-I"${HERE}"/include "${HERE}"/src/spdr_osx_unit.c)
+SPDR=("${HERE}"/src/spdr_osx_unit.c -I"${HERE}"/include)
+SPDR_FLAGS=(-I"${HERE}"/include)
 
 D="${OUTPUT}"/test
 "${CC}" "${cflags[@]}" -DTRACING_ENABLED=1 -std=c99 "${EXAMPLES}"/test.c -lm "${SPDR[@]}" \
@@ -58,10 +61,15 @@ D="${OUTPUT}"/test-full
         -o "${D}"
 printf "PROGRAM\t%s\n" "${D}"
 
+D="${OBJ_OUTPUT}"/spdr.o
+"${CC}" "${cflags[@]}" -c "${SPDR[@]}" -o "${D}"
+printf "OBJECT\t%s\n" "${D}"
+SPDR_OBJECT="${D}"
+
 D="${OUTPUT}"/test-cxx
 "${CXX}" "${cflags[@]}" -Wno-old-style-cast  -Wno-c++98-compat -stdlib=libc++ -std=c++11 \
          -DTRACING_ENABLED=1 \
-         "${EXAMPLES}"/test-cxx.cc -lm "${SPDR[@]}" \
+         "${EXAMPLES}"/test-cxx.cc -lm "${SPDR_FLAGS[@]}" "${SPDR_OBJECT}" \
          -o "${D}"
 printf "PROGRAM\t%s\n" "${D}"
 

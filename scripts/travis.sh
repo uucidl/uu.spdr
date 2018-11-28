@@ -45,7 +45,9 @@ set -x
 
 ## <RUN EXAMPLES..
 
-find "${TOP}"/output -type f | while read program
+export LSAN_OPTIONS=verbosity=1:log_threads=1
+
+find "${TOP}"/output/programs -type f | while read program
 do
     printf "Running %s:\n" "${program}"
     "${program}"

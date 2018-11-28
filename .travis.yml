@@ -9,6 +9,7 @@ matrix:
       env: CFLAGS="-Wextra -D_POSIX_C_SOURCE=200112L -Wno-unknown-pragmas"
     - compiler: clang
       os: linux
+      sudo: true # LSAN requires ptrace which is disabled in containers
       env: CFLAGS="-fsanitize=undefined -fsanitize=address -D_POSIX_C_SOURCE=200112L -Wno-unknown-pragmas"
 sudo: false
 script:

@@ -48,7 +48,7 @@ int main(int argc, char **argv)
         std::vector<char> buffer(LOG_N);
         spdr_init(&spdr, &buffer.front(), LOG_N);
         spdr_enable_trace(spdr, TRACING_ENABLED);
-        spdr_set_log_fn(spdr, trace, NULL);
+        spdr_set_log_fn(spdr, trace, nullptr);
 
         SPDR_METADATA1(spdr, "thread_name", SPDR_STR("name", "Main_Thread"));
 
