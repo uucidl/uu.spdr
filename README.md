@@ -200,7 +200,7 @@ before-hand to ensure the code is well formatted.
 
 The following third-party code are used:
 
-### Hans Boehm's atomic_ops library 7.2d
+### Hans Boehm's atomic_ops library 7.6.6
 
 Downloaded from: http://www.hpl.hp.com/research/linux/atomic_ops/
 
