@@ -1,6 +1,10 @@
 Changes
 =======
 
+0.4.4 -- SPDR now supports AArch64 CPUs.
+
+         Upgraded libatomics_ops to 7.6.6 to gain Arm 64 bit CPU support.
+
 0.4.3 -- SPDR now supports Visual Studio 2017
          
          The reason this is the thing, is that an optimizer 
