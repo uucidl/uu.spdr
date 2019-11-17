@@ -275,7 +275,7 @@ extern int uu_spdr_musttrace(const struct SPDR_Context *context)
         return context && context->tracing_p;
 }
 
-extern struct SPDR_Event_Arg uu_spdr_arg_make_int(const char *key, int value)
+extern struct SPDR_Event_Arg uu_spdr_arg_make_int(const char *key, int64_t value)
 {
         struct SPDR_Event_Arg arg = {0, SPDR_INT, {0}};
         arg.key = key;
@@ -394,7 +394,7 @@ spdr_internal void event_log(const struct SPDR_Context *context,
         {
                 int arg_i;
                 for (arg_i = 0; arg_i < event->int_count; arg_i++) {
-                        chars_catsprintf(&buffer, " \"%s\" %d",
+                        chars_catsprintf(&buffer, " \"%s\" %lld",
                                          event->int_args[arg_i].key,
                                          event->int_args[arg_i].value);
                 }
@@ -523,7 +523,7 @@ spdr_internal void log_json(const struct SPDR_Context *context,
         int i;
         const char *arg_prefix = "";
         int need_id = 0;
-        uint32_t id = 0;
+        int64_t id = 0;
         char buffer[2048];
         struct SPDR_Chars string = SPDR_Chars_NULL;
 
@@ -566,7 +566,7 @@ spdr_internal void log_json(const struct SPDR_Context *context,
 
         for (i = 0; i < e->int_count; i++) {
                 if (need_id && 0 == strcmp("id", e->int_args[i].key)) {
-                        id = (uint32_t)e->int_args[i].value;
+                        id = e->int_args[i].value;
                         continue;
                 }
                 chars_catsprintf(&string, "%s\"%s\":%d", arg_prefix,
@@ -588,7 +588,7 @@ spdr_internal void log_json(const struct SPDR_Context *context,
 
         chars_catsprintf(&string, "}");
         if (need_id) {
-                chars_catsprintf(&string, ",\"id\": %d", id);
+                chars_catsprintf(&string, ",\"id\": %lld", id);
         }
         chars_catsprintf(&string, "}");
 

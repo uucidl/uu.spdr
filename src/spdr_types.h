@@ -29,7 +29,7 @@ struct SPDR_Event {
         } str_args[3];
         struct {
                 const char *key;
-                int value;
+                int64_t value;
         } int_args[3];
         struct {
                 const char *key;
