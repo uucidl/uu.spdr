@@ -1,6 +1,8 @@
 #ifndef UU_SPDR_PRIVATE_H
 #define UU_SPDR_PRIVATE_H
 
+#include "pstdint.h"
+
 /**
  * Context for the library
  */
@@ -23,13 +25,13 @@ struct SPDR_Event_Arg {
         const char *key;
         enum SPDR_Event_Arg_Type type;
         union {
-                int i;
+                int64_t i;
                 double d;
                 const char *str;
         } value;
 };
 
-extern struct SPDR_Event_Arg uu_spdr_arg_make_int(const char *key, int value);
+extern struct SPDR_Event_Arg uu_spdr_arg_make_int(const char *key, int64_t value);
 extern struct SPDR_Event_Arg uu_spdr_arg_make_double(const char *key,
                                                      double value);
 extern struct SPDR_Event_Arg uu_spdr_arg_make_str(const char *key,
