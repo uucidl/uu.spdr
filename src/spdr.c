@@ -34,6 +34,7 @@
  */
 #define SPDR_T(x) (!0)
 
+#define SPDR_PRI64 "%" PRINTF_INT64_MODIFIER "d"
 #define SPDR_PRIu64 "%" PRINTF_INT64_MODIFIER "u"
 
 /**
@@ -394,7 +395,7 @@ spdr_internal void event_log(const struct SPDR_Context *context,
         {
                 int arg_i;
                 for (arg_i = 0; arg_i < event->int_count; arg_i++) {
-                        chars_catsprintf(&buffer, " \"%s\" %lld",
+                        chars_catsprintf(&buffer, " \"%s\" " SPDR_PRI64,
                                          event->int_args[arg_i].key,
                                          event->int_args[arg_i].value);
                 }
@@ -464,7 +465,7 @@ spdr_internal void log_json_arg_error(const struct SPDR_Context *context,
 
         switch (arg->type) {
         case SPDR_INT:
-                chars_catsprintf(&arg_value_string, "%d", arg->value.i);
+                chars_catsprintf(&arg_value_string, SPDR_PRI64, arg->value.i);
                 break;
         case SPDR_FLOAT:
                 chars_catsprintf(&arg_value_string, "%f", arg->value.d);
@@ -569,7 +570,7 @@ spdr_internal void log_json(const struct SPDR_Context *context,
                         id = e->int_args[i].value;
                         continue;
                 }
-                chars_catsprintf(&string, "%s\"%s\":%d", arg_prefix,
+                chars_catsprintf(&string, "%s\"%s\":" SPDR_PRI64, arg_prefix,
                                  e->int_args[i].key, e->int_args[i].value);
                 arg_prefix = ",";
         }
@@ -588,7 +589,7 @@ spdr_internal void log_json(const struct SPDR_Context *context,
 
         chars_catsprintf(&string, "}");
         if (need_id) {
-                chars_catsprintf(&string, ",\"id\": %lld", id);
+                chars_catsprintf(&string, ",\"id\": " SPDR_PRI64, id);
         }
         chars_catsprintf(&string, "}");
 
