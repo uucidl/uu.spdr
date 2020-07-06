@@ -202,8 +202,8 @@ The following third-party code are used:
 
 ### Hans Boehm's atomic_ops library 7.6.6
 
-Download URL, see: ./deps/libatomic.txt
-License, see: libatomics' doc/LICENSING.txt
+- Download URL, see: [libatomic.txt](./deps/libatomic.txt)
+- License, see: libatomics' [LICENSING.txt](./deps/libatomic_ops-7.6.6/doc/LICENSING.txt)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
