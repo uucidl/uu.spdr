@@ -11,11 +11,28 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <x86intrin.h>
+
 #include "../include/spdr/spdr.h"
 
 static struct SPDR_Context * g_spdr_context;
 
 #define trace(cat, name) SPDR_EVENT(g_spdr_context, cat, name)
+
+static inline uint64_t Clk() {
+// When I use __builtin_readcyclecounter() I get some strange
+// results. When the tracing is disabled we seem to be paying a high
+// price, which made me think that some of our calculations from
+// outside the rdtsc bracket were actually moved somehow inside of
+// it. When I use rdtscp I see much steadier results.
+#if 0
+    return __builtin_readcyclecounter();
+#else
+    unsigned int dummy;
+    return __rdtscp(&dummy);
+#endif
+}
+
 
 // Xorshift RNGs, George Marsaglia
 static inline uint32_t xorshift32(uint32_t *state) {
@@ -100,10 +117,9 @@ static inline void recorded_trace_call(const char* cat, const char* name) {
     uint32_t idx = g_call_counter++;
 
     __asm__ volatile("" : : : "memory");    
-    uint64_t start = __builtin_readcyclecounter();
+    uint64_t start = Clk();
     trace(cat, name);
-    
-    uint64_t end = __builtin_readcyclecounter();
+    uint64_t end = Clk();
     __asm__ volatile("" : : : "memory");    
     
     uint64_t diff = end - start;
@@ -307,9 +323,9 @@ void print_harness_baseline() {
         const char* d2 = "name";
 
         __asm__ volatile("" : : : "memory");    
-        uint64_t start = __builtin_readcyclecounter();
+        uint64_t start = Clk();
         // trace(d1, d2); // This is the empty macro
-        uint64_t end = __builtin_readcyclecounter();
+        uint64_t end = Clk();
         __asm__ volatile("" : : : "memory");    
 
         uint64_t diff = end - start;
