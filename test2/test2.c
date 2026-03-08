@@ -116,8 +116,14 @@ static uint32_t g_call_counter = 0;
 static inline void recorded_trace_call(const char* cat, const char* name) {  
     uint32_t idx = g_call_counter++;
 
-    __asm__ volatile("" : : : "memory");    
-    uint64_t start = Clk();
+    __asm__ volatile("" : : : "memory");
+
+    // LFENCE instruction will not execute until all prior
+    // instructions have “completed locally”, and no later
+    // instructions will begin execution (even speculatively) until
+    // the LFENCE instruction completes.
+    __asm__ volatile("lfence" : : :);
+    uint64_t start = __builtin_readcyclecounter();
     trace(cat, name);
     uint64_t end = Clk();
     __asm__ volatile("" : : : "memory");    
