@@ -22,6 +22,59 @@
 #include "spdr-internal.h"
 #include "spdr_types.h"
 
+struct SPDR_Event2 {
+        uint64_t ts_ticks;
+        uint32_t pid;
+        uint64_t tid;
+        const char *cat;
+        const char *name;
+        enum SPDR_Event_Type phase;
+        uint8_t str_count;
+        uint8_t int_count;
+        uint8_t float_count;
+        struct {
+                const char *key;
+                const char *value;
+        } str_args[3];
+        struct {
+                const char *key;
+                int64_t value;
+        } int_args[3];
+        struct {
+                const char *key;
+                double value;
+        } float_args[3];
+};
+
+struct SPDR_Block2 {
+        enum BlockType type;
+
+        /*
+         * extra block count.
+         *
+         * Whenever a block is not sufficient, contiguous blocks of
+         * memory are allocated of exactly:
+         *   count * sizeof(struct SPDR_Block2)
+         */
+        size_t count;
+        union BlockData2 {
+                struct SPDR_Event2 event;
+                char chars[sizeof(struct SPDR_Event2)];
+        } data;
+};
+
+struct SPDR_Bucket2_Allocator {
+        struct SPDR_Allocator super;
+        struct SPDR_Bucket2 *bucket;
+};
+
+struct SPDR_Bucket2 {
+        struct SPDR_Bucket2_Allocator allocator;
+        size_t blocks_capacity;
+        _Atomic int blocks_next;
+        struct SPDR_Block2 blocks[1];
+};
+
 /**
  *  "documented" truth value, use like:
  *
@@ -37,31 +90,31 @@
  *
  * @return a block or NULL if the capacity has been reached.
  */
-spdr_internal struct SPDR_Block *growblocks_until(struct SPDR_Block *blocks,
+spdr_internal struct SPDR_Block2 *growblocks_until(struct SPDR_Block2 *blocks,
                                                   size_t blocks_capacity,
                                                   _Atomic int *next,
                                                   size_t nblocks)
 {
         intptr_t increment = (intptr_t)nblocks;
-        _Atomic int i = atomic_fetch_add_explicit(next, increment, memory_order_acquire);
-
-        if (i >= blocks_capacity) {
-                atomic_fetch_sub_explicit(next, increment, memory_order_release);
+        int block_i = atomic_fetch_add_explicit(next, increment, memory_order_acquire);
+        int block_end  = block_i + increment;
+        if (block_end >= blocks_capacity) {
+                // We would overflow this bucket. This allocation failed.
                 return NULL;
         }
-
-        blocks[i].count = nblocks - 1;
-        return &blocks[i];
+                
+        blocks[block_i].count = nblocks - 1;
+        return &blocks[block_i];
 }
 
 /**
  * Allocate an event block
  */
-spdr_internal struct SPDR_Event *growlog_until(struct SPDR_Block *blocks,
+spdr_internal struct SPDR_Event2 *growlog_until(struct SPDR_Block2 *blocks,
                                                size_t blocks_capacity,
                                                _Atomic int * next)
 {
-        struct SPDR_Block *block =
+        struct SPDR_Block2 *block =
             growblocks_until(blocks, blocks_capacity, next, 1);
         if (!block) {
                 return NULL;
@@ -79,10 +132,10 @@ spdr_internal void *bucket_alloc(struct SPDR_Allocator *allocator, size_t size)
         }
 
         {
-                struct SPDR_Bucket *bucket =
-                    ((struct SPDR_Bucket_Allocator *)allocator)->bucket;
-                size_t nblocks = 1 + size / sizeof(struct SPDR_Block);
-                struct SPDR_Block *first_block =
+                struct SPDR_Bucket2 *bucket =
+                    ((struct SPDR_Bucket2_Allocator *)allocator)->bucket;
+                size_t nblocks = 1 + size / sizeof(struct SPDR_Block2);
+                struct SPDR_Block2 *first_block =
                     growblocks_until(bucket->blocks, bucket->blocks_capacity,
                                      &bucket->blocks_next, nblocks);
 
@@ -116,7 +169,7 @@ spdr_internal void *spdr_clock_alloc(struct SPDR_Allocator *allocator,
         return &context->clock_buffer;
 }
 
-spdr_internal void bucket_init(struct SPDR_Bucket *bucket, size_t buffer_size)
+spdr_internal void bucket_init(struct SPDR_Bucket2 *bucket, size_t buffer_size)
 {
         bucket->allocator.super.alloc = bucket_alloc;
         bucket->allocator.super.free = spdr_free;
@@ -124,7 +177,7 @@ spdr_internal void bucket_init(struct SPDR_Bucket *bucket, size_t buffer_size)
 
         bucket->blocks_capacity =
             1 + (buffer_size - sizeof *bucket) / sizeof bucket->blocks[0];
-        AO_store(&bucket->blocks_next, 0);
+        atomic_store(&bucket->blocks_next, 0);
 }
 
 spdr_internal struct SPDR_Context spdr_make_null_context(void)
@@ -147,6 +200,7 @@ spdr_init(struct SPDR_Context **context_ptr, void *buffer, size_t buffer_size)
         struct SPDR_Context *context;
         void *arena;
         uintptr_t buffer_last_pos;
+        uintptr_t context_pos;
         uintptr_t arena_pos;
         size_t arena_size;
 
@@ -154,8 +208,11 @@ spdr_init(struct SPDR_Context **context_ptr, void *buffer, size_t buffer_size)
                 return -1;
         }
 
-        context = SPDR_VOID_PTR_CAST(SPDR_Context, buffer);
+        context_pos = ((uintptr_t)buffer + _Alignof(struct SPDR_Context)) & (~(_Alignof(struct SPDR_Context)-1));
+        
+        context = SPDR_VOID_PTR_CAST(SPDR_Context, (void*)context_pos);
         *context = null_context;
+        context->pid = uu_spdr_get_pid();
 
         buffer_last_pos = (uintptr_t)buffer + buffer_size;
 
@@ -189,8 +246,8 @@ spdr_init(struct SPDR_Context **context_ptr, void *buffer, size_t buffer_size)
                 context->arena_size = arena_size;
 
                 for (i = 0; i < n; i++) {
-                        struct SPDR_Bucket *bucket = SPDR_VOID_PTR_CAST(
-                            struct SPDR_Bucket,
+                        struct SPDR_Bucket2 *bucket = SPDR_VOID_PTR_CAST(
+                            struct SPDR_Bucket2,
                             (void *)(((char *)arena) + i * bucket_size));
                         context->buckets[i] = bucket;
                         bucket_init(bucket, bucket_size);
@@ -213,21 +270,21 @@ extern void spdr_reset(struct SPDR_Context *context)
         int i;
 
         for (i = 0; i < BUCKET_COUNT; i++) {
-                AO_store(&context->buckets[i]->blocks_next, 0);
+                atomic_store(&context->buckets[i]->blocks_next, 0);
         }
 }
 
 extern struct SPDR_Capacity spdr_capacity(struct SPDR_Context *context)
 {
         struct SPDR_Capacity cap;
-        struct SPDR_Bucket **bucketp = &context->buckets[0];
+        struct SPDR_Bucket2 **bucketp = &context->buckets[0];
         int bucket_count = BUCKET_COUNT;
 
         cap.count = 0;
         cap.capacity = 0;
         while (bucket_count--) {
-                struct SPDR_Bucket const *bucket = *bucketp;
-                cap.count += AO_load(&bucket->blocks_next);
+                struct SPDR_Bucket2 const *bucket = *bucketp;
+                cap.count += atomic_load(&bucket->blocks_next);
                 cap.capacity += bucket->blocks_capacity;
                 ++bucketp;
         }
@@ -265,7 +322,7 @@ extern void spdr_enable_trace(struct SPDR_Context *context, int traceon)
         context->tracing_p = traceon;
 }
 
-extern int uu_spdr_musttrace(const struct SPDR_Context *context)
+static inline int uu_spdr_musttrace(const struct SPDR_Context *context)
 {
         /*  FEATURE: a null context is treated as a *never tracing* context */
         return context && context->tracing_p;
@@ -300,19 +357,40 @@ extern struct SPDR_Event_Arg uu_spdr_arg_make_str(const char *key,
         return arg;
 }
 
+struct Tls_Context {
+        int preferred_bucket;
+        uint64_t tid;
+        int initialized;
+};
+
+static _Thread_local struct Tls_Context tls_context;
+
+spdr_internal void init_tls_context()
+{
+        if (tls_context.initialized)
+                return;
+
+        uint8_t key[sizeof tls_context.tid];
+        memcpy(key, &tls_context.tid, sizeof key);
+        tls_context.preferred_bucket = murmurhash3_32(key, sizeof key, 0x4356) & BUCKET_COUNT_MASK;
+        tls_context.initialized = 1;
+}
+
 spdr_internal void event_make(struct SPDR_Context *context,
-                              struct SPDR_Event *event,
+                              struct SPDR_Event2 *event,
                               const char *cat,
                               const char *name,
                               enum SPDR_Event_Type type)
 {
+        init_tls_context();
+        
         if (context->clock_fn) {
                 event->ts_ticks = context->clock_fn(context->clock_user_data);
         } else {
                 event->ts_ticks = clock_ticks(context->clock);
         }
-        event->pid = uu_spdr_get_pid();
-        event->tid = uu_spdr_get_tid();
+        event->pid = context->pid;
+        event->tid = tls_context.tid;
         event->cat = cat;
         event->name = name;
         event->phase = type;
@@ -321,7 +399,7 @@ spdr_internal void event_make(struct SPDR_Context *context,
         event->float_count = 0;
 }
 
-spdr_internal void event_add_arg(struct SPDR_Event *event,
+spdr_internal void event_add_arg(struct SPDR_Event2 *event,
                                  struct SPDR_Event_Arg arg)
 {
         int i;
@@ -345,8 +423,8 @@ spdr_internal void event_add_arg(struct SPDR_Event *event,
         }
 }
 
-spdr_internal void event_log(const struct SPDR_Context *context,
-                             const struct SPDR_Event *event,
+spdr_internal spdr_noinline void event_log(const struct SPDR_Context *context,
+                             const struct SPDR_Event2 *event,
                              void (*print_fn)(const char *string,
                                               void *user_data),
                              void *user_data,
@@ -410,7 +488,7 @@ spdr_internal void event_log(const struct SPDR_Context *context,
         }
 }
 
-spdr_internal int has_non_json_arg(struct SPDR_Event const *const event,
+spdr_internal int has_non_json_arg(struct SPDR_Event2 const *const event,
                                    struct SPDR_Event_Arg *const first_arg)
 {
         int i;
@@ -428,7 +506,7 @@ spdr_internal int has_non_json_arg(struct SPDR_Event const *const event,
 }
 
 spdr_internal void log_json_arg_error(const struct SPDR_Context *context,
-                                      const struct SPDR_Event *e,
+                                      const struct SPDR_Event2 *e,
                                       struct SPDR_Event_Arg *arg,
                                       const char *prefix,
                                       void (*print_fn)(const char *string,
@@ -506,7 +584,7 @@ spdr_internal void log_json_arg_error(const struct SPDR_Context *context,
 }
 
 spdr_internal void log_json(const struct SPDR_Context *context,
-                            const struct SPDR_Event *e,
+                            const struct SPDR_Event2 *e,
                             const char *prefix,
                             void (*print_fn)(const char *string,
                                              void *user_data),
@@ -593,21 +671,14 @@ spdr_internal void log_json(const struct SPDR_Context *context,
         }
 }
 
-static _Thread_local int preferred_i = -1;
-
-spdr_internal int get_bucket_i(struct SPDR_Event const *const e)
+spdr_internal int get_bucket_i(struct SPDR_Event2 const *const e)
 {
-        if (preferred_i < 0) {
-                uint8_t key[sizeof e->tid];
-                memcpy(key, &e->tid, sizeof key);
-                preferred_i = murmurhash3_32(key, sizeof key, 0x4356) & BUCKET_COUNT_MASK;
-        }
-        return preferred_i;
+        return tls_context.preferred_bucket;
 }
 
 struct SPDR_EventAndBucket {
-        struct SPDR_Event *event;
-        struct SPDR_Bucket *bucket;
+        struct SPDR_Event2 *event;
+        struct SPDR_Bucket2 *bucket;
 };
 
 spdr_internal struct SPDR_EventAndBucket
@@ -619,8 +690,8 @@ growlog(struct SPDR_Context *const context, int const start_bucket_i)
         /* allocate from main bucket and if it fails, try the other ones */
         for (i = 0; i < BUCKET_COUNT; i++) {
                 int const bucket_i = (start_bucket_i + i) & BUCKET_COUNT_MASK;
-                struct SPDR_Bucket *bucket = context->buckets[bucket_i];
-                struct SPDR_Event *ep =
+                struct SPDR_Bucket2 *bucket = context->buckets[bucket_i];
+                struct SPDR_Event2 *ep =
                     growlog_until(bucket->blocks, bucket->blocks_capacity,
                                   &bucket->blocks_next);
                 if (ep) {
@@ -636,11 +707,11 @@ growlog(struct SPDR_Context *const context, int const start_bucket_i)
 }
 
 spdr_internal void record_event(struct SPDR_Context *context,
-                                struct SPDR_Event *e)
+                                struct SPDR_Event2 *e)
 {
         struct SPDR_EventAndBucket pair = growlog(context, get_bucket_i(e));
-        struct SPDR_Event *ep = pair.event;
-        struct SPDR_Bucket *bucket = pair.bucket;
+        struct SPDR_Event2 *ep = pair.event;
+        struct SPDR_Bucket2 *bucket = pair.bucket;
         int i;
 
         if (!ep) {
@@ -672,15 +743,16 @@ extern void uu_spdr_record(struct SPDR_Context *context,
                            const char *name,
                            enum SPDR_Event_Type type)
 {
-        struct SPDR_Event e;
+        struct SPDR_Event2 e;
         event_make(context, &e, cat, name, type);
 
+        record_event(context, &e);
+
         if (context->log_fn) {
+                // unlikely slow path
                 event_log(context, &e, context->log_fn, context->log_user_data,
                           !SPDR_T(with_newlines));
         }
-
-        record_event(context, &e);
 }
 
 extern void uu_spdr_record_1(struct SPDR_Context *context,
@@ -689,16 +761,18 @@ extern void uu_spdr_record_1(struct SPDR_Context *context,
                              enum SPDR_Event_Type type,
                              struct SPDR_Event_Arg arg0)
 {
-        struct SPDR_Event e;
+        struct SPDR_Event2 e;
 
         event_make(context, &e, cat, name, type);
         event_add_arg(&e, arg0);
+
+        record_event(context, &e);
+
         if (context->log_fn) {
+                // unlikely slow path
                 event_log(context, &e, context->log_fn, context->log_user_data,
                           !SPDR_T(with_newlines));
         }
-
-        record_event(context, &e);
 }
 
 extern void uu_spdr_record_2(struct SPDR_Context *context,
@@ -708,16 +782,18 @@ extern void uu_spdr_record_2(struct SPDR_Context *context,
                              struct SPDR_Event_Arg arg0,
                              struct SPDR_Event_Arg arg1)
 {
-        struct SPDR_Event e;
+        struct SPDR_Event2 e;
         event_make(context, &e, cat, name, type);
         event_add_arg(&e, arg0);
         event_add_arg(&e, arg1);
-        if (context->log_fn) {
-                event_log(context, &e, context->log_fn, context->log_user_data,
-                          !SPDR_T(with_newlines));
-        }
 
         record_event(context, &e);
+
+        if (context->log_fn) {
+                // unlikely slow path
+                event_log(context, &e, context->log_fn, context->log_user_data,
+                          !SPDR_T(with_newlines));
+        }        
 }
 
 extern void uu_spdr_record_3(struct SPDR_Context *context,
@@ -728,28 +804,31 @@ extern void uu_spdr_record_3(struct SPDR_Context *context,
                              struct SPDR_Event_Arg arg1,
                              struct SPDR_Event_Arg arg2)
 {
-        struct SPDR_Event e;
+        struct SPDR_Event2 e;
         event_make(context, &e, cat, name, type);
         event_add_arg(&e, arg0);
         event_add_arg(&e, arg1);
         event_add_arg(&e, arg2);
+
+        record_event(context, &e);
+
         if (context->log_fn) {
+                // unlikely slow path
                 event_log(context, &e, context->log_fn, context->log_user_data,
                           !SPDR_T(with_newlines));
         }
-
-        record_event(context, &e);
+        
 }
 
 spdr_internal int event_timecmp(void const *const _a, void const *const _b)
 {
-        struct SPDR_Event const *const *ap =
-            SPDR_VOID_PTR_CAST(struct SPDR_Event const *const, _a);
-        struct SPDR_Event const *const *bp =
-            SPDR_VOID_PTR_CAST(struct SPDR_Event const *const, _b);
+        struct SPDR_Event2 const *const *ap =
+            SPDR_VOID_PTR_CAST(struct SPDR_Event2 const *const, _a);
+        struct SPDR_Event2 const *const *bp =
+            SPDR_VOID_PTR_CAST(struct SPDR_Event2 const *const, _b);
 
-        struct SPDR_Event const *a = *ap;
-        struct SPDR_Event const *b = *bp;
+        struct SPDR_Event2 const *a = *ap;
+        struct SPDR_Event2 const *b = *bp;
 
         if (a->ts_ticks == b->ts_ticks) {
                 if (a->pid == b->pid) {
@@ -779,7 +858,7 @@ extern void spdr_report(struct SPDR_Context *context,
         size_t records_per_bucket[BUCKET_COUNT];
         size_t block_count = 0;
 
-        struct SPDR_Event const **events;
+        struct SPDR_Event2 const **events;
         size_t events_n;
         int bucket_i;
 
@@ -789,24 +868,24 @@ extern void spdr_report(struct SPDR_Context *context,
 
         /* blocks all further recording */
         for (bucket_i = 0; bucket_i < BUCKET_COUNT; bucket_i++) {
-                struct SPDR_Bucket *const bucket = context->buckets[bucket_i];
+                struct SPDR_Bucket2 *const bucket = context->buckets[bucket_i];
                 records_per_bucket[bucket_i] =
-                    AO_load_acquire(&bucket->blocks_next);
-                AO_store(&bucket->blocks_next, bucket->blocks_capacity);
+                    atomic_load_explicit(&bucket->blocks_next, memory_order_acquire);
+                atomic_store(&bucket->blocks_next, bucket->blocks_capacity);
                 block_count += records_per_bucket[bucket_i];
         }
 
-        events = SPDR_VOID_PTR_CAST(struct SPDR_Event const *,
+        events = SPDR_VOID_PTR_CAST(struct SPDR_Event2 const *,
                                     malloc(block_count * sizeof events[0]));
         events_n = 0;
 
         for (bucket_i = 0; bucket_i < BUCKET_COUNT; bucket_i++) {
-                struct SPDR_Bucket const *const bucket =
+                struct SPDR_Bucket2 const *const bucket =
                     context->buckets[bucket_i];
                 size_t j;
 
                 for (j = 0; j < records_per_bucket[bucket_i]; j++) {
-                        const struct SPDR_Block *block = &bucket->blocks[j];
+                        const struct SPDR_Block2 *block = &bucket->blocks[j];
                         if (block->type == EVENT_BLOCK) {
                                 events[events_n++] = &block->data.event;
                         }

@@ -64,7 +64,7 @@ struct SPDR_Bucket_Allocator {
 struct SPDR_Bucket {
         struct SPDR_Bucket_Allocator allocator;
         size_t blocks_capacity;
-        AO_t blocks_next;
+        _Atomic int blocks_next;
         struct SPDR_Block blocks[1];
 };
 
@@ -79,6 +79,7 @@ enum { BUCKET_COUNT_BITS = 3,
 
 struct SPDR_Context {
         int tracing_p;
+        uint64_t pid;
         struct SPDR_Clock *clock;
         char clock_buffer[sizeof(struct SPDR_Clock)];
         uint64_t (*clock_fn)(void *user_data);

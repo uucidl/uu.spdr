@@ -32,4 +32,10 @@
 #define spdr_non_aliasing __restrict__
 #endif
 
+#if defined(_MSC_VER)
+#define spdr_noinline __declspec(noinline)
+#elif defined(__gcc__)
+#define __attribute__ ((noinline))
+#endif
+
 #endif
