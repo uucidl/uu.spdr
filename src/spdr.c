@@ -34,6 +34,10 @@
  */
 #define SPDR_T(x) (!0)
 
+#ifndef PRINTF_INT64_MODIFIER
+#error No PRINTF_INT64_MODIFIER specified!
+#endif
+
 #define SPDR_PRI64 "%" PRINTF_INT64_MODIFIER "d"
 #define SPDR_PRIu64 "%" PRINTF_INT64_MODIFIER "u"
 
