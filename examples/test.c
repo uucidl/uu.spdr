@@ -104,10 +104,12 @@ int main(int argc, char **argv)
         SPDR_END(spdr, "Main", "main");
 
         {
-                FILE *file = fopen("trace.json", "wb+");
+		char const * filename = "trace.json";
+                FILE *file = fopen(filename, "wb+");
                 if (file) {
                         spdr_report(spdr, SPDR_CHROME_REPORT, print, file);
                         fclose(file);
+			printf("wrote %s\n", filename);
                 }
         }
         spdr_deinit(&spdr);
