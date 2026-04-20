@@ -1,1 +1,1 @@
-@url: http://www.hboehm.info/gc/gc_source/libatomic_ops-7.6.6.tar.gz
+@url: https://github.com/bdwgc/libatomic_ops/releases/download/v7.10.0/libatomic_ops-7.10.0.tar.gz
