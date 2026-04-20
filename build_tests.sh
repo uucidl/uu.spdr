@@ -27,7 +27,7 @@ set -o errexit
 TESTS="${HERE}"/tests
 
 D="${OUTPUT}"/spdr_basic_tests
-"${CC}" -std=c99 "${cflags[@]}" -DTRACING_ENABLED=1 "${TESTS}"/spdr_basic_tests.c -lm \
+"${CC}" -std=c99 -D_POSIX_C_SOURCE=200112L "${cflags[@]}" -DTRACING_ENABLED=1 "${TESTS}"/spdr_basic_tests.c -lm \
         -o "${D}"
 printf "PROGRAM\t%s\n" "${D}"
 
