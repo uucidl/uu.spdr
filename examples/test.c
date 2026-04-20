@@ -101,6 +101,8 @@ int main(int argc, char **argv)
                 }
         }
 
+	SPDR_EVENT1(spdr, "Main", "I64Example", SPDR_INT("i", 0x7fffffffffffffffull));
+
         SPDR_END(spdr, "Main", "main");
 
         {
