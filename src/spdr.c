@@ -13,6 +13,7 @@
 
 #include "../include/spdr/spdr.h"
 
+#include <inttypes.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,12 +35,6 @@
  */
 #define SPDR_T(x) (!0)
 
-#ifndef PRINTF_INT64_MODIFIER
-#error No PRINTF_INT64_MODIFIER specified!
-#endif
-
-#define SPDR_PRI64 "%" PRINTF_INT64_MODIFIER "d"
-#define SPDR_PRIu64 "%" PRINTF_INT64_MODIFIER "u"
 
 /**
  * Grow the memory buffer until capacity is reached.
@@ -376,7 +371,7 @@ spdr_internal void event_log(const struct SPDR_Context *context,
                 prefix = "\n";
         }
 
-        chars_catsprintf(&buffer, "%s" SPDR_PRIu64 " %u " SPDR_PRIu64 "",
+        chars_catsprintf(&buffer, "%s %" PRIu64 " %u  %" PRIu64 "",
                          prefix, ts_microseconds, event->pid, event->tid);
 
         chars_catsprintf(&buffer, " \"");
@@ -399,7 +394,7 @@ spdr_internal void event_log(const struct SPDR_Context *context,
         {
                 int arg_i;
                 for (arg_i = 0; arg_i < event->int_count; arg_i++) {
-                        chars_catsprintf(&buffer, " \"%s\" " SPDR_PRI64,
+                        chars_catsprintf(&buffer, " \"%s\" " "%" PRId64,
                                          event->int_args[arg_i].key,
                                          event->int_args[arg_i].value);
                 }
@@ -459,8 +454,8 @@ spdr_internal void log_json_arg_error(const struct SPDR_Context *context,
         arg_value_string.chars = arg_value_buffer;
         arg_value_string.capacity = sizeof arg_value_buffer;
 
-        chars_catsprintf(&string, "%s{\"ts\":" SPDR_PRIu64
-                                  ",\"pid\":%u,\"tid\":" SPDR_PRIu64 "",
+        chars_catsprintf(&string, "%s{\"ts\":" "%" PRIu64
+                                  ",\"pid\":%u,\"tid\":" "%" PRIu64 "",
                          prefix, ts_microseconds, e->pid, e->tid);
 
         chars_catsprintf(&string, ",\"cat\":\"spdr-error\"");
@@ -469,7 +464,7 @@ spdr_internal void log_json_arg_error(const struct SPDR_Context *context,
 
         switch (arg->type) {
         case SPDR_INT:
-                chars_catsprintf(&arg_value_string, SPDR_PRI64, arg->value.i);
+                chars_catsprintf(&arg_value_string, "%" PRId64, arg->value.i);
                 break;
         case SPDR_FLOAT:
                 chars_catsprintf(&arg_value_string, "%f", arg->value.d);
@@ -548,8 +543,8 @@ spdr_internal void log_json(const struct SPDR_Context *context,
                 need_id = 1;
         }
 
-        chars_catsprintf(&string, "%s{\"ts\":" SPDR_PRIu64
-                                  ",\"pid\":%u,\"tid\":" SPDR_PRIu64 "",
+        chars_catsprintf(&string, "%s{\"ts\":" "%" PRIu64
+                                  ",\"pid\":%u,\"tid\":" "%" PRIu64 "",
                          prefix, ts_microseconds, e->pid, e->tid);
 
         chars_catsprintf(&string, ",\"cat\":\"");
@@ -574,7 +569,7 @@ spdr_internal void log_json(const struct SPDR_Context *context,
                         id = e->int_args[i].value;
                         continue;
                 }
-                chars_catsprintf(&string, "%s\"%s\":" SPDR_PRI64, arg_prefix,
+                chars_catsprintf(&string, "%s\"%s\":" "%" PRId64, arg_prefix,
                                  e->int_args[i].key, e->int_args[i].value);
                 arg_prefix = ",";
         }
@@ -593,7 +588,7 @@ spdr_internal void log_json(const struct SPDR_Context *context,
 
         chars_catsprintf(&string, "}");
         if (need_id) {
-                chars_catsprintf(&string, ",\"id\": " SPDR_PRI64, id);
+                chars_catsprintf(&string, ",\"id\": %" PRId64, id);
         }
         chars_catsprintf(&string, "}");
 

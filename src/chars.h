@@ -2,7 +2,8 @@
 #define UU_SPDR_CHARS_H
 
 #include "inlines.h"
-#include "uu-stdint.h"
+
+#include <stdint.h>
 
 struct SPDR_Chars {
         uint32_t error;

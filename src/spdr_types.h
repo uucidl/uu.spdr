@@ -1,7 +1,7 @@
 #ifndef SPDR_TYPES_H
 #define SPDR_TYPES_H
 
-#include "uu-stdint.h"
+#include <stdint.h>
 
 #include "allocator_type.h"
 #include "clock_type.h"

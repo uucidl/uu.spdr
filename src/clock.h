@@ -2,7 +2,8 @@
 #define UU_SPDR_CLOCK_H
 
 #include "inlines.h"
-#include "uu-stdint.h" /* uint64_t */
+
+#include <stdint.h> /* uint64_t */
 
 struct SPDR_Clock;
 struct SPDR_Allocator;

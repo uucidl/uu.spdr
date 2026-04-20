@@ -6,8 +6,8 @@
  */
 
 #include "spdr-private.h"
-#include "pstdint.h"
 
+#include <stdint.h>
 #include <stddef.h> /* for size_t */
 
 /**

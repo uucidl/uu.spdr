@@ -1,7 +1,7 @@
 #ifndef UU_SPDR_PRIVATE_H
 #define UU_SPDR_PRIVATE_H
 
-#include "pstdint.h"
+#include <stdint.h> /* for int64_t */
 
 /**
  * Context for the library

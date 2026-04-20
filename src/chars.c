@@ -1,7 +1,7 @@
 #include "inlines.h"
 #include "chars.h"
 
-#include "uu-stdint.h"
+#include <stdint.h>
 
 /*
 *	http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
