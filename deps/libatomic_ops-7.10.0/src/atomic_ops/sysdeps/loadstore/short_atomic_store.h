@@ -29,11 +29,11 @@
 /* alignment).                                                          */
 
 AO_INLINE void
-AO_short_store(volatile unsigned/**/short *addr, unsigned/**/short new_val)
+AO_short_store(volatile unsigned short *addr, unsigned short new_val)
 {
 # ifdef AO_ACCESS_short_CHECK_ALIGNED
     AO_ASSERT_ADDR_ALIGNED(addr);
 # endif
-  *(unsigned/**/short *)addr = new_val;
+  *(unsigned short *)addr = new_val;
 }
 #define AO_HAVE_short_store

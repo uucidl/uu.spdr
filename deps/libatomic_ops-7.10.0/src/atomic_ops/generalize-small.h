@@ -28,11 +28,11 @@
 #if defined(AO_HAVE_char_fetch_compare_and_swap) \
     && defined(AO_HAVE_nop_full) \
     && !defined(AO_HAVE_char_fetch_compare_and_swap_acquire)
-  AO_INLINE unsigned/**/char
-  AO_char_fetch_compare_and_swap_acquire(volatile unsigned/**/char *addr,
-                                          unsigned/**/char old_val, unsigned/**/char new_val)
+  AO_INLINE unsigned char
+  AO_char_fetch_compare_and_swap_acquire(volatile unsigned char *addr,
+                                          unsigned char old_val, unsigned char new_val)
   {
-    unsigned/**/char result = AO_char_fetch_compare_and_swap(addr, old_val, new_val);
+    unsigned char result = AO_char_fetch_compare_and_swap(addr, old_val, new_val);
     AO_nop_full();
     return result;
   }
@@ -146,8 +146,8 @@
 #if defined(AO_HAVE_char_compare_and_swap) && defined(AO_HAVE_nop_full) \
     && !defined(AO_HAVE_char_compare_and_swap_acquire)
   AO_INLINE int
-  AO_char_compare_and_swap_acquire(volatile unsigned/**/char *addr, unsigned/**/char old,
-                                    unsigned/**/char new_val)
+  AO_char_compare_and_swap_acquire(volatile unsigned char *addr, unsigned char old,
+                                    unsigned char new_val)
   {
     int result = AO_char_compare_and_swap(addr, old, new_val);
     AO_nop_full();
@@ -281,10 +281,10 @@
 
 #if defined(AO_HAVE_char_load) && defined(AO_HAVE_nop_full) \
     && !defined(AO_HAVE_char_load_acquire)
-  AO_INLINE unsigned/**/char
-  AO_char_load_acquire(const volatile unsigned/**/char *addr)
+  AO_INLINE unsigned char
+  AO_char_load_acquire(const volatile unsigned char *addr)
   {
-    unsigned/**/char result = AO_char_load(addr);
+    unsigned char result = AO_char_load(addr);
 
     /* Acquire barrier would be useless, since the load could be delayed    */
     /* beyond it.                                                           */
@@ -296,10 +296,10 @@
 
 #if defined(AO_HAVE_char_load) && defined(AO_HAVE_nop_read) \
     && !defined(AO_HAVE_char_load_read)
-  AO_INLINE unsigned/**/char
-  AO_char_load_read(const volatile unsigned/**/char *addr)
+  AO_INLINE unsigned char
+  AO_char_load_read(const volatile unsigned char *addr)
   {
-    unsigned/**/char result = AO_char_load(addr);
+    unsigned char result = AO_char_load(addr);
 
     AO_nop_read();
     return result;
@@ -317,15 +317,15 @@
     && !defined(AO_HAVE_char_load_read)
 # define AO_char_CAS_BASED_LOAD_READ
   AO_ATTR_NO_SANITIZE_THREAD
-  AO_INLINE unsigned/**/char
-  AO_char_load_read(const volatile unsigned/**/char *addr)
+  AO_INLINE unsigned char
+  AO_char_load_read(const volatile unsigned char *addr)
   {
-    unsigned/**/char result;
+    unsigned char result;
 
     do {
-      result = *(const unsigned/**/char *)addr;
+      result = *(const unsigned char *)addr;
     } while (AO_EXPECT_FALSE(!AO_char_compare_and_swap_read(
-                                                (volatile unsigned/**/char *)addr,
+                                                (volatile unsigned char *)addr,
                                                 result, result)));
     return result;
   }
@@ -348,15 +348,15 @@
 #if defined(AO_HAVE_char_compare_and_swap_full) \
     && !defined(AO_HAVE_char_load_full)
   AO_ATTR_NO_SANITIZE_THREAD
-  AO_INLINE unsigned/**/char
-  AO_char_load_full(const volatile unsigned/**/char *addr)
+  AO_INLINE unsigned char
+  AO_char_load_full(const volatile unsigned char *addr)
   {
-    unsigned/**/char result;
+    unsigned char result;
 
     do {
-      result = *(const unsigned/**/char *)addr;
+      result = *(const unsigned char *)addr;
     } while (AO_EXPECT_FALSE(!AO_char_compare_and_swap_full(
-                                                (volatile unsigned/**/char *)addr,
+                                                (volatile unsigned char *)addr,
                                                 result, result)));
     return result;
   }
@@ -366,15 +366,15 @@
 #if defined(AO_HAVE_char_compare_and_swap_acquire) \
     && !defined(AO_HAVE_char_load_acquire)
   AO_ATTR_NO_SANITIZE_THREAD
-  AO_INLINE unsigned/**/char
-  AO_char_load_acquire(const volatile unsigned/**/char *addr)
+  AO_INLINE unsigned char
+  AO_char_load_acquire(const volatile unsigned char *addr)
   {
-    unsigned/**/char result;
+    unsigned char result;
 
     do {
-      result = *(const unsigned/**/char *)addr;
+      result = *(const unsigned char *)addr;
     } while (AO_EXPECT_FALSE(!AO_char_compare_and_swap_acquire(
-                                                (volatile unsigned/**/char *)addr,
+                                                (volatile unsigned char *)addr,
                                                 result, result)));
     return result;
   }
@@ -383,15 +383,15 @@
 
 #if defined(AO_HAVE_char_compare_and_swap) && !defined(AO_HAVE_char_load)
   AO_ATTR_NO_SANITIZE_THREAD
-  AO_INLINE unsigned/**/char
-  AO_char_load(const volatile unsigned/**/char *addr)
+  AO_INLINE unsigned char
+  AO_char_load(const volatile unsigned char *addr)
   {
-    unsigned/**/char result;
+    unsigned char result;
 
     do {
-      result = *(const unsigned/**/char *)addr;
+      result = *(const unsigned char *)addr;
     } while (AO_EXPECT_FALSE(!AO_char_compare_and_swap(
-                                                (volatile unsigned/**/char *)addr,
+                                                (volatile unsigned char *)addr,
                                                 result, result)));
     return result;
   }
@@ -457,12 +457,12 @@
     && !defined(AO_HAVE_char_store_write)
   AO_ATTR_NO_SANITIZE_MEMORY AO_ATTR_NO_SANITIZE_THREAD
   AO_INLINE void
-  AO_char_store_write(volatile unsigned/**/char *addr, unsigned/**/char new_val)
+  AO_char_store_write(volatile unsigned char *addr, unsigned char new_val)
   {
-    unsigned/**/char old_val;
+    unsigned char old_val;
 
     do {
-      old_val = *(unsigned/**/char *)addr;
+      old_val = *(unsigned char *)addr;
     } while (AO_EXPECT_FALSE(!AO_char_compare_and_swap_write(addr, old_val,
                                                               new_val)));
   }
@@ -487,12 +487,12 @@
 #if defined(AO_HAVE_char_compare_and_swap) && !defined(AO_HAVE_char_store)
   AO_ATTR_NO_SANITIZE_MEMORY AO_ATTR_NO_SANITIZE_THREAD
   AO_INLINE void
-  AO_char_store(volatile unsigned/**/char *addr, unsigned/**/char new_val)
+  AO_char_store(volatile unsigned char *addr, unsigned char new_val)
   {
-    unsigned/**/char old_val;
+    unsigned char old_val;
 
     do {
-      old_val = *(unsigned/**/char *)addr;
+      old_val = *(unsigned char *)addr;
     } while (AO_EXPECT_FALSE(!AO_char_compare_and_swap(addr,
                                                         old_val, new_val)));
   }
@@ -503,12 +503,12 @@
     && !defined(AO_HAVE_char_store_release)
   AO_ATTR_NO_SANITIZE_MEMORY AO_ATTR_NO_SANITIZE_THREAD
   AO_INLINE void
-  AO_char_store_release(volatile unsigned/**/char *addr, unsigned/**/char new_val)
+  AO_char_store_release(volatile unsigned char *addr, unsigned char new_val)
   {
-    unsigned/**/char old_val;
+    unsigned char old_val;
 
     do {
-      old_val = *(unsigned/**/char *)addr;
+      old_val = *(unsigned char *)addr;
     } while (AO_EXPECT_FALSE(!AO_char_compare_and_swap_release(addr, old_val,
                                                                 new_val)));
   }
@@ -519,12 +519,12 @@
     && !defined(AO_HAVE_char_store_full)
   AO_ATTR_NO_SANITIZE_MEMORY AO_ATTR_NO_SANITIZE_THREAD
   AO_INLINE void
-  AO_char_store_full(volatile unsigned/**/char *addr, unsigned/**/char new_val)
+  AO_char_store_full(volatile unsigned char *addr, unsigned char new_val)
   {
-    unsigned/**/char old_val;
+    unsigned char old_val;
 
     do {
-      old_val = *(unsigned/**/char *)addr;
+      old_val = *(unsigned char *)addr;
     } while (AO_EXPECT_FALSE(!AO_char_compare_and_swap_full(addr, old_val,
                                                              new_val)));
   }
@@ -560,11 +560,11 @@
 #if defined(AO_HAVE_short_fetch_compare_and_swap) \
     && defined(AO_HAVE_nop_full) \
     && !defined(AO_HAVE_short_fetch_compare_and_swap_acquire)
-  AO_INLINE unsigned/**/short
-  AO_short_fetch_compare_and_swap_acquire(volatile unsigned/**/short *addr,
-                                          unsigned/**/short old_val, unsigned/**/short new_val)
+  AO_INLINE unsigned short
+  AO_short_fetch_compare_and_swap_acquire(volatile unsigned short *addr,
+                                          unsigned short old_val, unsigned short new_val)
   {
-    unsigned/**/short result = AO_short_fetch_compare_and_swap(addr, old_val, new_val);
+    unsigned short result = AO_short_fetch_compare_and_swap(addr, old_val, new_val);
     AO_nop_full();
     return result;
   }
@@ -678,8 +678,8 @@
 #if defined(AO_HAVE_short_compare_and_swap) && defined(AO_HAVE_nop_full) \
     && !defined(AO_HAVE_short_compare_and_swap_acquire)
   AO_INLINE int
-  AO_short_compare_and_swap_acquire(volatile unsigned/**/short *addr, unsigned/**/short old,
-                                    unsigned/**/short new_val)
+  AO_short_compare_and_swap_acquire(volatile unsigned short *addr, unsigned short old,
+                                    unsigned short new_val)
   {
     int result = AO_short_compare_and_swap(addr, old, new_val);
     AO_nop_full();
@@ -813,10 +813,10 @@
 
 #if defined(AO_HAVE_short_load) && defined(AO_HAVE_nop_full) \
     && !defined(AO_HAVE_short_load_acquire)
-  AO_INLINE unsigned/**/short
-  AO_short_load_acquire(const volatile unsigned/**/short *addr)
+  AO_INLINE unsigned short
+  AO_short_load_acquire(const volatile unsigned short *addr)
   {
-    unsigned/**/short result = AO_short_load(addr);
+    unsigned short result = AO_short_load(addr);
 
     /* Acquire barrier would be useless, since the load could be delayed    */
     /* beyond it.                                                           */
@@ -828,10 +828,10 @@
 
 #if defined(AO_HAVE_short_load) && defined(AO_HAVE_nop_read) \
     && !defined(AO_HAVE_short_load_read)
-  AO_INLINE unsigned/**/short
-  AO_short_load_read(const volatile unsigned/**/short *addr)
+  AO_INLINE unsigned short
+  AO_short_load_read(const volatile unsigned short *addr)
   {
-    unsigned/**/short result = AO_short_load(addr);
+    unsigned short result = AO_short_load(addr);
 
     AO_nop_read();
     return result;
@@ -849,15 +849,15 @@
     && !defined(AO_HAVE_short_load_read)
 # define AO_short_CAS_BASED_LOAD_READ
   AO_ATTR_NO_SANITIZE_THREAD
-  AO_INLINE unsigned/**/short
-  AO_short_load_read(const volatile unsigned/**/short *addr)
+  AO_INLINE unsigned short
+  AO_short_load_read(const volatile unsigned short *addr)
   {
-    unsigned/**/short result;
+    unsigned short result;
 
     do {
-      result = *(const unsigned/**/short *)addr;
+      result = *(const unsigned short *)addr;
     } while (AO_EXPECT_FALSE(!AO_short_compare_and_swap_read(
-                                                (volatile unsigned/**/short *)addr,
+                                                (volatile unsigned short *)addr,
                                                 result, result)));
     return result;
   }
@@ -880,15 +880,15 @@
 #if defined(AO_HAVE_short_compare_and_swap_full) \
     && !defined(AO_HAVE_short_load_full)
   AO_ATTR_NO_SANITIZE_THREAD
-  AO_INLINE unsigned/**/short
-  AO_short_load_full(const volatile unsigned/**/short *addr)
+  AO_INLINE unsigned short
+  AO_short_load_full(const volatile unsigned short *addr)
   {
-    unsigned/**/short result;
+    unsigned short result;
 
     do {
-      result = *(const unsigned/**/short *)addr;
+      result = *(const unsigned short *)addr;
     } while (AO_EXPECT_FALSE(!AO_short_compare_and_swap_full(
-                                                (volatile unsigned/**/short *)addr,
+                                                (volatile unsigned short *)addr,
                                                 result, result)));
     return result;
   }
@@ -898,15 +898,15 @@
 #if defined(AO_HAVE_short_compare_and_swap_acquire) \
     && !defined(AO_HAVE_short_load_acquire)
   AO_ATTR_NO_SANITIZE_THREAD
-  AO_INLINE unsigned/**/short
-  AO_short_load_acquire(const volatile unsigned/**/short *addr)
+  AO_INLINE unsigned short
+  AO_short_load_acquire(const volatile unsigned short *addr)
   {
-    unsigned/**/short result;
+    unsigned short result;
 
     do {
-      result = *(const unsigned/**/short *)addr;
+      result = *(const unsigned short *)addr;
     } while (AO_EXPECT_FALSE(!AO_short_compare_and_swap_acquire(
-                                                (volatile unsigned/**/short *)addr,
+                                                (volatile unsigned short *)addr,
                                                 result, result)));
     return result;
   }
@@ -915,15 +915,15 @@
 
 #if defined(AO_HAVE_short_compare_and_swap) && !defined(AO_HAVE_short_load)
   AO_ATTR_NO_SANITIZE_THREAD
-  AO_INLINE unsigned/**/short
-  AO_short_load(const volatile unsigned/**/short *addr)
+  AO_INLINE unsigned short
+  AO_short_load(const volatile unsigned short *addr)
   {
-    unsigned/**/short result;
+    unsigned short result;
 
     do {
-      result = *(const unsigned/**/short *)addr;
+      result = *(const unsigned short *)addr;
     } while (AO_EXPECT_FALSE(!AO_short_compare_and_swap(
-                                                (volatile unsigned/**/short *)addr,
+                                                (volatile unsigned short *)addr,
                                                 result, result)));
     return result;
   }
@@ -989,12 +989,12 @@
     && !defined(AO_HAVE_short_store_write)
   AO_ATTR_NO_SANITIZE_MEMORY AO_ATTR_NO_SANITIZE_THREAD
   AO_INLINE void
-  AO_short_store_write(volatile unsigned/**/short *addr, unsigned/**/short new_val)
+  AO_short_store_write(volatile unsigned short *addr, unsigned short new_val)
   {
-    unsigned/**/short old_val;
+    unsigned short old_val;
 
     do {
-      old_val = *(unsigned/**/short *)addr;
+      old_val = *(unsigned short *)addr;
     } while (AO_EXPECT_FALSE(!AO_short_compare_and_swap_write(addr, old_val,
                                                               new_val)));
   }
@@ -1019,12 +1019,12 @@
 #if defined(AO_HAVE_short_compare_and_swap) && !defined(AO_HAVE_short_store)
   AO_ATTR_NO_SANITIZE_MEMORY AO_ATTR_NO_SANITIZE_THREAD
   AO_INLINE void
-  AO_short_store(volatile unsigned/**/short *addr, unsigned/**/short new_val)
+  AO_short_store(volatile unsigned short *addr, unsigned short new_val)
   {
-    unsigned/**/short old_val;
+    unsigned short old_val;
 
     do {
-      old_val = *(unsigned/**/short *)addr;
+      old_val = *(unsigned short *)addr;
     } while (AO_EXPECT_FALSE(!AO_short_compare_and_swap(addr,
                                                         old_val, new_val)));
   }
@@ -1035,12 +1035,12 @@
     && !defined(AO_HAVE_short_store_release)
   AO_ATTR_NO_SANITIZE_MEMORY AO_ATTR_NO_SANITIZE_THREAD
   AO_INLINE void
-  AO_short_store_release(volatile unsigned/**/short *addr, unsigned/**/short new_val)
+  AO_short_store_release(volatile unsigned short *addr, unsigned short new_val)
   {
-    unsigned/**/short old_val;
+    unsigned short old_val;
 
     do {
-      old_val = *(unsigned/**/short *)addr;
+      old_val = *(unsigned short *)addr;
     } while (AO_EXPECT_FALSE(!AO_short_compare_and_swap_release(addr, old_val,
                                                                 new_val)));
   }
@@ -1051,12 +1051,12 @@
     && !defined(AO_HAVE_short_store_full)
   AO_ATTR_NO_SANITIZE_MEMORY AO_ATTR_NO_SANITIZE_THREAD
   AO_INLINE void
-  AO_short_store_full(volatile unsigned/**/short *addr, unsigned/**/short new_val)
+  AO_short_store_full(volatile unsigned short *addr, unsigned short new_val)
   {
-    unsigned/**/short old_val;
+    unsigned short old_val;
 
     do {
-      old_val = *(unsigned/**/short *)addr;
+      old_val = *(unsigned short *)addr;
     } while (AO_EXPECT_FALSE(!AO_short_compare_and_swap_full(addr, old_val,
                                                              new_val)));
   }

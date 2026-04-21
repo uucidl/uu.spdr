@@ -19,8 +19,8 @@
 
 #ifndef AO_NO_char_ARITHM
 
-AO_INLINE unsigned/**/char
-AO_char_fetch_and_add(volatile unsigned/**/char *addr, unsigned/**/char incr)
+AO_INLINE unsigned char
+AO_char_fetch_and_add(volatile unsigned char *addr, unsigned char incr)
 {
   return __atomic_fetch_add(addr, incr, __ATOMIC_RELAXED);
 }
@@ -28,7 +28,7 @@ AO_char_fetch_and_add(volatile unsigned/**/char *addr, unsigned/**/char incr)
 
 #ifndef AO_SKIPATOMIC_ANY_and_ANY
   AO_INLINE void
-  AO_char_and(volatile unsigned/**/char *addr, unsigned/**/char value)
+  AO_char_and(volatile unsigned char *addr, unsigned char value)
   {
     (void)__atomic_and_fetch(addr, value, __ATOMIC_RELAXED);
   }
@@ -37,7 +37,7 @@ AO_char_fetch_and_add(volatile unsigned/**/char *addr, unsigned/**/char incr)
 
 #ifndef AO_SKIPATOMIC_ANY_or_ANY
   AO_INLINE void
-  AO_char_or(volatile unsigned/**/char *addr, unsigned/**/char value)
+  AO_char_or(volatile unsigned char *addr, unsigned char value)
   {
     (void)__atomic_or_fetch(addr, value, __ATOMIC_RELAXED);
   }
@@ -46,7 +46,7 @@ AO_char_fetch_and_add(volatile unsigned/**/char *addr, unsigned/**/char incr)
 
 #ifndef AO_SKIPATOMIC_ANY_xor_ANY
   AO_INLINE void
-  AO_char_xor(volatile unsigned/**/char *addr, unsigned/**/char value)
+  AO_char_xor(volatile unsigned char *addr, unsigned char value)
   {
     (void)__atomic_xor_fetch(addr, value, __ATOMIC_RELAXED);
   }
@@ -75,8 +75,8 @@ AO_char_fetch_and_add(volatile unsigned/**/char *addr, unsigned/**/char incr)
 
 #ifndef AO_NO_short_ARITHM
 
-AO_INLINE unsigned/**/short
-AO_short_fetch_and_add(volatile unsigned/**/short *addr, unsigned/**/short incr)
+AO_INLINE unsigned short
+AO_short_fetch_and_add(volatile unsigned short *addr, unsigned short incr)
 {
   return __atomic_fetch_add(addr, incr, __ATOMIC_RELAXED);
 }
@@ -84,7 +84,7 @@ AO_short_fetch_and_add(volatile unsigned/**/short *addr, unsigned/**/short incr)
 
 #ifndef AO_SKIPATOMIC_ANY_and_ANY
   AO_INLINE void
-  AO_short_and(volatile unsigned/**/short *addr, unsigned/**/short value)
+  AO_short_and(volatile unsigned short *addr, unsigned short value)
   {
     (void)__atomic_and_fetch(addr, value, __ATOMIC_RELAXED);
   }
@@ -93,7 +93,7 @@ AO_short_fetch_and_add(volatile unsigned/**/short *addr, unsigned/**/short incr)
 
 #ifndef AO_SKIPATOMIC_ANY_or_ANY
   AO_INLINE void
-  AO_short_or(volatile unsigned/**/short *addr, unsigned/**/short value)
+  AO_short_or(volatile unsigned short *addr, unsigned short value)
   {
     (void)__atomic_or_fetch(addr, value, __ATOMIC_RELAXED);
   }
@@ -102,7 +102,7 @@ AO_short_fetch_and_add(volatile unsigned/**/short *addr, unsigned/**/short incr)
 
 #ifndef AO_SKIPATOMIC_ANY_xor_ANY
   AO_INLINE void
-  AO_short_xor(volatile unsigned/**/short *addr, unsigned/**/short value)
+  AO_short_xor(volatile unsigned short *addr, unsigned short value)
   {
     (void)__atomic_xor_fetch(addr, value, __ATOMIC_RELAXED);
   }
@@ -243,8 +243,8 @@ AO_fetch_and_add(volatile AO_t *addr, AO_t incr)
 
 #ifndef AO_NO_char_ARITHM
 
-AO_INLINE unsigned/**/char
-AO_char_fetch_and_add_acquire(volatile unsigned/**/char *addr, unsigned/**/char incr)
+AO_INLINE unsigned char
+AO_char_fetch_and_add_acquire(volatile unsigned char *addr, unsigned char incr)
 {
   return __atomic_fetch_add(addr, incr, __ATOMIC_ACQUIRE);
 }
@@ -252,7 +252,7 @@ AO_char_fetch_and_add_acquire(volatile unsigned/**/char *addr, unsigned/**/char 
 
 #ifndef AO_SKIPATOMIC_ANY_and_ANY
   AO_INLINE void
-  AO_char_and_acquire(volatile unsigned/**/char *addr, unsigned/**/char value)
+  AO_char_and_acquire(volatile unsigned char *addr, unsigned char value)
   {
     (void)__atomic_and_fetch(addr, value, __ATOMIC_ACQUIRE);
   }
@@ -261,7 +261,7 @@ AO_char_fetch_and_add_acquire(volatile unsigned/**/char *addr, unsigned/**/char 
 
 #ifndef AO_SKIPATOMIC_ANY_or_ANY
   AO_INLINE void
-  AO_char_or_acquire(volatile unsigned/**/char *addr, unsigned/**/char value)
+  AO_char_or_acquire(volatile unsigned char *addr, unsigned char value)
   {
     (void)__atomic_or_fetch(addr, value, __ATOMIC_ACQUIRE);
   }
@@ -270,7 +270,7 @@ AO_char_fetch_and_add_acquire(volatile unsigned/**/char *addr, unsigned/**/char 
 
 #ifndef AO_SKIPATOMIC_ANY_xor_ANY
   AO_INLINE void
-  AO_char_xor_acquire(volatile unsigned/**/char *addr, unsigned/**/char value)
+  AO_char_xor_acquire(volatile unsigned char *addr, unsigned char value)
   {
     (void)__atomic_xor_fetch(addr, value, __ATOMIC_ACQUIRE);
   }
@@ -299,8 +299,8 @@ AO_char_fetch_and_add_acquire(volatile unsigned/**/char *addr, unsigned/**/char 
 
 #ifndef AO_NO_short_ARITHM
 
-AO_INLINE unsigned/**/short
-AO_short_fetch_and_add_acquire(volatile unsigned/**/short *addr, unsigned/**/short incr)
+AO_INLINE unsigned short
+AO_short_fetch_and_add_acquire(volatile unsigned short *addr, unsigned short incr)
 {
   return __atomic_fetch_add(addr, incr, __ATOMIC_ACQUIRE);
 }
@@ -308,7 +308,7 @@ AO_short_fetch_and_add_acquire(volatile unsigned/**/short *addr, unsigned/**/sho
 
 #ifndef AO_SKIPATOMIC_ANY_and_ANY
   AO_INLINE void
-  AO_short_and_acquire(volatile unsigned/**/short *addr, unsigned/**/short value)
+  AO_short_and_acquire(volatile unsigned short *addr, unsigned short value)
   {
     (void)__atomic_and_fetch(addr, value, __ATOMIC_ACQUIRE);
   }
@@ -317,7 +317,7 @@ AO_short_fetch_and_add_acquire(volatile unsigned/**/short *addr, unsigned/**/sho
 
 #ifndef AO_SKIPATOMIC_ANY_or_ANY
   AO_INLINE void
-  AO_short_or_acquire(volatile unsigned/**/short *addr, unsigned/**/short value)
+  AO_short_or_acquire(volatile unsigned short *addr, unsigned short value)
   {
     (void)__atomic_or_fetch(addr, value, __ATOMIC_ACQUIRE);
   }
@@ -326,7 +326,7 @@ AO_short_fetch_and_add_acquire(volatile unsigned/**/short *addr, unsigned/**/sho
 
 #ifndef AO_SKIPATOMIC_ANY_xor_ANY
   AO_INLINE void
-  AO_short_xor_acquire(volatile unsigned/**/short *addr, unsigned/**/short value)
+  AO_short_xor_acquire(volatile unsigned short *addr, unsigned short value)
   {
     (void)__atomic_xor_fetch(addr, value, __ATOMIC_ACQUIRE);
   }
@@ -467,8 +467,8 @@ AO_fetch_and_add_acquire(volatile AO_t *addr, AO_t incr)
 
 #ifndef AO_NO_char_ARITHM
 
-AO_INLINE unsigned/**/char
-AO_char_fetch_and_add_release(volatile unsigned/**/char *addr, unsigned/**/char incr)
+AO_INLINE unsigned char
+AO_char_fetch_and_add_release(volatile unsigned char *addr, unsigned char incr)
 {
   return __atomic_fetch_add(addr, incr, __ATOMIC_RELEASE);
 }
@@ -476,7 +476,7 @@ AO_char_fetch_and_add_release(volatile unsigned/**/char *addr, unsigned/**/char 
 
 #ifndef AO_SKIPATOMIC_ANY_and_ANY
   AO_INLINE void
-  AO_char_and_release(volatile unsigned/**/char *addr, unsigned/**/char value)
+  AO_char_and_release(volatile unsigned char *addr, unsigned char value)
   {
     (void)__atomic_and_fetch(addr, value, __ATOMIC_RELEASE);
   }
@@ -485,7 +485,7 @@ AO_char_fetch_and_add_release(volatile unsigned/**/char *addr, unsigned/**/char 
 
 #ifndef AO_SKIPATOMIC_ANY_or_ANY
   AO_INLINE void
-  AO_char_or_release(volatile unsigned/**/char *addr, unsigned/**/char value)
+  AO_char_or_release(volatile unsigned char *addr, unsigned char value)
   {
     (void)__atomic_or_fetch(addr, value, __ATOMIC_RELEASE);
   }
@@ -494,7 +494,7 @@ AO_char_fetch_and_add_release(volatile unsigned/**/char *addr, unsigned/**/char 
 
 #ifndef AO_SKIPATOMIC_ANY_xor_ANY
   AO_INLINE void
-  AO_char_xor_release(volatile unsigned/**/char *addr, unsigned/**/char value)
+  AO_char_xor_release(volatile unsigned char *addr, unsigned char value)
   {
     (void)__atomic_xor_fetch(addr, value, __ATOMIC_RELEASE);
   }
@@ -523,8 +523,8 @@ AO_char_fetch_and_add_release(volatile unsigned/**/char *addr, unsigned/**/char 
 
 #ifndef AO_NO_short_ARITHM
 
-AO_INLINE unsigned/**/short
-AO_short_fetch_and_add_release(volatile unsigned/**/short *addr, unsigned/**/short incr)
+AO_INLINE unsigned short
+AO_short_fetch_and_add_release(volatile unsigned short *addr, unsigned short incr)
 {
   return __atomic_fetch_add(addr, incr, __ATOMIC_RELEASE);
 }
@@ -532,7 +532,7 @@ AO_short_fetch_and_add_release(volatile unsigned/**/short *addr, unsigned/**/sho
 
 #ifndef AO_SKIPATOMIC_ANY_and_ANY
   AO_INLINE void
-  AO_short_and_release(volatile unsigned/**/short *addr, unsigned/**/short value)
+  AO_short_and_release(volatile unsigned short *addr, unsigned short value)
   {
     (void)__atomic_and_fetch(addr, value, __ATOMIC_RELEASE);
   }
@@ -541,7 +541,7 @@ AO_short_fetch_and_add_release(volatile unsigned/**/short *addr, unsigned/**/sho
 
 #ifndef AO_SKIPATOMIC_ANY_or_ANY
   AO_INLINE void
-  AO_short_or_release(volatile unsigned/**/short *addr, unsigned/**/short value)
+  AO_short_or_release(volatile unsigned short *addr, unsigned short value)
   {
     (void)__atomic_or_fetch(addr, value, __ATOMIC_RELEASE);
   }
@@ -550,7 +550,7 @@ AO_short_fetch_and_add_release(volatile unsigned/**/short *addr, unsigned/**/sho
 
 #ifndef AO_SKIPATOMIC_ANY_xor_ANY
   AO_INLINE void
-  AO_short_xor_release(volatile unsigned/**/short *addr, unsigned/**/short value)
+  AO_short_xor_release(volatile unsigned short *addr, unsigned short value)
   {
     (void)__atomic_xor_fetch(addr, value, __ATOMIC_RELEASE);
   }
@@ -691,8 +691,8 @@ AO_fetch_and_add_release(volatile AO_t *addr, AO_t incr)
 
 #ifndef AO_NO_char_ARITHM
 
-AO_INLINE unsigned/**/char
-AO_char_fetch_and_add_full(volatile unsigned/**/char *addr, unsigned/**/char incr)
+AO_INLINE unsigned char
+AO_char_fetch_and_add_full(volatile unsigned char *addr, unsigned char incr)
 {
   return __atomic_fetch_add(addr, incr, __ATOMIC_SEQ_CST);
 }
@@ -700,7 +700,7 @@ AO_char_fetch_and_add_full(volatile unsigned/**/char *addr, unsigned/**/char inc
 
 #ifndef AO_SKIPATOMIC_ANY_and_ANY
   AO_INLINE void
-  AO_char_and_full(volatile unsigned/**/char *addr, unsigned/**/char value)
+  AO_char_and_full(volatile unsigned char *addr, unsigned char value)
   {
     (void)__atomic_and_fetch(addr, value, __ATOMIC_SEQ_CST);
   }
@@ -709,7 +709,7 @@ AO_char_fetch_and_add_full(volatile unsigned/**/char *addr, unsigned/**/char inc
 
 #ifndef AO_SKIPATOMIC_ANY_or_ANY
   AO_INLINE void
-  AO_char_or_full(volatile unsigned/**/char *addr, unsigned/**/char value)
+  AO_char_or_full(volatile unsigned char *addr, unsigned char value)
   {
     (void)__atomic_or_fetch(addr, value, __ATOMIC_SEQ_CST);
   }
@@ -718,7 +718,7 @@ AO_char_fetch_and_add_full(volatile unsigned/**/char *addr, unsigned/**/char inc
 
 #ifndef AO_SKIPATOMIC_ANY_xor_ANY
   AO_INLINE void
-  AO_char_xor_full(volatile unsigned/**/char *addr, unsigned/**/char value)
+  AO_char_xor_full(volatile unsigned char *addr, unsigned char value)
   {
     (void)__atomic_xor_fetch(addr, value, __ATOMIC_SEQ_CST);
   }
@@ -747,8 +747,8 @@ AO_char_fetch_and_add_full(volatile unsigned/**/char *addr, unsigned/**/char inc
 
 #ifndef AO_NO_short_ARITHM
 
-AO_INLINE unsigned/**/short
-AO_short_fetch_and_add_full(volatile unsigned/**/short *addr, unsigned/**/short incr)
+AO_INLINE unsigned short
+AO_short_fetch_and_add_full(volatile unsigned short *addr, unsigned short incr)
 {
   return __atomic_fetch_add(addr, incr, __ATOMIC_SEQ_CST);
 }
@@ -756,7 +756,7 @@ AO_short_fetch_and_add_full(volatile unsigned/**/short *addr, unsigned/**/short 
 
 #ifndef AO_SKIPATOMIC_ANY_and_ANY
   AO_INLINE void
-  AO_short_and_full(volatile unsigned/**/short *addr, unsigned/**/short value)
+  AO_short_and_full(volatile unsigned short *addr, unsigned short value)
   {
     (void)__atomic_and_fetch(addr, value, __ATOMIC_SEQ_CST);
   }
@@ -765,7 +765,7 @@ AO_short_fetch_and_add_full(volatile unsigned/**/short *addr, unsigned/**/short 
 
 #ifndef AO_SKIPATOMIC_ANY_or_ANY
   AO_INLINE void
-  AO_short_or_full(volatile unsigned/**/short *addr, unsigned/**/short value)
+  AO_short_or_full(volatile unsigned short *addr, unsigned short value)
   {
     (void)__atomic_or_fetch(addr, value, __ATOMIC_SEQ_CST);
   }
@@ -774,7 +774,7 @@ AO_short_fetch_and_add_full(volatile unsigned/**/short *addr, unsigned/**/short 
 
 #ifndef AO_SKIPATOMIC_ANY_xor_ANY
   AO_INLINE void
-  AO_short_xor_full(volatile unsigned/**/short *addr, unsigned/**/short value)
+  AO_short_xor_full(volatile unsigned short *addr, unsigned short value)
   {
     (void)__atomic_xor_fetch(addr, value, __ATOMIC_SEQ_CST);
   }

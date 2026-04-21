@@ -1,1 +1,8 @@
 @url: https://github.com/bdwgc/libatomic_ops/releases/download/v7.10.0/libatomic_ops-7.10.0.tar.gz
+
+The following script was applied, to work around an issue with MSVC preprocessors:
+```
+find libatomic_ops-7.10.0/src/ -name "*.h" | while read f ; do sed -i -e 's/\/\*\*\// /g' "${f}" ; done
+```
+
+It is tested by build_tests.bat's with output: preprocessed.i

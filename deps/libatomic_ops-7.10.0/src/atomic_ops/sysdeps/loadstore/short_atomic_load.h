@@ -28,14 +28,14 @@
 /* atomic (either for suitably aligned data only or for any legal       */
 /* alignment).                                                          */
 
-AO_INLINE unsigned/**/short
-AO_short_load(const volatile unsigned/**/short *addr)
+AO_INLINE unsigned short
+AO_short_load(const volatile unsigned short *addr)
 {
 # ifdef AO_ACCESS_short_CHECK_ALIGNED
     AO_ASSERT_ADDR_ALIGNED(addr);
 # endif
   /* Cast away the volatile for architectures like IA64 where   */
   /* volatile adds barrier (fence) semantics.                   */
-  return *(const unsigned/**/short *)addr;
+  return *(const unsigned short *)addr;
 }
 #define AO_HAVE_short_load
