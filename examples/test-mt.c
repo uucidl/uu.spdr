@@ -38,7 +38,7 @@ static void *thread1(void *arg)
                 int pown = 32 * 65536;
 
                 SPDR_BEGIN2(spdr, "Main", "thread1",
-                            SPDR_INT("arg", (int)(intptr_t)arg),
+                            SPDR_INT("arg", (intptr_t)arg),
                             SPDR_FLOAT("y", y));
                 SPDR_COUNTER1(spdr, "thread1", "iteration",
                               SPDR_INT("value", n));
@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 
         SPDR_BEGIN3(spdr, "Main", "main", SPDR_INT("argc", argc),
                     SPDR_STR("argv[0]", argv[0]),
-                    SPDR_INT("cap", (int)cap.capacity));
+                    SPDR_INT("cap", (int64_t)cap.capacity));
 
         pthread_create(&thread, NULL, thread1, NULL);
 

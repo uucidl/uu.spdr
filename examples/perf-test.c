@@ -56,7 +56,7 @@ static void *thread_main(void *ctxt)
                     SPDR_INT("i", context->offset));
 
         while (j < context->n) {
-                SPDR_BEGIN1(spdr, "main", "::sin", SPDR_INT("i", (int)j));
+                SPDR_BEGIN1(spdr, "main", "::sin", SPDR_INT("i", (int64_t)j));
                 for (i = 0; i < chunks_n; i++) {
                         if (j + i >= context->n) {
                                 break;
@@ -110,7 +110,7 @@ extern int main(int argc, char **argv)
                         size_t i;
                         volatile double *data = results;
                         SPDR_BEGIN1(gbl_spdr, "main", "::sin",
-                                    SPDR_INT("i", (int)IN));
+                                    SPDR_INT("i", (int64_t)IN));
 
                         for (i = 0; i < IN; ++i) {
                                 data[i] = sin(data[i]);

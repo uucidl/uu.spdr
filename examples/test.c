@@ -42,7 +42,7 @@ static void print(const char *string, void *user_data)
 static void act(const char *a_string)
 {
         SPDR_BEGIN2(spdr, "Main", "act",
-                    SPDR_INT("info-id", (int)(intptr_t)a_string),
+                    SPDR_INT("info-id", (intptr_t)a_string),
                     SPDR_STR("info", a_string));
 
         printf("%s\n", a_string);
