@@ -1,6 +1,11 @@
 Changes
 =======
 
+0.5.0 -- SPDR now supports 64bit integer inputs.
+
+	 Upgraded libatomics_ops to 7.10.0 for Aarch64 compatibility with
+ 	 Microsoft Visual Studio.
+
 0.4.4 -- SPDR now supports AArch64 CPUs.
 
          Upgraded libatomics_ops to 7.6.6 to gain Arm 64 bit CPU support.
